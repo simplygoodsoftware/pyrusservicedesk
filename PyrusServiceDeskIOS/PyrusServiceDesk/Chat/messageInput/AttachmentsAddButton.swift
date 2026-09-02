@@ -21,7 +21,7 @@ class AttachmentsAddButton: UIButton {
         if PSDLiquidGlassStyle.isEnabled {
             //На стекле иконка одного цвета с остальными стеклянными кнопками.
             //Template + динамический tintColor: при смене темы перекрашивается сама.
-            self.setImage(UIImage.PSDImage(name: "clip")?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.setImage(UIImage.PSDImage(name: "lgpaperclip")?.withRenderingMode(.alwaysTemplate), for: .normal)
             self.tintColor = PSDLiquidGlassStyle.iconColor
             return
         }

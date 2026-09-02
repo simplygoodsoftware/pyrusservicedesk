@@ -216,7 +216,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 
                 let oldInset = self.tableView.contentInset.top
                 let oldOffset = self.tableView.contentOffset.y
-                let oldKeyboardHeight = self.currkeyboardHeight
                 
                 currkeyboardHeight = keyboardHeight
                 
@@ -238,7 +237,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         }
                         isFirstKeyboardShow = false
                     } else {
-                        let delta = keyboardHeight - oldKeyboardHeight
+                        //Дельта — от текущего инсета, а не от currkeyboardHeight: ниже инсет
+                        //ставится абсолютно, и офсет должен сдвинуться ровно на его изменение.
+                        //currkeyboardHeight отстаёт от инсета после addAttachment/needShowRate
+                        //и после keyboardWillHide, и офсет по нему уезжал на эту разницу.
+                        let delta = keyboardHeight - oldInset
                         
                         if delta > 0 {
                             self.tableView.contentOffset.y -= delta
@@ -466,10 +469,10 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     ///Отступ от навигационного бара для перевёрнутой таблицы.
     ///Таблица развёрнута на 180°, поэтому визуальный верх — это нижняя вставка.
     ///Именно вставка, а не констрейнт: контент должен подъезжать под стекло, а не обрезаться.
+    ///Пишем не в `contentInset.bottom` напрямую — им владеет таблица и складывает
+    ///этот отступ со своим отступом под лоадер.
     private func updateGlassTopContentInset(infoViewHeight: CGFloat) {
-        let topInset = view.safeAreaInsets.top + infoViewHeight
-        guard tableView.contentInset.bottom != topInset else { return }
-        tableView.contentInset.bottom = topInset
+        tableView.additionalBottomInset = view.safeAreaInsets.top + infoViewHeight
     }
     
     @objc private func appEnteredForeground(){

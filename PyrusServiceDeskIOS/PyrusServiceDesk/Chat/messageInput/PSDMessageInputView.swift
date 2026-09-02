@@ -111,14 +111,21 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         static let sendButtonInset: CGFloat = 0
         ///Расстояние от текста до кнопки отправки.
         static let textToSendSpacing: CGFloat = 6
+        ///Отступ вложений от верхнего края капсулы, когда они есть.
+        static let attachmentsTopInset: CGFloat = 8
+        ///Отступ вложений от боковых краёв капсулы. У ячейки есть свой внутренний
+        ///отступ `distToBoard`, вычитаем его — миниатюра встаёт по одной линии с текстом.
+        static let attachmentsHorizontalInset: CGFloat = textHorizontalInset - AttachmentCollectionViewCell.distToBoard
         ///Плотность цветовой подмешки блюр-подложки панели.
         static let backdropDimAlpha: CGFloat = 0.45
     }
     
     ///Стеклянный круг под кнопкой вложений.
     private lazy var attachGlassBackground = PSDGlassBackgroundView(isInteractive: true)
-    ///Стеклянная капсула поля ввода. Кнопка отправки живёт внутри неё.
-    private lazy var inputGlassCapsule = PSDGlassBackgroundView()
+    ///Стеклянная капсула поля ввода. Кнопка отправки и вложения живут внутри неё.
+    ///Радиус фиксированный: при минимальной высоте это капсула, а когда поле растёт
+    ///под многострочный текст или вложения, углы не раздуваются до половины высоты.
+    private lazy var inputGlassCapsule = PSDGlassBackgroundView(shape: .rounded(radius: GlassLayout.capsuleMinHeight / 2))
     ///Стеклянный круг под кнопкой микрофона.
     private lazy var micGlassBackground = PSDGlassBackgroundView(isInteractive: true)
     
@@ -143,6 +150,16 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Когда микрофон скрыт, капсула дотягивается до правого края.
     private var capsuleTrailingToMic: NSLayoutConstraint?
     private var capsuleTrailingToEdge: NSLayoutConstraint?
+    
+    ///Отступ вложений от верха капсулы. Есть только в стеклянной раскладке:
+    ///без вложений — ноль, чтобы капсула не росла впустую.
+    private var attachmentsTopConstraint: NSLayoutConstraint?
+    
+    ///Единственное место, где меняется геометрия панели вложений.
+    private func updateAttachmentsLayout(visible: Bool) {
+        attachmentsHeightConstraint?.constant = visible ? PSDMessageInputView.attachmentsHeight : 0
+        attachmentsTopConstraint?.constant = visible ? GlassLayout.attachmentsTopInset : 0
+    }
     
     ///Текущее состояние микрофона. `nil` — раскладка ещё не применялась.
     private var isMicButtonVisible: Bool?
@@ -381,7 +398,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     ///In current version this function replase added to message attachments
     func addAttachment(_ attachment : PSDAttachment){
-        attachmentsHeightConstraint?.constant = PSDMessageInputView.attachmentsHeight
+        updateAttachmentsLayout(visible: true)
         setNeedsLayout()
         attachmentsPresenter.addAttachment(attachment)
         checkSendButton()
@@ -540,7 +557,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     
     private func checkCollectionHeight() {
-        attachmentsHeightConstraint?.constant = attachmentsPresenter.attachmentsNumber() > 0 ? PSDMessageInputView.attachmentsHeight : 0
+        updateAttachmentsLayout(visible: attachmentsPresenter.attachmentsNumber() > 0)
     }
     
     
@@ -589,13 +606,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         textRateHeightConstraint?.isActive = true
         
         // Устанавливаем constraints для attachmentsCollection
+        // Положение задаётся в ветках раскладки: в прежней коллекция над панелью
+        // на всю ширину, в стеклянной — внутри капсулы.
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
-            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
-            attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor)
-        ])
-        
         attachmentsHeightConstraint = attachmentsCollection.heightAnchor.constraint(equalToConstant: 0)
         attachmentsHeightConstraint?.isActive = true
         
@@ -633,6 +646,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Прежняя раскладка: кнопка отправки справа от поля ввода, без стеклянных подложек.
     private func addLegacyControlConstraints() {
         NSLayoutConstraint.activate([
+            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
+            attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor),
+            
             // inputTextView
             inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
             inputTextView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: distAddToText),
@@ -698,12 +715,17 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             attachmentsAddButton.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
             
             inputGlassCapsule.leadingAnchor.constraint(equalTo: attachGlassBackground.trailingAnchor, constant: GlassLayout.itemSpacing),
-            inputGlassCapsule.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
+            inputGlassCapsule.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
             inputGlassCapsule.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
             inputGlassCapsule.heightAnchor.constraint(greaterThanOrEqualToConstant: GlassLayout.capsuleMinHeight),
             
+            //Вложения — внутри капсулы, над текстом. Пока их нет, коллекция нулевой высоты
+            //лежит у верхней кромки и текст начинается сразу за ней.
+            attachmentsCollection.leadingAnchor.constraint(equalTo: capsuleContent.leadingAnchor, constant: GlassLayout.attachmentsHorizontalInset),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: capsuleContent.trailingAnchor, constant: -GlassLayout.attachmentsHorizontalInset),
+            
             inputTextView.leadingAnchor.constraint(equalTo: capsuleContent.leadingAnchor, constant: GlassLayout.textHorizontalInset),
-            inputTextView.topAnchor.constraint(equalTo: capsuleContent.topAnchor, constant: GlassLayout.textVerticalInset),
+            inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: GlassLayout.textVerticalInset),
             inputTextView.bottomAnchor.constraint(equalTo: capsuleContent.bottomAnchor, constant: -GlassLayout.textVerticalInset),
             inputTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -GlassLayout.textToSendSpacing),
             inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
@@ -734,6 +756,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             cancelButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor)
         ])
         
+        attachmentsTopConstraint = attachmentsCollection.topAnchor.constraint(equalTo: capsuleContent.topAnchor)
+        attachmentsTopConstraint?.isActive = true
+        
         capsuleTrailingToMic = inputGlassCapsule.trailingAnchor.constraint(equalTo: micGlassBackground.leadingAnchor,
                                                                            constant: -GlassLayout.itemSpacing)
         capsuleTrailingToEdge = inputGlassCapsule.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor)
@@ -755,6 +780,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         //Кнопки живут внутри своих подложек, а не поверх них: интерактивное стекло
         //должно реагировать на касания того элемента, который оно подсвечивает.
         attachGlassBackground.glassContentView.addSubview(attachmentsAddButton)
+        inputGlassCapsule.glassContentView.addSubview(attachmentsCollection)
         inputGlassCapsule.glassContentView.addSubview(inputTextView)
         inputGlassCapsule.glassContentView.addSubview(sendButton)
         micGlassBackground.glassContentView.addSubview(micButton)

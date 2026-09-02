@@ -1,12 +1,21 @@
 import UIKit
 
-/// Подложка в стиле Liquid Glass в форме капсулы.
+/// Подложка в стиле Liquid Glass.
 ///
-/// На iOS 26+ использует системный `UIGlassEffect` (он по умолчанию рисуется капсулой
-/// и сам подстраивается под светлую/тёмную тему и под содержимое за собой).
-/// На более ранних версиях системы деградирует до системного материала,
-/// чтобы вью оставалось пригодным для переиспользования вне Liquid Glass-сценариев.
+/// На iOS 26+ использует системный `UIGlassEffect` (он сам подстраивается под
+/// светлую/тёмную тему и под содержимое за собой). На более ранних версиях системы
+/// деградирует до системного материала, чтобы вью оставалось пригодным
+/// для переиспользования вне Liquid Glass-сценариев.
 final class PSDGlassBackgroundView: UIView {
+    
+    /// Форма стекла.
+    enum Shape {
+        /// Капсула: радиус — половина меньшей стороны. Для кнопок и однострочных пилюль.
+        case capsule
+        /// Фиксированный радиус. Для контейнеров, которые растут в высоту:
+        /// при минимальной высоте выглядит капсулой, при росте не раздувает углы.
+        case rounded(radius: CGFloat)
+    }
     
     private enum Constants {
         /// Материал-заглушка для систем без Liquid Glass.
@@ -19,6 +28,7 @@ final class PSDGlassBackgroundView: UIView {
     }
     
     private let isInteractive: Bool
+    private let shape: Shape
     
     private lazy var effectView: UIVisualEffectView = {
         let view = UIVisualEffectView(effect: Self.makeEffect(isInteractive: isInteractive))
@@ -26,15 +36,22 @@ final class PSDGlassBackgroundView: UIView {
         // Форму стекла задаёт только cornerConfiguration и только после установки эффекта:
         // layer.cornerRadius на UIGlassEffect система игнорирует.
         if #available(iOS 26.0, *) {
-            view.cornerConfiguration = .capsule()
+            switch shape {
+            case .capsule:
+                view.cornerConfiguration = .capsule()
+            case .rounded(let radius):
+                view.cornerConfiguration = .corners(radius: .fixed(radius))
+            }
         }
         return view
     }()
     
     /// - Parameter isInteractive: включает отклик стекла на касания.
     ///   Имеет смысл только для подложек под интерактивными элементами.
-    init(isInteractive: Bool = false) {
+    /// - Parameter shape: форма стекла, по умолчанию капсула.
+    init(isInteractive: Bool = false, shape: Shape = .capsule) {
         self.isInteractive = isInteractive
+        self.shape = shape
         super.init(frame: .zero)
         setupLayout()
     }
@@ -75,7 +92,12 @@ final class PSDGlassBackgroundView: UIView {
         if #available(iOS 26.0, *) {
             return
         }
-        effectView.layer.cornerRadius = bounds.height / 2
+        switch shape {
+        case .capsule:
+            effectView.layer.cornerRadius = min(bounds.width, bounds.height) / 2
+        case .rounded(let radius):
+            effectView.layer.cornerRadius = radius
+        }
         effectView.layer.masksToBounds = true
     }
 }
