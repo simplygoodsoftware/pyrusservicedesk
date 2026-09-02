@@ -1,4 +1,3 @@
-
 import UIKit
 
 protocol PSDMainController: NSObjectProtocol {
@@ -227,6 +226,14 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
     
     private func backBarButtonItem() -> UIBarButtonItem {
         let mainColor = customization?.themeColor ?? .darkAppColor
+        //Эта кнопка кладётся в customLeftBarButtonItem, то есть в тот же слот, что и кнопка
+        //интегратора. Экраны не могут отличить её от чужой и берут как есть, поэтому
+        //оформление под Liquid Glass нужно задавать здесь, а не на экранах.
+        if PSDLiquidGlassStyle.isEnabled,
+           let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
+                                                                     action: #selector(goBack)) {
+            return glassItem
+        }
         let button = UIButton()
         button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
         button.setTitle(" " + "Back".localizedPSD(), for: .normal)

@@ -1,4 +1,3 @@
-
 import UIKit
 
 protocol PSDMessageInputViewDelegate: AnyObject {
@@ -9,6 +8,8 @@ protocol PSDMessageInputViewDelegate: AnyObject {
     func recordStart()
     func recordStop()
     func deletedAllAttachments()
+    ///Контроллер, от имени которого панель показывает свои меню и алерты.
+    func presenterForInputMenus() -> UIViewController?
 }
 
 let DEFAULT_LAYOUT_MARGINS: CGFloat = 8
@@ -34,6 +35,21 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private var textRateView: RateViewProtocol!
     private var emojiRateView: RateViewProtocol!
     private var rateHeight: CGFloat = 0
+    ///Фактическая высота показанного рейтинга. Считается в `showRate`,
+    ///поэтому читать её можно только после установки флага показа.
+    var currentRateHeight: CGFloat { rateHeight }
+    
+    ///Есть ли рейтингу что показывать. Значения текстового рейтинга приезжают с сервера
+    ///и могут отставать от команды показа — с пустым списком показывать нечего.
+    ///У эмодзи-рейтинга значения генерируются локально и есть всегда.
+    var hasRateContent: Bool {
+        switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
+        case .text:
+            return !(CustomizationHelper.ratingSettings.ratingTextValues ?? []).isEmpty
+        default:
+            return true
+        }
+    }
     private lazy var rateLabel: UILabel = {
         let label = UILabel()
         label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
@@ -88,6 +104,134 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     private var audioLeadingConstraint: NSLayoutConstraint?
     
+    //MARK: Liquid Glass
+    
+    ///Размеры и отступы стеклянной раскладки панели ввода.
+    private enum GlassLayout {
+        ///Диаметр круглых кнопок по бокам (вложения, микрофон).
+        static let sideButtonSize: CGFloat = 44
+        ///Минимальная высота капсулы ввода.
+        static let capsuleMinHeight: CGFloat = 44
+        ///Расстояние между кнопками и капсулой.
+        static let itemSpacing: CGFloat = 8
+        ///Отступ текста от левого края капсулы.
+        static let textHorizontalInset: CGFloat = 14
+        ///Отступ текста от верха и низа капсулы.
+        static let textVerticalInset: CGFloat = 4
+        ///Сторона кнопки отправки внутри капсулы — та же, что у боковых кнопок,
+        ///чтобы глиф отправки был одного размера со скрепкой.
+        static let sendButtonSize: CGFloat = sideButtonSize
+        ///Отступ кнопки отправки от правого и нижнего края капсулы.
+        ///Ноль: при минимальной высоте капсулы кнопка занимает её целиком.
+        static let sendButtonInset: CGFloat = 0
+        ///Расстояние от текста до кнопки отправки.
+        static let textToSendSpacing: CGFloat = 6
+        ///Отступ вложений от верхнего края капсулы, когда они есть.
+        static let attachmentsTopInset: CGFloat = 8
+        ///Отступ вложений от боковых краёв капсулы. У ячейки есть свой внутренний
+        ///отступ `distToBoard`, вычитаем его — миниатюра встаёт по одной линии с текстом.
+        static let attachmentsHorizontalInset: CGFloat = textHorizontalInset - AttachmentCollectionViewCell.distToBoard
+        ///Плотность цветовой подмешки блюр-подложки панели.
+        static let backdropDimAlpha: CGFloat = 0.45
+    }
+    
+    ///Стеклянный круг под кнопкой вложений.
+    private lazy var attachGlassBackground = PSDGlassBackgroundView(isInteractive: true)
+    ///Стеклянная капсула поля ввода. Кнопка отправки и вложения живут внутри неё.
+    ///Радиус фиксированный: при минимальной высоте это капсула, а когда поле растёт
+    ///под многострочный текст или вложения, углы не раздуваются до половины высоты.
+    private lazy var inputGlassCapsule = PSDGlassBackgroundView(shape: .rounded(radius: GlassLayout.capsuleMinHeight / 2))
+    ///Стеклянный круг под кнопкой микрофона.
+    private lazy var micGlassBackground = PSDGlassBackgroundView(isInteractive: true)
+    
+    ///Кнопка записи голосового сообщения. Видна, только когда включены голосовые
+    ///и отправлять пока нечего, — см. `updateMicButtonVisibility`.
+    private(set) lazy var micButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 13.0, *) {
+            button.setImage(UIImage(systemName: "mic")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        }
+        button.tintColor = PSDLiquidGlassStyle.iconColor
+        button.addTarget(self, action: #selector(micButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    ///Блюр-подложка всей панели: затухает вверх, к переписке.
+    private lazy var inputBackdropView = BlurBackdropView(fadeEdge: .top,
+                                                          dimColor: Self.backdropDimColor)
+    
+    ///Два взаимоисключающих правых края капсулы: до микрофона либо до края панели.
+    ///Когда микрофон скрыт, капсула дотягивается до правого края.
+    private var capsuleTrailingToMic: NSLayoutConstraint?
+    private var capsuleTrailingToEdge: NSLayoutConstraint?
+    
+    ///Отступ вложений от верха капсулы. Есть только в стеклянной раскладке:
+    ///без вложений — ноль, чтобы капсула не росла впустую.
+    private var attachmentsTopConstraint: NSLayoutConstraint?
+    
+    ///Единственное место, где меняется геометрия панели вложений.
+    private func updateAttachmentsLayout(visible: Bool) {
+        attachmentsHeightConstraint?.constant = visible ? PSDMessageInputView.attachmentsHeight : 0
+        attachmentsTopConstraint?.constant = visible ? GlassLayout.attachmentsTopInset : 0
+    }
+    
+    ///Текущее состояние микрофона. `nil` — раскладка ещё не применялась.
+    private var isMicButtonVisible: Bool?
+    
+    ///Микрофон нужен, когда включены голосовые сообщения и отправлять пока нечего.
+    private var shouldShowMicButton: Bool {
+        PyrusServiceDesk.voiceMessages
+            && inputTextView.text.count == 0
+            && attachmentsPresenter.attachmentsNumber() == 0
+    }
+    
+    ///Прозрачность кнопки отправки, когда отправлять нечего.
+    ///В Liquid Glass кнопка исчезает; в прежнем оформлении остаётся бледной,
+    ///если голосовые сообщения выключены, и исчезает, если включены.
+    private var idleSendButtonAlpha: CGFloat {
+        if PSDLiquidGlassStyle.isEnabled {
+            return 0
+        }
+        return PyrusServiceDesk.voiceMessages ? 0 : 0.4
+    }
+    
+    ///Цвет подмешки берётся из кастомизации фона, а не из темы системы.
+    private static var backdropDimColor: UIColor {
+        let base = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackgroundColor
+        return base.withAlphaComponent(GlassLayout.backdropDimAlpha)
+    }
+    
+    @objc private func micButtonTapped() {
+        //Точка входа записи голосового сообщения. Пайплайн записи (VoiceRecordButton,
+        //AudioRecordingObject) в текущей версии закомментирован — при его возвращении
+        //запуск записи подключается сюда.
+    }
+    
+    ///Показывает или прячет микрофон и перетягивает правый край капсулы.
+    private func updateMicButtonVisibility(animated: Bool) {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        let showMic = shouldShowMicButton
+        guard showMic != isMicButtonVisible else { return }
+        isMicButtonVisible = showMic
+        
+        //Сначала деактивация, потом активация — иначе конфликт констрейнтов.
+        capsuleTrailingToMic?.isActive = false
+        capsuleTrailingToEdge?.isActive = false
+        (showMic ? capsuleTrailingToMic : capsuleTrailingToEdge)?.isActive = true
+        
+        let changes = {
+            self.micGlassBackground.alpha = showMic ? 1 : 0
+            self.micButton.alpha = showMic ? 1 : 0
+            self.backgroundView.layoutIfNeeded()
+        }
+        guard animated else {
+            changes()
+            return
+        }
+        UIView.animate(withDuration: 0.2, animations: changes)
+    }
+    
     private lazy var deleteAudioButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -115,6 +259,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     var showRate = false {
         didSet {
+            PSDRateDebug.log("showRate didSet -> \(showRate)") //ВРЕМЕННО
             switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
             case .text:
                 let size = CGFloat(CustomizationHelper.ratingSettings.size)
@@ -144,6 +289,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         super.traitCollectionDidChange(previousTraitCollection)
         cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
+        if PSDLiquidGlassStyle.isEnabled {
+            //Цвет иконки динамический и переключается сам; пересобирать надо только подложку.
+            inputBackdropView.dimColor = Self.backdropDimColor
+        }
     }
     
     override init(frame: CGRect) {
@@ -201,13 +350,20 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         emojiRateView.addSubview(textRateLabel)
         textRateView.isHidden = !showRate
         emojiRateView.isHidden = !showRate
+        //В Liquid Glass подписи «Оцените качество» над рейтингом нет — по макету
+        //кнопки говорят сами за себя.
+        rateLabel.isHidden = PSDLiquidGlassStyle.isEnabled
+        textRateLabel.isHidden = PSDLiquidGlassStyle.isEnabled
 //        backgroundView.addSubview(lockRecordView!)
 //        backgroundView.addSubview(recordButton!)
 //        backgroundView.addSubview(audioInputView)
         backgroundView.addSubview(deleteAudioButton)
         backgroundView.clipsToBounds = false
         clipsToBounds = false
-                
+        
+        if PSDLiquidGlassStyle.isEnabled {
+            embedControlsIntoGlass()
+        }
         addConstraints()
         
 //        self.recordingObject = AudioRecordingObject.init()
@@ -232,7 +388,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     func setupBottomView() {
         let bottomView = UIView()
-        bottomView.backgroundColor = .psdBackgroundColor
+        //В Liquid Glass фон панели рисует блюр-подложка, сплошная заливка не нужна.
+        bottomView.backgroundColor = PSDLiquidGlassStyle.isEnabled ? .clear : .psdBackgroundColor
         bottomView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomView)
         bottomView.topAnchor.constraint(equalTo: topAnchor).isActive = true
@@ -243,11 +400,25 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         }
         bottomView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
         bottomView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        //Подложка занимает ту же область, что и прежняя заливка, — вплоть до клавиатуры,
+        //и лежит ниже всего содержимого панели.
+        insertSubview(inputBackdropView, at: 0)
+        inputBackdropView.translatesAutoresizingMaskIntoConstraints = false
+        inputBackdropView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        if #available(iOS 15.0, *) {
+            inputBackdropView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.bottomAnchor).isActive = true
+        } else {
+            inputBackdropView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        }
+        inputBackdropView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+        inputBackdropView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
     }
     
     ///In current version this function replase added to message attachments
     func addAttachment(_ attachment : PSDAttachment){
-        attachmentsHeightConstraint?.constant = PSDMessageInputView.attachmentsHeight
+        updateAttachmentsLayout(visible: true)
         setNeedsLayout()
         attachmentsPresenter.addAttachment(attachment)
         checkSendButton()
@@ -269,8 +440,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     func setToDefault() {
         if inputTextView.text.count == 0 {
             UIView.animate(withDuration: 0.1, animations: {
-                self.sendButton.isUserInteractionEnabled = false || PyrusServiceDesk.voiceMessages
-                self.sendButton.alpha = PyrusServiceDesk.voiceMessages ? 0 : 0.4
+                //Прежнее значение `false || voiceMessages` сохранено для старого оформления;
+                //в Liquid Glass невидимая кнопка не должна ловить касания.
+                self.sendButton.isUserInteractionEnabled = !PSDLiquidGlassStyle.isEnabled && PyrusServiceDesk.voiceMessages
+                self.sendButton.alpha = self.idleSendButtonAlpha
 //                self.recordButton?.alpha = PyrusServiceDesk.voiceMessages ? 1 : 0
             })
         } else{
@@ -280,6 +453,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
 //                self.recordButton?.alpha = 0
             })
         }
+        updateMicButtonVisibility(animated: false)
     }
     
     func stopRecord() {
@@ -382,20 +556,28 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     ///Check is send button need to enabled or not
     private func checkSendButton() {
-        if !PyrusServiceDesk.voiceMessages {
-            self.sendButton.isUserInteractionEnabled = self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0
-            self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0.4 : 1
+        defer {
+            updateMicButtonVisibility(animated: true)
+        }
+        let hasContent = self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0
+        if !PyrusServiceDesk.voiceMessages && !PSDLiquidGlassStyle.isEnabled {
+            self.sendButton.isUserInteractionEnabled = hasContent
+            self.sendButton.alpha = !hasContent ? 0.4 : 1
 //            self.recordButton?.alpha = 0
             return
         }
+        if PSDLiquidGlassStyle.isEnabled {
+            //Исчезнувшая кнопка не должна оставаться кликабельной.
+            self.sendButton.isUserInteractionEnabled = hasContent
+        }
         UIView.animate(withDuration: 0.1, animations: {
-            self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
+            self.sendButton.alpha = hasContent ? 1 : self.idleSendButtonAlpha
 //            self.recordButton?.alpha = (self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
         })
     }
     
     private func checkCollectionHeight() {
-        attachmentsHeightConstraint?.constant = attachmentsPresenter.attachmentsNumber() > 0 ? PSDMessageInputView.attachmentsHeight : 0
+        updateAttachmentsLayout(visible: attachmentsPresenter.attachmentsNumber() > 0)
     }
     
     
@@ -405,6 +587,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        PSDRateDebug.log("input layout h=\(frame.height)") //ВРЕМЕННО
         if UIDevice.current.orientation.isLandscape{
             heightConstraint?.constant = inputTextView.maxHorizontalHeight()
         }
@@ -444,13 +627,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         textRateHeightConstraint?.isActive = true
         
         // Устанавливаем constraints для attachmentsCollection
+        // Положение задаётся в ветках раскладки: в прежней коллекция над панелью
+        // на всю ширину, в стеклянной — внутри капсулы.
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
-            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
-            attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor)
-        ])
-        
         attachmentsHeightConstraint = attachmentsCollection.heightAnchor.constraint(equalToConstant: 0)
         attachmentsHeightConstraint?.isActive = true
         
@@ -466,7 +645,32 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
 //        audioLeadingConstraint = audioInputView.widthAnchor.constraint(equalToConstant: 0)
 //        audioLeadingConstraint?.isActive = true
+        if PSDLiquidGlassStyle.isEnabled {
+            addLiquidGlassControlConstraints()
+        } else {
+            addLegacyControlConstraints()
+        }
+        
         NSLayoutConstraint.activate([
+            textRateLabel.topAnchor.constraint(equalTo: emojiRateView.topAnchor, constant: 12),
+            textRateLabel.centerXAnchor.constraint(equalTo: emojiRateView.centerXAnchor),
+            
+            rateLabel.topAnchor.constraint(equalTo: textRateView.topAnchor, constant: 12),
+            rateLabel.centerXAnchor.constraint(equalTo: textRateView.centerXAnchor),
+            
+            emojiRateView.bottomAnchor.constraint(equalTo: textRateView.topAnchor),
+            
+        ])
+        superview?.topAnchor.constraint(equalTo: emojiRateView.topAnchor).isActive = true
+    }
+    
+    ///Прежняя раскладка: кнопка отправки справа от поля ввода, без стеклянных подложек.
+    private func addLegacyControlConstraints() {
+        NSLayoutConstraint.activate([
+            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
+            attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor),
+            
             // inputTextView
             inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
             inputTextView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: distAddToText),
@@ -509,18 +713,103 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         // Отдельно сохраняем heightConstraint для inputTextView
         heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())
         heightConstraint?.isActive = true
+    }
+    
+    ///Раскладка Liquid Glass: кнопка вложений и микрофон на стеклянных кругах,
+    ///поле ввода в стеклянной капсуле, кнопка отправки — внутри капсулы.
+    ///Правый край капсулы двойной (до микрофона / до края) — см. `updateMicButtonVisibility`.
+    private func addLiquidGlassControlConstraints() {
+        [attachGlassBackground, inputGlassCapsule, micGlassBackground].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        let capsuleContent = inputGlassCapsule.glassContentView
         
         NSLayoutConstraint.activate([
-            textRateLabel.topAnchor.constraint(equalTo: emojiRateView.topAnchor, constant: 12),
-            textRateLabel.centerXAnchor.constraint(equalTo: emojiRateView.centerXAnchor),
+            attachGlassBackground.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
+            attachGlassBackground.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            attachGlassBackground.widthAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            attachGlassBackground.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
             
-            rateLabel.topAnchor.constraint(equalTo: textRateView.topAnchor, constant: 12),
-            rateLabel.centerXAnchor.constraint(equalTo: textRateView.centerXAnchor),
+            attachmentsAddButton.centerXAnchor.constraint(equalTo: attachGlassBackground.glassContentView.centerXAnchor),
+            attachmentsAddButton.centerYAnchor.constraint(equalTo: attachGlassBackground.glassContentView.centerYAnchor),
+            attachmentsAddButton.widthAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            attachmentsAddButton.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
             
-            emojiRateView.bottomAnchor.constraint(equalTo: textRateView.topAnchor),
+            inputGlassCapsule.leadingAnchor.constraint(equalTo: attachGlassBackground.trailingAnchor, constant: GlassLayout.itemSpacing),
+            inputGlassCapsule.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
+            inputGlassCapsule.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            inputGlassCapsule.heightAnchor.constraint(greaterThanOrEqualToConstant: GlassLayout.capsuleMinHeight),
             
+            //Вложения — внутри капсулы, над текстом. Пока их нет, коллекция нулевой высоты
+            //лежит у верхней кромки и текст начинается сразу за ней.
+            attachmentsCollection.leadingAnchor.constraint(equalTo: capsuleContent.leadingAnchor, constant: GlassLayout.attachmentsHorizontalInset),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: capsuleContent.trailingAnchor, constant: -GlassLayout.attachmentsHorizontalInset),
+            
+            inputTextView.leadingAnchor.constraint(equalTo: capsuleContent.leadingAnchor, constant: GlassLayout.textHorizontalInset),
+            inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: GlassLayout.textVerticalInset),
+            inputTextView.bottomAnchor.constraint(equalTo: capsuleContent.bottomAnchor, constant: -GlassLayout.textVerticalInset),
+            inputTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -GlassLayout.textToSendSpacing),
+            inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
+            
+            //Кнопка отправки — внутри капсулы, у правого нижнего угла:
+            //при многострочном тексте капсула растёт вверх, кнопка остаётся у нижней кромки.
+            sendButton.trailingAnchor.constraint(equalTo: capsuleContent.trailingAnchor, constant: -GlassLayout.sendButtonInset),
+            sendButton.bottomAnchor.constraint(equalTo: capsuleContent.bottomAnchor, constant: -GlassLayout.sendButtonInset),
+            sendButton.widthAnchor.constraint(equalToConstant: GlassLayout.sendButtonSize),
+            sendButton.heightAnchor.constraint(equalToConstant: GlassLayout.sendButtonSize),
+            
+            micGlassBackground.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor),
+            micGlassBackground.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            micGlassBackground.widthAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            micGlassBackground.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            
+            micButton.centerXAnchor.constraint(equalTo: micGlassBackground.glassContentView.centerXAnchor),
+            micButton.centerYAnchor.constraint(equalTo: micGlassBackground.glassContentView.centerYAnchor),
+            micButton.widthAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            micButton.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            
+            deleteAudioButton.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
+            deleteAudioButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            deleteAudioButton.widthAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            deleteAudioButton.heightAnchor.constraint(equalToConstant: GlassLayout.sideButtonSize),
+            
+            cancelButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            cancelButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor)
         ])
-        superview?.topAnchor.constraint(equalTo: emojiRateView.topAnchor).isActive = true
+        
+        attachmentsTopConstraint = attachmentsCollection.topAnchor.constraint(equalTo: capsuleContent.topAnchor)
+        attachmentsTopConstraint?.isActive = true
+        
+        capsuleTrailingToMic = inputGlassCapsule.trailingAnchor.constraint(equalTo: micGlassBackground.leadingAnchor,
+                                                                           constant: -GlassLayout.itemSpacing)
+        capsuleTrailingToEdge = inputGlassCapsule.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor)
+        
+        heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())
+        heightConstraint?.isActive = true
+        
+        updateMicButtonVisibility(animated: false)
+    }
+    
+    ///Перекладывает элементы на стеклянные подложки. Иерархия меняется до раскладки:
+    ///кнопки получают стеклянные круги, поле ввода и кнопка отправки переезжают
+    ///внутрь стеклянной капсулы. Разделитель в стекле не нужен — его роль играет блюр.
+    private func embedControlsIntoGlass() {
+        backgroundView.addSubview(attachGlassBackground)
+        backgroundView.insertSubview(inputGlassCapsule, belowSubview: cancelButton)
+        backgroundView.addSubview(micGlassBackground)
+        
+        //Кнопки живут внутри своих подложек, а не поверх них: интерактивное стекло
+        //должно реагировать на касания того элемента, который оно подсвечивает.
+        attachGlassBackground.glassContentView.addSubview(attachmentsAddButton)
+        inputGlassCapsule.glassContentView.addSubview(attachmentsCollection)
+        inputGlassCapsule.glassContentView.addSubview(inputTextView)
+        inputGlassCapsule.glassContentView.addSubview(sendButton)
+        micGlassBackground.glassContentView.addSubview(micButton)
+        
+        //Внутри капсулы кнопка отправки квадратная — отступы широкого варианта ей не подходят.
+        sendButton.applyLiquidGlassStyle()
+        
+        topGrayLine.isHidden = true
     }
     
     @objc private func deleteAudioButtonTapped() {
@@ -567,6 +856,10 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
         delegate?.addButtonTapped()
         //        self.becomeFirstResponder()
         //        inputTextView.becomeFirstResponder()
+    }
+    
+    func attachmentMenuPresenter() -> UIViewController? {
+        return delegate?.presenterForInputMenus()
     }
     
     func attachmentChoosed(_ data:Data, _ url:URL?)

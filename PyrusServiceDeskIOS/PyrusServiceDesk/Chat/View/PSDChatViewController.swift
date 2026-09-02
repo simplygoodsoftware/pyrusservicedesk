@@ -1,4 +1,3 @@
-
 import UIKit
 
 ///Protocol for updateting info
@@ -62,6 +61,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return button
     }()
     
+    ///Стеклянный круг под кнопкой скролла. Используется только в Liquid Glass оформлении.
+    private lazy var scrollButtonGlass = PSDGlassBackgroundView(isInteractive: true)
+    
+    ///Вью, которую позиционируем, прячем и масштабируем: под флагом — стеклянный круг
+    ///с кнопкой внутри, иначе — сама кнопка. Все внешние манипуляции идут через неё,
+    ///чтобы стекло и кнопка не разъезжались.
+    private var scrollControlView: UIView {
+        PSDLiquidGlassStyle.isEnabled ? scrollButtonGlass : scrollButton
+    }
+    
     private var bottomStopButton: NSLayoutConstraint?
     private lazy var stopButton: UIButton = {
         let button = UIButton()
@@ -112,6 +121,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }()
     
     private lazy var infoButton: UIBarButtonItem? = {
+        if PSDLiquidGlassStyle.isEnabled,
+           let glassItem = PSDChatNavigationItemFactory.makeInfoItem(target: self,
+                                                                     action: #selector(showPopover)) {
+            return glassItem
+        }
         if #available(iOS 14.0, *) {
             let button = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showPopover))
             button.tintColor = .appColor
@@ -121,8 +135,18 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
     }()
     
+    ///Заголовок чата на стеклянной капсуле. Используется только в Liquid Glass оформлении.
+    private lazy var glassTitleView = PSDChatGlassTitleView()
+    
+    ///Подложка под навигационным баром, затухает вниз, к переписке.
+    ///Используется только в Liquid Glass оформлении.
+    private lazy var navigationBackdropView = BlurBackdropView(fadeEdge: .bottom)
+    private var navigationBackdropHeight: NSLayoutConstraint?
+    
     private var firstLoad: Bool = true
     private var isActive: Bool = true
+    ///Пришла ли информация по заявке — до этого кнопке «инфо» показывать нечего.
+    private var isTicketInfoAvailable: Bool = false
     
     private var tableViewTopConstant: NSLayoutConstraint?
     
@@ -180,6 +204,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var defaultMessageInputViewHeight: CGFloat = 0
     
     @objc private func keyboardWillShow(_ notification: NSNotification) {
+        PSDRateDebug.log("kbWillShow panelH=\(messageInputView.frame.height)") //ВРЕМЕННО
         if #available(iOS 26.0, *) {
             if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
                let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
@@ -192,7 +217,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 
                 let oldInset = self.tableView.contentInset.top
                 let oldOffset = self.tableView.contentOffset.y
-                let oldKeyboardHeight = self.currkeyboardHeight
                 
                 currkeyboardHeight = keyboardHeight
                 
@@ -214,7 +238,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         }
                         isFirstKeyboardShow = false
                     } else {
-                        let delta = keyboardHeight - oldKeyboardHeight
+                        //Дельта — от текущего инсета, а не от currkeyboardHeight: ниже инсет
+                        //ставится абсолютно, и офсет должен сдвинуться ровно на его изменение.
+                        //currkeyboardHeight отстаёт от инсета после addAttachment/needShowRate
+                        //и после keyboardWillHide, и офсет по нему уезжал на эту разницу.
+                        let delta = keyboardHeight - oldInset
                         
                         if delta > 0 {
                             self.tableView.contentOffset.y -= delta
@@ -306,11 +334,14 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
-        scrollButton.layer.shadowColor = UIColor.black.cgColor
-        scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-        scrollButton.layer.shadowRadius = 4
-        scrollButton.layer.shadowOpacity = 0.2
-        scrollButton.layer.masksToBounds = false
+        if !PSDLiquidGlassStyle.isEnabled {
+            //У стекла своя объёмность, тень ему не нужна.
+            scrollButton.layer.shadowColor = UIColor.black.cgColor
+            scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+            scrollButton.layer.shadowRadius = 4
+            scrollButton.layer.shadowOpacity = 0.2
+            scrollButton.layer.masksToBounds = false
+        }
         
 //        stopButton.layer.shadowColor = UIColor.black.cgColor
 //        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
@@ -318,7 +349,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 //        stopButton.layer.shadowOpacity = 0.2
 //        stopButton.layer.masksToBounds = false
         
-        messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+        if !PSDLiquidGlassStyle.isEnabled {
+            messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+        }
     }
 
     private var firstLayout: Bool = true
@@ -343,7 +376,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 //              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
 //            return
 //        }
-//        
+//
 //        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
 //            self.tableView.reloadData()
 //            if self.tableView.contentOffset.y > 100,
@@ -403,14 +436,44 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func recolor() {
         super.recolor()
         recolorTextInput(messageInputView)
+        //PSDViewController.recolor() безусловно кладёт в titleView собственный лейбл.
+        //Возвращаем оформленный заголовок, иначе стеклянная капсула живёт до первой
+        //смены темы или установки title.
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        applyChatTitle()
+        //Цвет бара берётся из кастомизации и может зависеть от темы — подложку перекрашиваем.
+        updateNavigationBackdropColor()
     }
     
     func resizeTable() {
-        if let infoView = PyrusServiceDesk.mainController?.customization?.infoView, !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
-            tableViewTopConstant?.constant = infoView.frame.size.height
-        } else {
-            tableViewTopConstant?.constant = 0
+        let infoViewHeight = visibleInfoViewHeight
+        guard PSDLiquidGlassStyle.isEnabled else {
+            tableViewTopConstant?.constant = infoViewHeight
+            return
         }
+        //Таблица прижата к верху экрана — сдвигать её нельзя, иначе пропадёт уезжание под бар.
+        tableViewTopConstant?.constant = 0
+        navigationBackdropHeight?.constant = navigationBackdropHeightValue
+        updateGlassTopContentInset(infoViewHeight: infoViewHeight)
+    }
+    
+    ///Высота информационной вью заказчика, если она сейчас показана.
+    private var visibleInfoViewHeight: CGFloat {
+        guard let infoView = PyrusServiceDesk.mainController?.customization?.infoView,
+              !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true)
+        else {
+            return 0
+        }
+        return infoView.frame.size.height
+    }
+    
+    ///Отступ от навигационного бара для перевёрнутой таблицы.
+    ///Таблица развёрнута на 180°, поэтому визуальный верх — это нижняя вставка.
+    ///Именно вставка, а не констрейнт: контент должен подъезжать под стекло, а не обрезаться.
+    ///Пишем не в `contentInset.bottom` напрямую — им владеет таблица и складывает
+    ///этот отступ со своим отступом под лоадер.
+    private func updateGlassTopContentInset(infoViewHeight: CGFloat) {
+        tableView.additionalBottomInset = view.safeAreaInsets.top + infoViewHeight
     }
     
     @objc private func appEnteredForeground(){
@@ -439,7 +502,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         let style = CustomizationHelper.keyboardStyle
         input.inputTextView.keyboardAppearance = style
         let (backInputColor, textInputColor) = CustomizationHelper.colorsForInput
-        input.backgroundView.backgroundColor = backInputColor
+        //В Liquid Glass панель прозрачная: её фон рисует блюр-подложка внутри самой панели.
+        input.backgroundView.backgroundColor = PSDLiquidGlassStyle.isEnabled ? .clear : backInputColor
         input.inputTextView.textColor = textInputColor
         input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
     }
@@ -449,6 +513,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackgroundColor
         designNavigation()
         setupTableView()
+        setupNavigationBackdropIfNeeded()
         setupInfoView()
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
@@ -471,7 +536,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        if #available(iOS 11.0, *) {
+        if PSDLiquidGlassStyle.isEnabled {
+            //Переписка уезжает под навигационный бар.
+            //Отступ под баром задаётся не констрейнтом, а вставкой — см. resizeTable().
+            tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.topAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        } else if #available(iOS 11.0, *) {
             tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
@@ -485,18 +556,67 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         tableView.addActivityView()
     }
     
-    func setupScrollButton() {
-        view.addSubview(scrollButton)
-        let image = UIImageView(image: UIImage.PSDImage(name: "down"))
-        image.translatesAutoresizingMaskIntoConstraints = false
-        scrollButton.addSubview(image)
-        badgeView.addSubview(newMessageCount)
-        scrollButton.addSubview(badgeView)
+    ///Подложка под навигационным баром. Добавляется поверх таблицы, чтобы переписка
+    ///уезжала под неё, но остаётся ниже самого бара — его рисует навигационный контроллер.
+    private func setupNavigationBackdropIfNeeded() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        if #available(iOS 26.0, *) {
+            //Автоматический краевой эффект на перевёрнутой таблице гасит всю переписку.
+            tableView.disableAutomaticScrollEdgeEffects()
+        }
+        
+        updateNavigationBackdropColor()
+        view.addSubview(navigationBackdropView)
+        navigationBackdropView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let heightConstraint = navigationBackdropView.heightAnchor.constraint(equalToConstant: 0)
+        navigationBackdropHeight = heightConstraint
         
         NSLayoutConstraint.activate([
-            scrollButton.heightAnchor.constraint(equalToConstant: 40),
-            scrollButton.widthAnchor.constraint(equalToConstant: 40),
-            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
+            navigationBackdropView.topAnchor.constraint(equalTo: view.topAnchor),
+            navigationBackdropView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            navigationBackdropView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            heightConstraint
+        ])
+    }
+    
+    ///Dim-слой подложки должен совпадать с цветом бара из кастомизации, а не с темой
+    ///системы: интегратор может задать тёмный бар в светлой теме и наоборот.
+    private func updateNavigationBackdropColor() {
+        navigationBackdropView.dimColor = CustomizationHelper.navigationBarColor
+            .withAlphaComponent(PSDChatDesign.navigationBackdropDimAlpha)
+    }
+    
+    ///Высота подложки — вся зона под баром вместе со статус-баром.
+    private var navigationBackdropHeightValue: CGFloat {
+        let safeAreaTop = view.safeAreaInsets.top
+        guard safeAreaTop > 0 else {
+            //Подстраховка на случай, если safe area ещё не посчитана:
+            //берём геометрию бара напрямую, она уже включает статус-бар.
+            return navigationController?.navigationBar.frame.maxY ?? 0
+        }
+        return safeAreaTop
+    }
+    
+    func setupScrollButton() {
+        embedScrollButtonIntoGlassIfNeeded()
+        view.addSubview(scrollControlView)
+        let image = UIImageView(image: UIImage.PSDImage(name: "down"))
+        image.translatesAutoresizingMaskIntoConstraints = false
+        if PSDLiquidGlassStyle.isEnabled {
+            image.image = image.image?.withRenderingMode(.alwaysTemplate)
+            image.tintColor = PSDLiquidGlassStyle.iconColor
+        }
+        scrollButton.addSubview(image)
+        badgeView.addSubview(newMessageCount)
+        //Бейдж выступает за край кнопки, а стекло режет содержимое по своей форме —
+        //поэтому в Liquid Glass бейдж лежит на контейнере, поверх стекла.
+        scrollControlView.addSubview(badgeView)
+        
+        NSLayoutConstraint.activate([
+            scrollControlView.heightAnchor.constraint(equalToConstant: 40),
+            scrollControlView.widthAnchor.constraint(equalToConstant: 40),
+            scrollControlView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
             image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
             image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
             badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
@@ -508,11 +628,31 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             newMessageCount.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
             badgeView.leadingAnchor.constraint(equalTo: newMessageCount.leadingAnchor, constant: -4)
         ])
-        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
+        bottomScrollButton = scrollControlView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomScrollButton?.isActive = true
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
+    }
+    
+    ///Кладёт кнопку скролла внутрь интерактивного стекла. Кнопка — внутри контента стекла,
+    ///а не поверх него: так тап доходит до кнопки, а стекло анимирует нажатие.
+    ///Заливку и стартовый масштаб кнопки перенимает контейнер.
+    private func embedScrollButtonIntoGlassIfNeeded() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        scrollButtonGlass.translatesAutoresizingMaskIntoConstraints = false
+        scrollButtonGlass.transform = scrollButton.transform
+        scrollButton.transform = .identity
+        scrollButton.backgroundColor = .clear
+        
+        let content = scrollButtonGlass.glassContentView
+        content.addSubview(scrollButton)
+        NSLayoutConstraint.activate([
+            scrollButton.topAnchor.constraint(equalTo: content.topAnchor),
+            scrollButton.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            scrollButton.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            scrollButton.trailingAnchor.constraint(equalTo: content.trailingAnchor)
+        ])
     }
     
     func setupStopButton() {
@@ -577,17 +717,18 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.navigationBar.isTranslucent = true
         
         if #available(iOS 13.0, *) {
-            let color = CustomizationHelper.navigationBarColor
-            let barAppearance = UIBarAppearance()
-            barAppearance.backgroundColor = color
-            let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
-            bigAppear.configureWithOpaqueBackground()
-            bigAppear.backgroundColor = color
-            bigAppear.backgroundEffect = nil
-            navigationItem.scrollEdgeAppearance = bigAppear
-            navigationItem.standardAppearance = bigAppear
+            if PSDLiquidGlassStyle.isEnabled {
+                PSDNavigationBarStyler.applySystem(to: navigationItem)
+            } else {
+                PSDNavigationBarStyler.applyLegacy(to: navigationItem,
+                                                   backgroundColor: CustomizationHelper.navigationBarColor)
+            }
         }
         self.setItems()
+        if PSDLiquidGlassStyle.isEnabled {
+            //В прежнем оформлении заголовок выставляется только по .updateTitle — не меняем это.
+            applyChatTitle()
+        }
         navigationController?.navigationBar.isHidden = false
     }
     
@@ -617,24 +758,98 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     ///Set navigation items
+    ///
+    ///Единственное место, где решается состав кнопок бара. Приоритет всегда за кастомизацией:
+    ///если интегратор задал свою кнопку — ставим её, свои кнопки не подмешиваем.
+    ///Правой кнопки может не быть вовсе: пока не пришла информация по заявке
+    ///и своей кнопки у интегратора нет — справа пусто.
     private func setItems() {
-        if let rightBarButtonItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
-            rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
-            navigationItem.rightBarButtonItem = rightBarButtonItem
+        navigationItem.leftBarButtonItem = makeLeftBarButtonItem()
+        navigationItem.rightBarButtonItem = makeRightBarButtonItem()
+    }
+    
+    private func makeLeftBarButtonItem() -> UIBarButtonItem? {
+        if let customItem = PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
+            customItem.tintColor = customBarButtonTintColor
+            return customItem
         }
-        if let leftBarButtonItem =
-            PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
-            leftBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
-            navigationItem.leftBarButtonItem = leftBarButtonItem
+        return makeDefaultBackItem()
+    }
+    
+    private func makeRightBarButtonItem() -> UIBarButtonItem? {
+        if let customItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
+            customItem.tintColor = customBarButtonTintColor
+            return customItem
+        }
+        return isTicketInfoAvailable ? infoButton : nil
+    }
+    
+    ///Кнопка возврата по умолчанию — иконка-шеврон.
+    ///В прежнем оформлении остаётся текстовая кнопка `leftButton`.
+    private func makeDefaultBackItem() -> UIBarButtonItem {
+        if PSDLiquidGlassStyle.isEnabled,
+           let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
+                                                                     action: #selector(closeButtonAction)) {
+            return glassItem
+        }
+        return UIBarButtonItem(customView: leftButton)
+    }
+    
+    ///Заголовок чата. Кастомная вью заказчика приоритетнее любого оформления.
+    private func applyChatTitle() {
+        if let customTitleView = PyrusServiceDesk.mainController?.customization?.chatTitleView {
+            navigationItem.titleView = customTitleView
+            customTitleView.sizeToFit()
+            navigationController?.navigationBar.layoutIfNeeded()
+            return
+        }
+        
+        guard PSDLiquidGlassStyle.isEnabled else {
+            title = CustomizationHelper.chatTitle
+            return
+        }
+        
+        glassTitleView.title = CustomizationHelper.chatTitle
+        glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
+        glassTitleView.sizeToFit()
+        navigationItem.titleView = glassTitleView
+        navigationController?.navigationBar.layoutIfNeeded()
+    }
+    
+    ///Заголовок для состояния «нет сети».
+    private func applyConnectionErrorTitle() {
+        let errorText = "Waiting_For_Network".localizedPSD()
+        
+        if PSDLiquidGlassStyle.isEnabled {
+            glassTitleView.title = errorText
+            glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
+            glassTitleView.sizeToFit()
+            navigationItem.titleView = glassTitleView
         } else {
-            let item = UIBarButtonItem.init(customView: leftButton)
-            navigationItem.leftBarButtonItem = item
+            let label = UILabel()
+            label.text = errorText
+            label.textColor = CustomizationHelper.colorForChatTitle
+            label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+            navigationItem.titleView = label
         }
+        tableView.endRefreshing()
+    }
+    
+    ///Цвет кнопок бара, заданных Service Desk.
+    private var barButtonTintColor: UIColor {
+        PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+    }
+    
+    ///Цвет кнопок бара, заданных интегратором. Может быть `nil` — тогда кнопка
+    ///остаётся с тем цветом, который выставил интегратор.
+    private var customBarButtonTintColor: UIColor? {
+        PyrusServiceDesk.mainController?.customization?.themeColor
+        ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
     }
     
     private lazy var leftButton: UIButton = {
         let button = UIButton.init(type: .custom)
-        let mainColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+        let mainColor = barButtonTintColor
         button.titleLabel?.font = .backButton
         button.setTitle("Back".localizedPSD(), for: .normal)
         button.setTitleColor(mainColor, for: .normal)
@@ -647,6 +862,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }()
     
     private func customiseDesign(color: UIColor) {
+        //В Liquid Glass цвет иконок задаёт фабрика, а кнопки интегратора
+        //остаются с его цветом — перекрашивать здесь нечего.
+        guard !PSDLiquidGlassStyle.isEnabled else { return }
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
@@ -685,11 +903,27 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 
 private extension PSDChatViewController {
     func needShowRate(_ showRate: Bool) {
-        if showRate && messageInputView.showRate != showRate {
-            tableView.contentInset.top += PSDMessageInputView.RATE_HEIGHT
-            tableView.contentOffset.y -= PSDMessageInputView.RATE_HEIGHT
+        //Команда показа может прийти раньше, чем загрузятся значения текстового рейтинга, —
+        //тогда показывать нечего: рисовался пустой контейнер, а плашки появлялись только
+        //со следующей командой. Не трогаем состояние вовсе: повторная команда с данными
+        //пройдёт как первый показ и зарезервирует место под фактическую высоту.
+        if showRate, !messageInputView.hasRateContent {
+            PSDRateDebug.log("needShowRate(true) skipped: no rate content yet") //ВРЕМЕННО
+            return
         }
+        let wasShown = messageInputView.showRate
+        PSDRateDebug.log("needShowRate(\(showRate)) wasShown=\(wasShown)") //ВРЕМЕННО
+        //Сначала установка: showRate пересчитывает фактическую высоту рейтинга.
         messageInputView.showRate = showRate
+        if showRate && !wasShown {
+            //Именно фактическая высота, а не RATE_HEIGHT: у текстового рейтинга она
+            //зависит от числа плашек, и с константой кнопки оказывались за нижней
+            //кромкой до ближайшего пересчёта инсета.
+            let rateHeight = messageInputView.currentRateHeight
+            tableView.contentInset.top += rateHeight
+            tableView.contentOffset.y -= rateHeight
+            PSDRateDebug.log("inset moved by \(rateHeight)") //ВРЕМЕННО
+        }
     }
     
     func dataIsShown() {
@@ -748,24 +982,9 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.reloadAll(animated: animated)
         case .updateTitle(connectionError: let connectionError):
             if !connectionError {
-                if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {
-                    navigationItem.titleView = view
-                    view.sizeToFit()
-                    navigationController?.navigationBar.layoutIfNeeded()
-                } else {
-                    title = CustomizationHelper.chatTitle
-                }
+                applyChatTitle()
             } else {
-                let label = UILabel()
-                label.text = "Waiting_For_Network".localizedPSD()
-                var textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor ?? .psdLabel
-                if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
-                    textColor = UIColor.getTextColor(for: color)
-                }
-                label.textColor = CustomizationHelper.colorForChatTitle
-                label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-                navigationItem.titleView = label
-                tableView.endRefreshing()
+                applyConnectionErrorTitle()
             }
         case .reloadTitle:
             designNavigation()
@@ -786,7 +1005,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
-            navigationItem.rightBarButtonItem = infoButton
+            isTicketInfoAvailable = true
+            navigationItem.rightBarButtonItem = makeRightBarButtonItem()
         case .showRatingComment(ratingText: let ratingText, rating: let rating):
             messageInputView.inputTextView.resignFirstResponder()
             DispatchQueue.main.async { [weak self] in
@@ -827,6 +1047,10 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
         messageInputView.inputTextView.resignFirstResponder()
     }
     
+    func presenterForInputMenus() -> UIViewController? {
+        return self
+    }
+    
     func send(_ message:String, _ attachments: [PSDAttachment]) {
         interactor.doInteraction(.send(message: message, attachments: attachments))
     }
@@ -852,33 +1076,33 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
     }
     
     func updateScrollButton(isAtBottom: Bool, isDragging: Bool) {
-        if !isAtBottom && scrollButton.isHidden == true && isDragging {
+        if !isAtBottom && scrollControlView.isHidden == true && isDragging {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isAtBottom && scrollButton.isHidden == false {
+        } else if isAtBottom && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
     }
     
     func updateScrollButton(isHidden: Bool) {
-        if !isHidden && scrollButton.isHidden == true {
+        if !isHidden && scrollControlView.isHidden == true {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isHidden && scrollButton.isHidden == false {
+        } else if isHidden && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
         
@@ -930,6 +1154,12 @@ extension PSDChatViewController: UIPopoverPresentationControllerDelegate {
 
 private extension UIFont {
     static let backButton = CustomizationHelper.systemFont(ofSize: 18)
+}
+
+///Настройки Liquid Glass оформления экрана чата.
+private enum PSDChatDesign {
+    ///Плотность цветовой подмешки подложки под навигационным баром.
+    static let navigationBackdropDimAlpha: CGFloat = 0.45
 }
 
 private extension UIColor {
