@@ -35,6 +35,21 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private var textRateView: RateViewProtocol!
     private var emojiRateView: RateViewProtocol!
     private var rateHeight: CGFloat = 0
+    ///Фактическая высота показанного рейтинга. Считается в `showRate`,
+    ///поэтому читать её можно только после установки флага показа.
+    var currentRateHeight: CGFloat { rateHeight }
+    
+    ///Есть ли рейтингу что показывать. Значения текстового рейтинга приезжают с сервера
+    ///и могут отставать от команды показа — с пустым списком показывать нечего.
+    ///У эмодзи-рейтинга значения генерируются локально и есть всегда.
+    var hasRateContent: Bool {
+        switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
+        case .text:
+            return !(CustomizationHelper.ratingSettings.ratingTextValues ?? []).isEmpty
+        default:
+            return true
+        }
+    }
     private lazy var rateLabel: UILabel = {
         let label = UILabel()
         label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
@@ -244,6 +259,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     var showRate = false {
         didSet {
+            PSDRateDebug.log("showRate didSet -> \(showRate)") //ВРЕМЕННО
             switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
             case .text:
                 let size = CGFloat(CustomizationHelper.ratingSettings.size)
@@ -334,6 +350,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         emojiRateView.addSubview(textRateLabel)
         textRateView.isHidden = !showRate
         emojiRateView.isHidden = !showRate
+        //В Liquid Glass подписи «Оцените качество» над рейтингом нет — по макету
+        //кнопки говорят сами за себя.
+        rateLabel.isHidden = PSDLiquidGlassStyle.isEnabled
+        textRateLabel.isHidden = PSDLiquidGlassStyle.isEnabled
 //        backgroundView.addSubview(lockRecordView!)
 //        backgroundView.addSubview(recordButton!)
 //        backgroundView.addSubview(audioInputView)
@@ -567,6 +587,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        PSDRateDebug.log("input layout h=\(frame.height)") //ВРЕМЕННО
         if UIDevice.current.orientation.isLandscape{
             heightConstraint?.constant = inputTextView.maxHorizontalHeight()
         }

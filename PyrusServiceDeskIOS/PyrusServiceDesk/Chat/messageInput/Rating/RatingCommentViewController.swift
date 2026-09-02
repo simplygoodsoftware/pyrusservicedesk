@@ -78,6 +78,14 @@ class RatingCommentViewController: UIViewController {
         return button
     }()
 
+    ///Размеры Liquid Glass оформления.
+    private enum GlassLayout {
+        static let closeButtonSize: CGFloat = 44
+        static let sendButtonHeight: CGFloat = 48
+        static let textViewCornerRadius: CGFloat = 12
+        static let sideInset: CGFloat = 16
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
@@ -94,6 +102,15 @@ class RatingCommentViewController: UIViewController {
             view.addSubview($0)
         }
 
+        if PSDLiquidGlassStyle.isEnabled {
+            applyLiquidGlassAppearance()
+            addLiquidGlassConstraints()
+        } else {
+            addLegacyConstraints()
+        }
+    }
+
+    private func addLegacyConstraints() {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -116,6 +133,49 @@ class RatingCommentViewController: UIViewController {
             sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             sendButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             sendButton.heightAnchor.constraint(equalToConstant: 48),
+        ])
+    }
+
+    ///Оформление по макету: круглый крестик в правом верхнем углу вместо кнопки
+    ///«Закрыть», поле с большим радиусом, «Отправить» — пилюля во всю ширину.
+    ///Цвета остаются из кастомизации, меняется только форма.
+    private func applyLiquidGlassAppearance() {
+        closeButton.setTitle(nil, for: .normal)
+        closeButton.setImage(PSDNavigationItemFactory.image(for: .close), for: .normal)
+        closeButton.tintColor = PSDLiquidGlassStyle.iconColor
+        closeButton.backgroundColor = CustomizationHelper.grayViewColor
+        closeButton.layer.cornerRadius = GlassLayout.closeButtonSize / 2
+        closeButton.clipsToBounds = true
+
+        sendButton.layer.cornerRadius = GlassLayout.sendButtonHeight / 2
+        sendButton.titleLabel?.font = .boldSystemFont(ofSize: 17)
+
+        textView.layer.cornerRadius = GlassLayout.textViewCornerRadius
+    }
+
+    private func addLiquidGlassConstraints() {
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.topAnchor, constant: GlassLayout.sideInset),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
+            closeButton.widthAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
+            closeButton.heightAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
+
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
+            titleLabel.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -12),
+
+            commentLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            commentLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
+
+            textView.topAnchor.constraint(equalTo: commentLabel.bottomAnchor, constant: 6),
+            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
+            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
+            textView.heightAnchor.constraint(equalToConstant: 66),
+
+            sendButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 24),
+            sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
+            sendButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
+            sendButton.heightAnchor.constraint(equalToConstant: GlassLayout.sendButtonHeight),
         ])
     }
 

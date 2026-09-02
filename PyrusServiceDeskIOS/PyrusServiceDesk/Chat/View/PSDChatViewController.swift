@@ -204,6 +204,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var defaultMessageInputViewHeight: CGFloat = 0
     
     @objc private func keyboardWillShow(_ notification: NSNotification) {
+        PSDRateDebug.log("kbWillShow panelH=\(messageInputView.frame.height)") //ВРЕМЕННО
         if #available(iOS 26.0, *) {
             if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
                let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
@@ -902,11 +903,27 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 
 private extension PSDChatViewController {
     func needShowRate(_ showRate: Bool) {
-        if showRate && messageInputView.showRate != showRate {
-            tableView.contentInset.top += PSDMessageInputView.RATE_HEIGHT
-            tableView.contentOffset.y -= PSDMessageInputView.RATE_HEIGHT
+        //Команда показа может прийти раньше, чем загрузятся значения текстового рейтинга, —
+        //тогда показывать нечего: рисовался пустой контейнер, а плашки появлялись только
+        //со следующей командой. Не трогаем состояние вовсе: повторная команда с данными
+        //пройдёт как первый показ и зарезервирует место под фактическую высоту.
+        if showRate, !messageInputView.hasRateContent {
+            PSDRateDebug.log("needShowRate(true) skipped: no rate content yet") //ВРЕМЕННО
+            return
         }
+        let wasShown = messageInputView.showRate
+        PSDRateDebug.log("needShowRate(\(showRate)) wasShown=\(wasShown)") //ВРЕМЕННО
+        //Сначала установка: showRate пересчитывает фактическую высоту рейтинга.
         messageInputView.showRate = showRate
+        if showRate && !wasShown {
+            //Именно фактическая высота, а не RATE_HEIGHT: у текстового рейтинга она
+            //зависит от числа плашек, и с константой кнопки оказывались за нижней
+            //кромкой до ближайшего пересчёта инсета.
+            let rateHeight = messageInputView.currentRateHeight
+            tableView.contentInset.top += rateHeight
+            tableView.contentOffset.y -= rateHeight
+            PSDRateDebug.log("inset moved by \(rateHeight)") //ВРЕМЕННО
+        }
     }
     
     func dataIsShown() {
