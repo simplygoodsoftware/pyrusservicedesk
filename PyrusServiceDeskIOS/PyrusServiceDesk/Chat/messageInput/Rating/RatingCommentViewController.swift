@@ -80,8 +80,9 @@ class RatingCommentViewController: UIViewController {
 
     ///Размеры Liquid Glass оформления.
     private enum GlassLayout {
-        static let closeButtonSize: CGFloat = 44
+        static let closeButtonSize: CGFloat = 32
         static let sendButtonHeight: CGFloat = 48
+        static let textViewHeight: CGFloat = 120
         static let textViewCornerRadius: CGFloat = 12
         static let sideInset: CGFloat = 16
     }
@@ -136,7 +137,7 @@ class RatingCommentViewController: UIViewController {
         ])
     }
 
-    ///Оформление по макету: круглый крестик в правом верхнем углу вместо кнопки
+    ///Оформление по макету: круглый крестик по центру заголовка вместо кнопки
     ///«Закрыть», поле с большим радиусом, «Отправить» — пилюля во всю ширину.
     ///Цвета остаются из кастомизации, меняется только форма.
     private func applyLiquidGlassAppearance() {
@@ -151,18 +152,45 @@ class RatingCommentViewController: UIViewController {
         sendButton.titleLabel?.font = .boldSystemFont(ofSize: 17)
 
         textView.layer.cornerRadius = GlassLayout.textViewCornerRadius
+        applyLiquidGlassColors()
+    }
+    
+    ///Цвета экрана, разрешённые в актуальной теме.
+    ///
+    ///Лейблы и поле создаются как `let` до загрузки вью: `getTextColor(for:)` там
+    ///разрешает динамический цвет фона вне trait-контекста — то есть всегда по светлой
+    ///теме. В тёмной получалась каша: чёрный заголовок и светлые панели на тёмном фоне.
+    ///Здесь всё разрешается по фактическим traits и пересобирается при их смене.
+    private func applyLiquidGlassColors() {
+        let background = (PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground)
+            .resolvedColor(with: traitCollection)
+        view.backgroundColor = background
+        titleLabel.textColor = UIColor.getTextColor(for: background)
+        commentLabel.textColor = UIColor.getSecondTextColor(for: background)
+        textView.backgroundColor = background
+        textView.textColor = UIColor.getTextColor(for: background)
+        textView.layer.borderColor = UIColor.getBorderColor(for: background).cgColor
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard PSDLiquidGlassStyle.isEnabled,
+              traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection)
+        else { return }
+        applyLiquidGlassColors()
     }
 
     private func addLiquidGlassConstraints() {
         NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.topAnchor, constant: GlassLayout.sideInset),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
-            closeButton.widthAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
-            closeButton.heightAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
-
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
             titleLabel.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -12),
+
+            //Крестик выровнен по центру заголовка.
+            closeButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
+            closeButton.widthAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
+            closeButton.heightAnchor.constraint(equalToConstant: GlassLayout.closeButtonSize),
 
             commentLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
             commentLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
@@ -170,7 +198,7 @@ class RatingCommentViewController: UIViewController {
             textView.topAnchor.constraint(equalTo: commentLabel.bottomAnchor, constant: 6),
             textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
             textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -GlassLayout.sideInset),
-            textView.heightAnchor.constraint(equalToConstant: 66),
+            textView.heightAnchor.constraint(equalToConstant: GlassLayout.textViewHeight),
 
             sendButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 24),
             sendButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: GlassLayout.sideInset),
