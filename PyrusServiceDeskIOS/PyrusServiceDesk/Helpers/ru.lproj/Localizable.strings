@@ -7,7 +7,6 @@
 "ReceiveIikoSupport" = "Мы отправим на него одноразовый код доступа";
 "AgreePrivacyPolicy" = "Нажимая кнопку Далее вы соглашаетесь\nc ";
 "Enter" = "Войти";
-"Continue" = "Продолжить";
 "NoConnection" = "Нет связи с сетью";
 "SMSLimit" = "Вы превысили лимит по отправке СМС. Попробуйте позже.";
 "CannotSendSMS" = "Не удается отправить СМС на номер  %@";
@@ -20,7 +19,6 @@
 "Repeat" = "Повторить";
 "Cancel" = "Отмена";
 "TryAgainLater" = "Вы превысили количество попыток ввода кода. Попробуйте позже.";
-"Back" = " Назад";
 "WhatsName" = "Имя";
 "SoWeKnowHowToAddressYou" = "Чтобы мы знали как к вам обращаться";
 "YourRestaurant" = "Вход в чат с поддержкой";
@@ -52,23 +50,17 @@
 "OpenSettings" = "Перейти в настройки";
 "CameraAccess" = "Доступ к камере";
 "Continue" = "Далее";
-"Settings" = "Настройки";
 "YouPhoneNumber" = "Номер телефона";
 "PrivacyPolicy" = "Политика конфиденциальности";
 "Privacy" = "Политикой конфиденциальности";
 "Exit" = "Выход";
 "ExitInfo" = "История ваших обращений будет потеряна. Вы уверены, что хотите выйти из аккаунта?";
 "GreatingMessage" = "Здравствуйте, %@! Чем могу помочь?";
-"OK" = "ОК";
 "iikoSupport" = "Поддержка";
 "nameApplication" = "name_ru";
 "Edit" = "Изменить";
 "Logout" = "Выйти";
 "Version" = "Версия";
-"EvaluateQuality" = "Оцените работу оператора";
-"PleaseEvaluateQuality" = "Пожалуйста, оцените работу оператора";
-"LeaveYourComment" = "Оставьте свой комментарий";
-"Close" = "Закрыть";
 
 //https://helpy.pyrus.com/n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==/251380432/extraFields?user_name=%D0%A0%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD:%20%5B149-039-001%5D%20%D0%9F%D0%B0%D0%BF%D0%B0%20%D0%94%D0%B6%D0%BE%D0%BD%D1%81%20%E2%84%9639%20%D0%91%D1%83%D1%82%D0%BE%D0%B2%D0%BE
 // Mark: HELPY
@@ -161,7 +153,6 @@
 "SupportDefaultName" = "поддержка";
 "Helpy" = "Помощник";
 "All" = "Все";
-"ClosedTickets" = "Закрытые обращения";
 "You" = "Вы";
 "ClosedTickets" = "Закрытые обращения";
 "AccessDeniedInfo" = "Для получения доступа к %@ обратитесь к администратору";

@@ -7,7 +7,6 @@
 "ReceiveIikoSupport" = "We'll send a one-time access code";
 "AgreePrivacyPolicy" = "By tapping Continue, you agree\nwith the ";
 "Enter" = "Enter";
-"Continue" = "Continue";
 "NoConnection" = "No network connection";
 "SMSLimit" = "You have exceeded your SMS limit. Try again later.";
 "CannotSendSMS" = "Cannot send an SMS to %@";
@@ -20,7 +19,6 @@
 "Repeat" = "Repeat";
 "Cancel" = "Cancel";
 "TryAgainLater" = "You have exceeded the number of attempts to enter the code. Try again later.";
-"Back" = " Back";
 "WhatsName" = "Name";
 "SoWeKnowHowToAddressYou" = "So we know how to address you";
 "YourRestaurant" = "Join support chat";
@@ -46,14 +44,12 @@
 "YouWillNotReceiveReplies" = "You will not receive replies to your messages, until you go into the app. To turn on notifications, open the app Settings -> Notifications -> Helpy";
 "OpenSettings" = "Open settings";
 "Continue" = "Continue";
-"Settings" = "Settings";
 "YouPhoneNumber" = "Phone number";
 "PrivacyPolicy" = "Privacy Policy";
 "Privacy" = "Privacy Policy";
 "Exit" = "Exit";
 "ExitInfo" = "Your message history will be lost. Are you sure you want to exit your account?";
 "GreatingMessage" = "Hello, %@! How can I help you?";
-"OK" = "OK";
 "iikoSupport" = "support";
 "AllowCamera" = "Allow access to your camera";
 "InviteLink" = "Use invitation link";
@@ -64,10 +60,6 @@
 "Edit" = "Edit";
 "Logout" = "Logout";
 "Version" = "Version";
-"EvaluateQuality" = "Evaluate the quality of service";
-"PleaseEvaluateQuality" = "Evaluate the quality of service";
-"LeaveYourComment" = "Write a review";
-"Close" = "Close";
 
 // Mark: HELPY
 "Last_Message" = "This is the last message from that conversation";
