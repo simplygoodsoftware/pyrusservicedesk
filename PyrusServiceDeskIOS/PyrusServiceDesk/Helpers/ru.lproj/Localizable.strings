@@ -1,7 +1,6 @@
 "PrivicyCamera" = "Вы сможете отсканировать QR-код для авторизации.";
 "PrivicyLocation" = "Вы сможете находить компании поблизости.";
 "PrivicyMicrophone" = "Вы сможете отправлять голосовые сообщения и видео со звуком.";
-
 "InstantSupport" = "Ваша служба поддержки";
 "EnterPhone" = "Введите номер телефона";
 "ReceiveIikoSupport" = "Мы отправим на него одноразовый код доступа";
@@ -82,7 +81,6 @@
 "EvaluateQuality" = "Оцените работу оператора";
 "PleaseEvaluateQuality" = "Пожалуйста, оцените работу оператора";
 "LeaveYourComment" = "Оставьте свой комментарий";
-
 "Waiting_For_Network" = "Ожидание сети...";
 //Buttons' Title
 "CreatTicket" = "Создать обращение";
@@ -95,7 +93,7 @@
 "Back" = "Назад";
 "Done" = "Готово";
 "CancelDownload" = "Отменить загрузку";
-"FileLoadError"="Не удалось загрузить файл";
+"FileLoadError" = "Не удалось загрузить файл";
 "NoPreviewAvailable" = "Предпросмотр недоступен";
 "OpenWith" = "Открыть";
 "RetryButton" = "Повторить";
@@ -108,7 +106,7 @@
 "Phone_Gallery_Access_Error" = "Нет доступа к галерее";
 "Access_Error" = "Ошибка доступа";
 "Size_Error" = "Размер файла не должен привышать 200 МБ.";
-"No_File_Error"="Файл не найден";
+"No_File_Error" = "Файл не найден";
 
 
 //Append time from data
@@ -118,7 +116,6 @@
 "Interval_Day" = "%% д назад";
 "Interval_Week" = "%% н назад";
 "Interval_Mounth" = "%% м назад";
-
 "Interval_One_Year" = "%% год назад";
 "Interval_One_End_Year" = "%% год назад";
 "Interval_Years_234" = "%% года назад";
@@ -135,18 +132,15 @@
 "No_Connection" = "Нет интернет-соединения";
 "Retry" = "Попробовать заново";
 "Error" = "Ошибка";
-"AttachmentLoadError"="Не могу загрузить данное вложение";
-"ErrorServerError"="Связь с сервером прервана";
-
-"AcсessDenied"="Нет доступа";
-"OK"="ОК";
-
-"PrepareLog"="Подготовка лога...";
-"SendLog"="Отправить логи библиотеки";
-
+"AttachmentLoadError" = "Не могу загрузить данное вложение";
+"ErrorServerError" = "Связь с сервером прервана";
+"AcсessDenied" = "Нет доступа";
+"OK" = "ОК";
+"PrepareLog" = "Подготовка лога...";
+"SendLog" = "Отправить логи библиотеки";
 "ExternalSourceWarning" = "Эта ссылка ведет на %@\nВы действительно хотите туда перейти?";
-"ShortYes"="Да";
-"ShortNo"="Нет";
+"ShortYes" = "Да";
+"ShortNo" = "Нет";
 
 
 

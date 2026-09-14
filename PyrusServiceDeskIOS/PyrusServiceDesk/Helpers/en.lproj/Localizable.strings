@@ -1,7 +1,6 @@
 "PrivicyCamera" = "This allows you to scan QR code to authorize and attach photos and videos.";
 "PrivicyLocation" = "Вы сможете находить компании поблизости.";
 "PrivicyMicrophone" = "This allows you to attach voice messages and video files to tickets.";
-
 "InstantSupport" = "Your Customer Support";
 "EnterPhone" = "Enter your phone number";
 "ReceiveIikoSupport" = "We'll send a one-time access code";
@@ -93,7 +92,7 @@
 "Back" = "Back";
 "Done" = "Done";
 "CancelDownload" = "Cancel download";
-"FileLoadError"="Can't load file preview";
+"FileLoadError" = "Can't load file preview";
 "NoPreviewAvailable" = "No preview available";
 "OpenWith" = "Open with";
 "RetryButton" = "Retry";
@@ -106,7 +105,7 @@
 "Phone_Gallery_Access_Error" = "No access to phone gallery";
 "Access_Error" = "Access error";
 "Size_Error" = "File size should not exceed 200 MB.";
-"No_File_Error"="File doesn't exist";
+"No_File_Error" = "File doesn't exist";
 
 
 //Append time from data
@@ -116,7 +115,6 @@
 "Interval_Day" = "%% d ago";
 "Interval_Week" = "%% w ago";
 "Interval_Mounth" = "%% m ago";
-
 "Interval_One_Year" = "%% year ago";
 "Interval_One_End_Year" = "%% years ago";
 "Interval_Years_234" = "%% years ago";
@@ -134,15 +132,12 @@
 "No_Connection" = "No Internet Connection";
 "Retry" = "RETRY";
 "Error" = "Error";
-"AttachmentLoadError"="Can't load this attachment";
-"ErrorServerError"="Server connection interrupted";
-
-"AcсessDenied"="Access denied";
-"OK"="OK";
-
-"PrepareLog"="Preparing log...";
-"SendLog"="Send library logs";
-
+"AttachmentLoadError" = "Can't load this attachment";
+"ErrorServerError" = "Server connection interrupted";
+"AcсessDenied" = "Access denied";
+"OK" = "OK";
+"PrepareLog" = "Preparing log...";
+"SendLog" = "Send library logs";
 "ExternalSourceWarning" = "This link leads to a %@\nDo you really want to follow the link?";
 "ShortYes" = "Yes";
 "ShortNo" = "No";
