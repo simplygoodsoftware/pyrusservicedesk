@@ -54,8 +54,8 @@
 "ExternalSourceWarning" = "このリンクは%@にリンクしています。\n本当にこのリンクを開きますか？";
 "LeaveYourComment" = "レビューを作成";
 "Close" = "閉める";
-"EvaluateQuality" = "サービスの品質を評価する";
-"PleaseEvaluateQuality" = "サービスの品質を評価する";
+"EvaluateQuality" = "サービス品質を評価";
+"PleaseEvaluateQuality" = "サービス品質を評価";
 "Back" = "バック";
 "PrivicyCamera" = "これにより、QRコードをスキャンして認証し、写真や動画を添付することができます。";
 "PrivicyLocation" = "近くの会社を見つけることができます。";
@@ -145,3 +145,4 @@
 "Video" = "ビデオ";
 "PyrusCannotAccessYourMicrophone" = "マイクへのアクセスを許可";
 "PleaseEnableAccessMicrophone" = "これにより、音声メッセージを録音してタスクに添付できるようになります。\n有効にするには、「設定」をクリックして「マイク」をオンにしてください。";
+"DTF_Full" = "日月年_時分秒";
