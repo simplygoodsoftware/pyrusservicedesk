@@ -72,9 +72,9 @@
 "Close" = "Cerrar";
 "PrivicyCamera" = "Esto le permite escanear el código QR para autorizar y adjuntar fotografías y vídeos.";
 "PrivicyLocation" = "Вы сможете находить компании поблизости.";
-"PrivicyMicrophone" = "Esto le permite adjuntar mensajes de voz y archivos de vídeo a los tiquets.";
+"PrivicyMicrophone" = "Esto le permite adjuntar mensajes de voz y archivos de vídeo a los tickets.";
 "InstantSupport" = "Su Servicio de atención al cliente";
-"EnterPhone" = "Introducir su número telefónico";
+"EnterPhone" = "Introduzca su número telefónico";
 "ReceiveIikoSupport" = "Enviaremos un código de acceso de un solo uso";
 "AgreePrivacyPolicy" = "Si toca Continuar, acepta\nlos ";
 "Enter" = "Acceder";
@@ -89,7 +89,7 @@
 "RequestTime" = "Solicitar después de %@";
 "RequestAgain" = "Solicitar nuevamente el código";
 "Repeat" = "Repetir";
-"TryAgainLater" = "Ha excedido la cantidad de intentos para introducir el código. Intente nuevamente más tarde.";
+"TryAgainLater" = "Ha superado la cantidad de intentos para introducir el código. Intente nuevamente más tarde.";
 "WhatsName" = "Nombre";
 "SoWeKnowHowToAddressYou" = "Para saber cómo dirigirse a usted";
 "YourRestaurant" = "Unirse al chat de soporte";
@@ -156,6 +156,6 @@
 "File" = "Archivo";
 "TicketNumber" = "Número de ticket";
 "HoldToRecord" = "Mantenga pulsado para registrar un audio";
-"DTF_Full" = "ddMMyyyy_HHmmss";
+"DTF_Full" = "ddMMaaaa_HHmmss";
 "PyrusCannotAccessYourMicrophone" = "Permitir el acceso al micrófono";
 "PleaseEnableAccessMicrophone" = "Le permitirá registrar los mensajes de audio y adjuntarlos a las tareas.\nPara activar esto, haga clic en Configuración y active el Micrófono.";
