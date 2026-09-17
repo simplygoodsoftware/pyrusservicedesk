@@ -1,4 +1,3 @@
-
 import UIKit
 
 protocol PSDMessageSendButtonDelegate: class {
@@ -31,6 +30,17 @@ class PSDMessageSendButton: UIButton {
         //isHidden = true
         //isEnabled = false
         self.delegate?.sendMessage()
+    }
+    
+    ///Оформление для стеклянной капсулы.
+    ///
+    ///Кнопка квадратная: боковые `contentEdgeInsets` рассчитаны на широкий вариант 60×44
+    ///и в квадрате сплющивали бы иконку — снимаем их и вписываем картинку по пропорциям.
+    ///Цвет иконки не меняется: `sendFill` — фирменный ассет, он остаётся в цвете кастомизации,
+    ///а не в общем цвете стеклянных кнопок.
+    func applyLiquidGlassStyle() {
+        contentEdgeInsets = .zero
+        imageView?.contentMode = .scaleAspectFit
     }
     
     required init?(coder aDecoder: NSCoder) {
