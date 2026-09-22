@@ -7,8 +7,7 @@ import Foundation
 /// По спеке из корня запроса убраны `app_id`, `user_id`, `last_note_id`
 /// и `security_key` — данные о пользователях передаются массивом `users`.
 /// `sort_type` сознательно не отправляется: сортировка тикетов полностью
-/// перенесена на клиент. `max_closed_tickets_count` не отправляется —
-/// используется серверный дефолт (см. `HelpySyncDefaults.maxClosedTicketsCount`).
+/// перенесена на клиент.
 struct HelpySyncRequest: Encodable {
     /// id установки приложения (меняется при переустановке). Максимум 36 байт.
     let instanceId: String

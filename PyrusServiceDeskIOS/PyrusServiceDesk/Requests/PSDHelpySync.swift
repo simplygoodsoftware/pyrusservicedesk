@@ -11,16 +11,12 @@ import Foundation
 struct PSDHelpySync {
 
     private enum Constants {
-        /// Обход серверного бага сериализации вложений —
-        /// тот же, что применялся для GetTickets.
-        static let brokenAttachmentsPattern = #"\"attachments\":\[\s*\"attachments\":"#
-        static let fixedAttachmentsReplacement = "\"attachments\":["
         static let applicationsKey = "applications"
         static let tooManyRequestsCode = 429
         static let forbiddenCode = 403
         static let successCode = 200
         /// Максимальная длина фрагмента тела ответа в логах при ошибке парсинга.
-        static let logSnippetLength = 2000
+        static let logSnippetLength = 30
         /// Сколько тикетов с дельтой максимум печатать в лог ответа.
         static let maxLoggedDeltaTickets = 30
         static let dumpLabel = "HelpySync"
@@ -140,17 +136,15 @@ private extension PSDHelpySync {
         elapsed: CFAbsoluteTime,
         completion: @escaping (GetTicketsResponse) -> Void
     ) {
-        let fixedData = fixBrokenAttachments(in: data)
-
         do {
             // Изменившаяся часть контракта — через Codable.
             let decoder = PSDJSONDecoderFactory.makeServerResponseDecoder()
-            let syncResponse = try decoder.decode(HelpySyncResponse.self, from: fixedData)
+            let syncResponse = try decoder.decode(HelpySyncResponse.self, from: data)
             logResponseSummary(syncResponse, bodySize: data.count, elapsed: elapsed)
 
             // Блок applications не менялся — разбирается прежней логикой.
             let responseDictionary = try JSONSerialization.jsonObject(
-                with: fixedData,
+                with: data,
                 options: .allowFragments
             ) as? [String: Any] ?? [:]
             let clientsArray = responseDictionary[Constants.applicationsKey] as? NSArray ?? NSArray()
@@ -176,7 +170,7 @@ private extension PSDHelpySync {
                 )
             )
         } catch {
-            logParsingFailure(error, data: fixedData)
+            logParsingFailure(error, data: data)
             completion(GetTicketsResponse(complete: false))
         }
     }
@@ -232,15 +226,5 @@ private extension PSDHelpySync {
             print(decodingError)
         }
         print("HelpySync response snippet: \(snippet)")
-    }
-
-    static func fixBrokenAttachments(in data: Data) -> Data {
-        let jsonString = String(decoding: data, as: UTF8.self)
-        let fixed = jsonString.replacingOccurrences(
-            of: Constants.brokenAttachmentsPattern,
-            with: Constants.fixedAttachmentsReplacement,
-            options: .regularExpression
-        )
-        return Data(fixed.utf8)
     }
 }

@@ -11,6 +11,7 @@ protocol CoreDataServiceProtocol: AnyObject {
     func fetchClients() throws -> [DBClient]
     func save(completion: ((Result<Void, Error>) -> Void)?, block: @escaping (NSManagedObjectContext) throws -> Void)
     func deleteAllObjects(forEntityName entityName: String)
+    func deleteCommands(excludingType type: Int)
     func deleteCommand(id: String) throws
     func deleteChats(ids: [Int64]) throws
     func deleteClients(ids: [String]) throws

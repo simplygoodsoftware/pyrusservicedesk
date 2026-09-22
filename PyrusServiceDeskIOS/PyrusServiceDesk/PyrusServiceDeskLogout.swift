@@ -8,8 +8,10 @@ extension PyrusServiceDesk {
     /// для всех user_id необходимо отправить команду setPushToken
     /// с token = nil — бэкенд удалит пуш-токены этих пользователей.
     ///
-    /// Вызывать до `cleanCache()`, чтобы команды успели встать в очередь
-    /// до очистки хранилища.
+    /// Синк запускается сразу после постановки команд в очередь, без
+    /// троттлинга. Команды setPushToken переживают `cleanCache()`
+    /// (см. `PSDChatsDataService.deleteAllObjects`), поэтому при обрыве
+    /// доставятся в следующей сессии — бэк дедуплицирует по command_id.
     @objc public static func logoutAllUsers() {
         guard let clientId, !clientId.isEmpty else {
             EventsLogger.logEvent(.emptyClientId)
@@ -21,27 +23,24 @@ extension PyrusServiceDesk {
             logoutTargets.append((user.clientId, user.userId))
         }
 
-        for target in logoutTargets {
-            let params = TicketCommandParams(
-                ticketId: nil,
-                appId: target.appId,
-                userId: target.userId,
-                token: nil,
-                type: DeviceType.ios.legacyName
-            )
-            let command = TicketCommand(
+        let commands = logoutTargets.map { target in
+            TicketCommand(
                 commandId: UUID().uuidString,
                 type: .setPushToken,
                 appId: target.appId,
                 userId: target.userId,
-                params: params
+                params: TicketCommandParams(
+                    ticketId: nil,
+                    appId: target.appId,
+                    userId: target.userId,
+                    token: nil,
+                    type: DeviceType.ios.legacyName
+                )
             )
-            // Синк не триггерим на каждую команду — один общий ниже.
-            repository.add(command: command, needSync: false)
         }
 
-        DispatchQueue.main.async {
-            syncManager.syncGetTickets()
+        repository.add(commands: commands) {
+            syncManager.syncImmediately()
         }
     }
 }

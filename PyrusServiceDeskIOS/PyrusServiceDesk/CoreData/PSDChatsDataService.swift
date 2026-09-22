@@ -22,7 +22,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBAttachment")
         coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
-        coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
+        // setPushToken (в т.ч. с token = nil при разлогине) должны
+        // пережить очистку кэша и уйти в следующем синке.
+        coreDataService.deleteCommands(excludingType: TicketCommandType.setPushToken.rawValue)
         coreDataService.deleteAllObjects(forEntityName: "DBAnnouncement")
     }
     
@@ -317,7 +319,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.commandId = message.commandId
                 dbMessage.date = message.date
                 dbMessage.fromStorage = message.fromStrorage
-                dbMessage.isOutgoing = message.isSupportMessage
+                dbMessage.isOutgoing = !message.isSupportMessage
                 dbMessage.isRatingMessage = message.isRatingMessage
                 dbMessage.isWelcomeMessage = message.isWelcomeMessage
                 dbMessage.requestNewTicket = message.requestNewTicket

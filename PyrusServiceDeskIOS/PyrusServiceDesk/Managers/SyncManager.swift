@@ -68,6 +68,14 @@ class SyncManager {
     func loadCache() {
         firstLoadUpdates()
     }
+    
+    /// Синк без троттлинга — когда команды нужно доставить немедленно
+    /// (например, setPushToken(nil) при разлогине перед cleanCache).
+    func syncImmediately() {
+        DispatchQueue.main.async { [weak self] in
+            self?.sync(isFilter: false)
+        }
+    }
 }
 
 private extension SyncManager {
@@ -148,9 +156,13 @@ private extension SyncManager {
                 UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                 
                 let startTime = CFAbsoluteTimeGetCurrent()
-                chatsDataService.saveChatModels(with: chats) { [weak self] _ in
+                chatsDataService.saveChatModels(with: chats) { [weak self] saveResult in
                     DispatchQueue.main.async { [weak self] in
                         guard let self else { return }
+                        
+                        if PyrusServiceDesk.multichats, case .success = saveResult {
+                            HelpySyncFullResyncFlag.clear()
+                        }
                         
                         if let clients, clients.count > 0  {
                             updateChatsAndClients(clients: clients, userInfo: userInfo)
@@ -216,11 +228,19 @@ private extension SyncManager {
             for user in PyrusServiceDesk.additionalUsers {
                 user.lastNoteId = 0
             }
+            // HelpySync не использует lastNoteId — полную перезагрузку
+            // обеспечивает флаг (блоб tickets не отправляется до успешного синка).
+            HelpySyncFullResyncFlag.raise()
         }
         
         let commands = PyrusServiceDesk.repository.getCommands()
-        if commands.count > 0,
-           commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue }) {
+        // setPushToken с token = nil — отложенный разлогин,
+        // доставляем не дожидаясь обычного синка.
+        let hasLogoutTokens = commands.contains {
+            $0.type == TicketCommandType.setPushToken.rawValue && $0.params.token == nil
+        }
+        if commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue })
+            || hasLogoutTokens {
             syncGetTickets()
         }
     }

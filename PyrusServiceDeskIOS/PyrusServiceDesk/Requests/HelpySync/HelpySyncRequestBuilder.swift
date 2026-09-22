@@ -8,9 +8,6 @@ import Foundation
 enum HelpySyncRequestBuilder {
 
     private enum Constants {
-        /// Значение поля `version` — то же, что и в остальных запросах SDK
-        /// (см. `URLRequest.addStaticKeys`).
-        static let protocolVersion = 2
         static let defaultLocale = "en"
     }
 
@@ -115,6 +112,12 @@ private extension HelpySyncRequestBuilder {
         // не сообщаем серверу о кэше, чтобы получить всё заново.
         guard !PyrusServiceDesk.needShowLoading else {
             PyrusLogger.shared.logEvent("HelpySync request: needShowLoading, tickets blob skipped")
+            return nil
+        }
+
+        // Версия кэша повысилась — запрашиваем полную историю.
+        guard !HelpySyncFullResyncFlag.isRaised else {
+            PyrusLogger.shared.logEvent("HelpySync request: full resync flag raised, tickets blob skipped")
             return nil
         }
 

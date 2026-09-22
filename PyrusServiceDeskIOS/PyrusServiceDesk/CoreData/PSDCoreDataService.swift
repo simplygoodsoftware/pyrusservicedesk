@@ -366,6 +366,19 @@ extension CoreDataService: CoreDataServiceProtocol {
     }
 
     
+    func deleteCommands(excludingType type: Int) {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBTicketCommand")
+        fetchRequest.predicate = NSPredicate(format: "type != %d", type)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        let backgroundContext = backgroundContext
+        do {
+            try backgroundContext.execute(deleteRequest)
+            try backgroundContext.save()
+        } catch {
+            print("Error deleting commands: \(error)")
+        }
+    }
+
     func deleteAllObjects(forEntityName entityName: String) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
