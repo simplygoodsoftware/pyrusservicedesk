@@ -51,7 +51,9 @@ struct NetworkDumpWriter {
 
     /// Включает запись дампов. Отключается из кода приложения,
     /// если нужно перестать писать на диск.
-    static var isEnabled = true
+    ///
+    /// Также надо включить флаги Supports opening documents in place и Application supports iTunes file sharing
+    static var isEnabled = false
 
     private static let queue = DispatchQueue(label: Constants.queueLabel, qos: .utility)
 
