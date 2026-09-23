@@ -375,6 +375,9 @@ extension CoreDataService: CoreDataServiceProtocol {
             let result = try backgroundContext.execute(deleteRequest) as? NSBatchDeleteResult
             // Batch delete идёт мимо контекстов — мерджим удаления,
             // чтобы загруженные объекты не остались протухшими.
+            // Только viewContext: `backgroundContext` — computed property,
+            // отдающая новый контекст на каждое обращение, долгоживущих
+            // фоновых контекстов в сервисе нет.
             if let objectIDs = result?.result as? [NSManagedObjectID], !objectIDs.isEmpty {
                 NSManagedObjectContext.mergeChanges(
                     fromRemoteContextSave: [NSDeletedObjectsKey: objectIDs],

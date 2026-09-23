@@ -27,8 +27,11 @@ struct PSDHelpySync {
     /// Выполняет синхронизацию HelpySync.
     /// Ожидает вызова с главного потока: снапшот кэша чатов и состояние
     /// пользователей читаются при сборке запроса.
-    /// On completion возвращает `GetTicketsResponse` (complete == false,
-    /// если синк нужно повторить).
+    /// Completion всегда вызывается на главном потоке — там же выполняется
+    /// разбор дельты и весь пост-процессинг, мутирующий общее состояние
+    /// (кэш чатов и снапшот — reference-типы, живущие на main).
+    /// Возвращает `GetTicketsResponse` (complete == false, если синк
+    /// нужно повторить).
     static func get(
         commands: [TicketCommand],
         completion: @escaping (GetTicketsResponse) -> Void
@@ -57,15 +60,18 @@ struct PSDHelpySync {
         PyrusLogger.shared.logEvent("HelpySync did begin, commands count: \(commands.count)")
         let requestStartTime = CFAbsoluteTimeGetCurrent()
 
+        #if DEBUG
         let dumpToken = NetworkDumpWriter.saveRequest(
             label: Constants.dumpLabel,
             request: request,
             fallbackBody: try? HelpySyncWireFormat.makeEncoder().encode(requestBody)
         )
+        #endif
         
         sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             let elapsed = CFAbsoluteTimeGetCurrent() - requestStartTime
             
+            #if DEBUG
             NetworkDumpWriter.saveResponse(
                 for: dumpToken,
                 body: data,
@@ -73,13 +79,16 @@ struct PSDHelpySync {
                 error: error,
                 duration: elapsed
             )
+            #endif
             
             guard let data, error == nil else {
                 PyrusLogger.shared.logEvent(
                     "HelpySync network error after \(String(format: "%.2f", elapsed))s:"
                     + " \(error?.localizedDescription ?? "no data")"
                 )
-                completion(GetTicketsResponse(complete: false))
+                DispatchQueue.main.async {
+                    completion(GetTicketsResponse(complete: false))
+                }
                 return
             }
 
@@ -126,7 +135,9 @@ private extension PSDHelpySync {
                 completion(GetTicketsResponse(complete: false))
             }
         default:
-            completion(GetTicketsResponse(complete: false))
+            DispatchQueue.main.async {
+                completion(GetTicketsResponse(complete: false))
+            }
         }
     }
 
@@ -136,10 +147,13 @@ private extension PSDHelpySync {
         elapsed: CFAbsoluteTime,
         completion: @escaping (GetTicketsResponse) -> Void
     ) {
+        // Декодирование — чистая работа с Data, остаётся на фоне.
+        let syncResponse: HelpySyncResponse
+        let clientsArray: NSArray
         do {
             // Изменившаяся часть контракта — через Codable.
             let decoder = PSDJSONDecoderFactory.makeServerResponseDecoder()
-            let syncResponse = try decoder.decode(HelpySyncResponse.self, from: data)
+            syncResponse = try decoder.decode(HelpySyncResponse.self, from: data)
             logResponseSummary(syncResponse, bodySize: data.count, elapsed: elapsed)
 
             // Блок applications не менялся — разбирается прежней логикой.
@@ -147,7 +161,19 @@ private extension PSDHelpySync {
                 with: data,
                 options: .allowFragments
             ) as? [String: Any] ?? [:]
-            let clientsArray = responseDictionary[Constants.applicationsKey] as? NSArray ?? NSArray()
+            clientsArray = responseDictionary[Constants.applicationsKey] as? NSArray ?? NSArray()
+        } catch {
+            logParsingFailure(error, data: data)
+            DispatchQueue.main.async {
+                completion(GetTicketsResponse(complete: false))
+            }
+            return
+        }
+
+        // Маппинг и разбор applications мутируют общее состояние
+        // (глобальные lastNoteId, список пользователей поддержки, clients)
+        // и итерируют reference-типы снапшота, живущие на main.
+        DispatchQueue.main.async {
             let clientsResult = PSDGetChats.generateClients(from: clientsArray)
             let announcementsResult = PSDGetChats.generateAnnouncements(
                 from: clientsResult.serverAnnouncements
@@ -169,9 +195,6 @@ private extension PSDHelpySync {
                     hasMoreClosedTickets: syncResponse.hasMoreClosedTickets
                 )
             )
-        } catch {
-            logParsingFailure(error, data: data)
-            completion(GetTicketsResponse(complete: false))
         }
     }
 
@@ -183,6 +206,7 @@ private extension PSDHelpySync {
         bodySize: Int,
         elapsed: CFAbsoluteTime
     ) {
+        #if DEBUG
         let tickets = response.tickets ?? []
         let newCommentsCount = tickets.reduce(0) { $0 + ($1.comments?.count ?? 0) }
         print(
@@ -213,18 +237,20 @@ private extension PSDHelpySync {
         print(
             "HelpySync delta by ticket (\(ticketsWithDelta.count)): [\(delta)\(suffix)]"
         )
+        #endif
     }
 
-    /// Пишет в лог и консоль ошибку декодирования (с путём до поля)
-    /// и фрагмент тела ответа — чтобы причину было видно сразу.
+    /// Пишет ошибку декодирования (с путём до поля) и фрагмент тела ответа.
     static func logParsingFailure(_ error: Error, data: Data) {
         let snippet = String(decoding: data.prefix(Constants.logSnippetLength), as: UTF8.self)
         PyrusLogger.shared.logEvent("HelpySync parsing error: \(error)")
         PyrusLogger.shared.logEvent("HelpySync response snippet: \(snippet)")
+        #if DEBUG
         print("HelpySync parsing error: \(error)")
         if let decodingError = error as? DecodingError {
             print(decodingError)
         }
         print("HelpySync response snippet: \(snippet)")
+        #endif
     }
 }
