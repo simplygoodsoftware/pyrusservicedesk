@@ -366,16 +366,23 @@ extension CoreDataService: CoreDataServiceProtocol {
     }
 
     
-    func deleteCommands(excludingType type: Int) {
+    func deleteCommands(excludingType type: TicketCommandType) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBTicketCommand")
-        fetchRequest.predicate = NSPredicate(format: "type != %d", type)
+        fetchRequest.predicate = NSPredicate(format: "type != %d", type.rawValue)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-        let backgroundContext = backgroundContext
+        deleteRequest.resultType = .resultTypeObjectIDs
         do {
-            try backgroundContext.execute(deleteRequest)
-            try backgroundContext.save()
+            let result = try backgroundContext.execute(deleteRequest) as? NSBatchDeleteResult
+            // Batch delete идёт мимо контекстов — мерджим удаления,
+            // чтобы загруженные объекты не остались протухшими.
+            if let objectIDs = result?.result as? [NSManagedObjectID], !objectIDs.isEmpty {
+                NSManagedObjectContext.mergeChanges(
+                    fromRemoteContextSave: [NSDeletedObjectsKey: objectIDs],
+                    into: [persistentContainer.viewContext]
+                )
+            }
         } catch {
-            print("Error deleting commands: \(error)")
+            PyrusLogger.shared.logEvent("Error deleting commands: \(error)")
         }
     }
 

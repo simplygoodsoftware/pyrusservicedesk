@@ -23,8 +23,8 @@ extension URLRequest {
      
      Тело кодируется как есть, без добавления статических ключей
      (`addStaticKeys`): по спеке HelpySync корневые `app_id`, `user_id`,
-     `last_note_id` и `security_key` в запрос не передаются, а `instance_id`,
-     `locale` и `version` модель запроса несёт сама.
+     `last_note_id` и `security_key` в запрос не передаются, а `instance_id`
+     и `locale` модель запроса несёт сама (`version` в HelpySync не нужен).
      */
     static func createRequest<Body: Encodable>(
         type: urlType,
@@ -53,7 +53,6 @@ extension URLRequest {
         request.addValue("\(jsonData.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
         request.addUserAgent()
-        print(request.allHTTPHeaderFields ?? "Нет заголовков")
         return request
     }
     

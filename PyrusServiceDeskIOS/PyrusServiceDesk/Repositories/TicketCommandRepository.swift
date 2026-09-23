@@ -211,12 +211,15 @@ class TicketCommandRepository {
             DispatchQueue.main.async { completion?() }
             return
         }
-        for command in commands {
+        // commandsCache обновится только после сохранения, поэтому дубли
+        // setPushToken внутри самой пачки суперсидим до записи.
+        let commandsToSave = supersededWithinBatch(commands)
+        for command in commandsToSave {
             removeSupersededPushTokenCommands(for: command)
         }
         
         let group = DispatchGroup()
-        for command in commands {
+        for command in commandsToSave {
             group.enter()
             chatsDataService.saveTicketCommand(with: command) { _ in
                 group.leave()
@@ -227,6 +230,23 @@ class TicketCommandRepository {
             self.commandsCache = self.chatsDataService.getAllCommands()
             completion?()
         }
+    }
+    
+    /// Оставляет последнюю setPushToken по каждой паре appId + userId,
+    /// сохраняя порядок остальных команд.
+    private func supersededWithinBatch(_ commands: [TicketCommand]) -> [TicketCommand] {
+        var seenPushTokenKeys = Set<String>()
+        var result = [TicketCommand]()
+        for command in commands.reversed() {
+            if command.type == TicketCommandType.setPushToken.rawValue {
+                let key = "\(command.appId ?? "")|\(command.userId ?? "")"
+                guard seenPushTokenKeys.insert(key).inserted else {
+                    continue
+                }
+            }
+            result.append(command)
+        }
+        return result.reversed()
     }
     
     /// Для setPushToken актуальна только последняя команда

@@ -127,7 +127,9 @@ private extension HelpySyncRequestBuilder {
                 continue
             }
             let ticketId = Int64(chatId)
-            let lastNoteId = lastCachedNoteId(of: chat)
+            // Кэш не содержит несохраняемые комментарии (например, оценки),
+            // поэтому дополнительно учитываем максимальный виденный id.
+            let lastNoteId = max(lastCachedNoteId(of: chat), chat.lastSeenNoteId)
             // На случай дублей в кэше берём максимальный известный id.
             entriesByTicketId[ticketId] = max(entriesByTicketId[ticketId] ?? 0, lastNoteId)
         }
@@ -148,6 +150,7 @@ private extension HelpySyncRequestBuilder {
     /// Пустой блоб на первом синке (пустой кэш) — норма: сервер вернёт всё,
     /// дельта начинает работать со второго синка.
     static func logBlobEntries(_ entries: [TicketCacheEntry]) {
+        #if DEBUG
         guard !entries.isEmpty else {
             print("HelpySync request: tickets blob empty (full history will be returned)")
             return
@@ -162,10 +165,12 @@ private extension HelpySyncRequestBuilder {
             "HelpySync request: tickets blob \(entries.count) entries"
             + " (with lastNoteId=0: \(zeroCount)) [\(pairs)\(suffix)]"
         )
+        #endif
     }
 
     /// Base64 блоба (усечённый) — для сверки с телом запроса в снифере.
     static func logBlob(_ blob: String?) {
+        #if DEBUG
         guard let blob else {
             return
         }
@@ -174,10 +179,12 @@ private extension HelpySyncRequestBuilder {
         print(
             "HelpySync request: tickets base64 \(blob.count) chars: \(prefix)\(truncated ? "…" : "")"
         )
+        #endif
     }
 
     /// Сводка по составу запроса: пользователи, команды, чекпоинты.
     static func logRequestSummary(_ request: HelpySyncRequest) {
+        #if DEBUG
         let userIds = request.users
             .prefix(LogConstants.maxLoggedEntries)
             .map { user in user.userId.map { String($0) } ?? "anonymous" }
@@ -188,6 +195,7 @@ private extension HelpySyncRequestBuilder {
             + " announcement checkpoints: \(request.announcementCheckpoints?.count ?? 0),"
             + " author_id set: \(request.authorId?.isEmpty == false)"
         )
+        #endif
     }
 
     /// Максимальный числовой id комментария тикета в кэше.

@@ -1,6 +1,10 @@
 import Foundation
 
+#if DEBUG
+
 /// Пишет тела сетевых запросов и ответов в JSON-файлы.
+/// Компилируется только в DEBUG: дампы содержат содержимое переписки
+/// и не должны существовать в релизной сборке даже выключенными.
 ///
 /// Запрос и ответ сохраняются в отдельные файлы в разных подпапках
 /// (`Requests` / `Responses`) и связываются общим именем:
@@ -51,9 +55,22 @@ struct NetworkDumpWriter {
 
     /// Включает запись дампов. Отключается из кода приложения,
     /// если нужно перестать писать на диск.
-    ///
-    /// Также надо включить флаги Supports opening documents in place и Application supports iTunes file sharing
-    static var isEnabled = false
+    /// Читается и пишется с разных потоков — доступ под локом.
+    static var isEnabled: Bool {
+        get {
+            stateLock.lock()
+            defer { stateLock.unlock() }
+            return _isEnabled
+        }
+        set {
+            stateLock.lock()
+            defer { stateLock.unlock() }
+            _isEnabled = newValue
+        }
+    }
+
+    private static let stateLock = NSLock()
+    private static var _isEnabled = false
 
     private static let queue = DispatchQueue(label: Constants.queueLabel, qos: .utility)
 
@@ -90,7 +107,7 @@ struct NetworkDumpWriter {
             Constants.Key.method: request.httpMethod ?? ""
         ]
         if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
-            payload[Constants.Key.headers] = headers
+            payload[Constants.Key.headers] = sanitizedHeaders(headers)
         }
 
         write(
@@ -176,7 +193,7 @@ private extension NetworkDumpWriter {
             dump[Constants.Key.identifier] = token.identifier
             dump[Constants.Key.date] = timestampFormatter.string(from: date)
             dump[Constants.Key.bodySize] = body?.count ?? 0
-            dump[Constants.Key.body] = jsonValue(from: body)
+            dump[Constants.Key.body] = sanitized(jsonValue(from: body))
 
             guard
                 JSONSerialization.isValidJSONObject(dump),
@@ -200,6 +217,38 @@ private extension NetworkDumpWriter {
                 print("Network dump write failed: \(error)")
             }
         }
+    }
+
+    enum SensitiveKeys {
+        static let bodyKeys: Set<String> = ["api_sign", "token", "security_key"]
+        static let headerKeys: Set<String> = ["authorization"]
+        static let redacted = "<redacted>"
+    }
+
+    static func sanitizedHeaders(_ headers: [String: String]) -> [String: String] {
+        return headers.reduce(into: [:]) { result, pair in
+            result[pair.key] = SensitiveKeys.headerKeys.contains(pair.key.lowercased())
+                ? SensitiveKeys.redacted
+                : pair.value
+        }
+    }
+
+    /// Рекурсивно маскирует значения чувствительных ключей в JSON-дереве.
+    /// null не маскируется: token = null при разлогине важно видеть в дампе.
+    static func sanitized(_ value: Any) -> Any {
+        if let dictionary = value as? [String: Any] {
+            return dictionary.reduce(into: [String: Any]()) { result, pair in
+                if SensitiveKeys.bodyKeys.contains(pair.key.lowercased()), !(pair.value is NSNull) {
+                    result[pair.key] = SensitiveKeys.redacted
+                } else {
+                    result[pair.key] = sanitized(pair.value)
+                }
+            }
+        }
+        if let array = value as? [Any] {
+            return array.map(sanitized)
+        }
+        return value
     }
 
     /// Тело кладём разобранным деревом — так файл читается и ищется как JSON.
@@ -236,3 +285,5 @@ private extension NetworkDumpWriter {
         }
     }
 }
+
+#endif

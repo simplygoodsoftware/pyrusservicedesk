@@ -22,8 +22,13 @@ extension PyrusServiceDesk {
         for user in additionalUsers {
             logoutTargets.append((user.clientId, user.userId))
         }
+        // Основной пользователь может дублироваться в additionalUsers.
+        var seenPairs = Set<String>()
+        let uniqueTargets = logoutTargets.filter {
+            seenPairs.insert("\($0.appId)|\($0.userId ?? "")").inserted
+        }
 
-        let commands = logoutTargets.map { target in
+        let commands = uniqueTargets.map { target in
             TicketCommand(
                 commandId: UUID().uuidString,
                 type: .setPushToken,

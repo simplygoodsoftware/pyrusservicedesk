@@ -24,7 +24,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
         // setPushToken (в т.ч. с token = nil при разлогине) должны
         // пережить очистку кэша и уйти в следующем синке.
-        coreDataService.deleteCommands(excludingType: TicketCommandType.setPushToken.rawValue)
+        coreDataService.deleteCommands(excludingType: .setPushToken)
         coreDataService.deleteAllObjects(forEntityName: "DBAnnouncement")
     }
     
@@ -306,6 +306,13 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbChat.appId = appId
             }
 
+            // Монотонно: часть комментариев дельты (например, оценки)
+            // не сохраняется в кэш, поэтому виденный id — отдельное поле.
+            let maxDeltaNoteId = chatModel.messages
+                .compactMap { Int64($0.messageId) }
+                .max() ?? 0
+            dbChat.lastSeenNoteId = max(dbChat.lastSeenNoteId, maxDeltaNoteId)
+
             for message in chatModel.messages where (message.rating ?? 0) <= 0 {
 
                 let dbMessage =
@@ -319,6 +326,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.commandId = message.commandId
                 dbMessage.date = message.date
                 dbMessage.fromStorage = message.fromStrorage
+                // Легаси-формат БД: поле хранит инвертированное значение,
+                // все загрузчики читают isSupportMessage = !isOutgoing.
                 dbMessage.isOutgoing = !message.isSupportMessage
                 dbMessage.isRatingMessage = message.isRatingMessage
                 dbMessage.isWelcomeMessage = message.isWelcomeMessage
@@ -378,6 +387,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     chat.appId = dbChat.appId
                     
                     if let dbMessages = dbChat.messages?.array as? [DBMessage] {
@@ -490,6 +500,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 chat.appId = dbChat.appId
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
@@ -578,6 +589,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 
                 return chat
             }
@@ -604,6 +616,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     
                     return chat
                 }
