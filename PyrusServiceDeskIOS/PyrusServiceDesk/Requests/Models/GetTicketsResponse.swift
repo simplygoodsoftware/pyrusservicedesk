@@ -1,4 +1,3 @@
-
 struct GetTicketsResponse {
     let complete: Bool
     let chats: [PSDChat]?
@@ -6,13 +5,17 @@ struct GetTicketsResponse {
     let commandsResult: [TicketCommandResult]?
     let authorAccessDenied: [String]?
     let announcementsResult: AnnouncementsResult?
+    /// HelpySync: true, если бэкенд вернул не все закрытые тикеты
+    /// (сработало ограничение maxClosedTicketsCount). nil для легаси GetTickets.
+    let hasMoreClosedTickets: Bool?
     
     init(complete: Bool,
          chats: [PSDChat]? = nil,
          clients: [PSDClientInfo]? = nil,
          commandsResult: [TicketCommandResult]? = nil,
          authorAccessDenied: [String]? = nil,
-         announcementsResult: AnnouncementsResult? = nil
+         announcementsResult: AnnouncementsResult? = nil,
+         hasMoreClosedTickets: Bool? = nil
     ) {
         self.complete = complete
         self.chats = chats
@@ -20,6 +23,7 @@ struct GetTicketsResponse {
         self.commandsResult = commandsResult
         self.authorAccessDenied = authorAccessDenied
         self.announcementsResult = announcementsResult
+        self.hasMoreClosedTickets = hasMoreClosedTickets
     }
 }
 

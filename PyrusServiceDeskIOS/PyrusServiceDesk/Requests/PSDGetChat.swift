@@ -189,7 +189,13 @@ struct PSDGetChat {
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
                 message.isOutgoing = IsInbound
-                message.isSupportMessage = (dic["is_inbound"] as? Bool ?? false)
+                // is_inbound == false — комментарий от поддержки;
+                // при отсутствии поля определяем по автору
+                if let isInbound = dic["is_inbound"] as? Bool {
+                    message.isSupportMessage = !isInbound
+                } else {
+                    message.isSupportMessage = !IsInbound
+                }
                 message.isSystemMessage = dic["is_system"] as? Bool ?? false
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
