@@ -49,7 +49,7 @@
     <string name="psd_close">Փակել</string>
     <string name="leave_your_comment">Թողնել ակնարկ</string>
     <string name="psd_filters">Ֆիլտրեր</string>
-    <string name="psd_ticket_number">Գործարքի համարը ՝%s</string>
+    <string name="psd_ticket_number">Դիմումի համարը՝ %s</string>
     <string name="psd_ticket_data_create">Ստեղծվել է %s</string>
     <string name="all">Բոլորը</string>
     <string name="psd_you">Դուք</string>
@@ -58,11 +58,11 @@
     <string name="psd_type_file">Ֆայլ</string>
     <string name="psd_type_audio">Ձայնային հաղորդագրություն</string>
     <string name="psd_unsupptorted_attachment">Չաջակցվող կցված ֆայլ</string>
-    <string name="new_ticket">Նոր գործարք</string>
-    <string name="closed_teckets">Ավարտված գործարքներ</string>
-    <string name="ticket_was_closed">Գործարքը փակվել է</string>
+    <string name="new_ticket">Նոր դիմում</string>
+    <string name="closed_teckets">Փակված դիմումներ</string>
+    <string name="ticket_was_closed">Դիմումը փակվել է</string>
     <string name="all_conversations">Բոլոր հաղորդակցությունները</string>
-    <string name="psd_search_by_tickets">Որոնել ըստ գործարքների</string>
+    <string name="psd_search_by_tickets">Որոնել ըստ դիմումների</string>
     <string name="psd_no_suggestions">Առաջարկություններ չկան</string>
     <string name="psd_swipe_cancel">‹‹ չեղարկել</string>
     <string name="psd_cancel">Չեղարկել</string>

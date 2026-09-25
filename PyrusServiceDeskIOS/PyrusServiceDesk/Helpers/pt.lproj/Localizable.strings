@@ -12,7 +12,7 @@
 "New_Conversation_Short" = "Novo";
 "Cancel" = "Cancelar";
 "Send" = "Enviar";
-"Back" = " Voltar";
+"Back" = "Voltar";
 "Done" = "Feito";
 "CancelDownload" = "Cancelar download";
 "FileLoadError" = "Não é possível carregar a visualização do arquivo";
@@ -75,7 +75,7 @@
 "InstantSupport" = "Seu suporte ao cliente";
 "EnterPhone" = "Digite seu número de telefone";
 "ReceiveIikoSupport" = "Enviaremos um código de acesso único";
-"AgreePrivacyPolicy" = "Ao tocar em Continuar, você concorda.\ncom ";
+"AgreePrivacyPolicy" = "Ao tocar em Continuar, você concorda\ncom a ";
 "Enter" = "Entrar";
 "Continue" = "Continuar";
 "NoConnection" = "Sem conexão de rede";
@@ -85,8 +85,8 @@
 "ChangePhone" = " Alterar número";
 "ConfirmPhone" = "Confirme seu número de telefone";
 "CodeHasBeenSent" = "O código foi enviado para\n%@";
-"RequestTime" = "Solicitação após %@";
-"RequestAgain" = "Solicite o código novamente";
+"RequestTime" = "Solicitar novamente em %@";
+"RequestAgain" = "Solicitar o código novamente";
 "Repeat" = "Repetir";
 "TryAgainLater" = "Você excedeu o número de tentativas para inserir o código. Tente novamente mais tarde.";
 "WhatsName" = "Nome";
