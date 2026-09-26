@@ -49,7 +49,7 @@
     <string name="psd_close">Փակել</string>
     <string name="leave_your_comment">Թողնել ակնարկ</string>
     <string name="psd_filters">Ֆիլտրեր</string>
-    <string name="psd_ticket_number">Դիմումի համարը ՝%s</string>
+    <string name="psd_ticket_number">Դիմումի համարը՝ %s</string>
     <string name="psd_ticket_data_create">Ստեղծվել է %s</string>
     <string name="all">Բոլորը</string>
     <string name="psd_you">Դուք</string>
