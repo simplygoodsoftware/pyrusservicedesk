@@ -9,8 +9,8 @@
     <string name="psd_organization_support">Աջակցություն</string>
     <string name="psd_today">Այսօր</string>
     <string name="psd_yesterday">Երեկ</string>
-    <string name="psd_date_format_d_m_y">ԱԱԱԱ օ, տտտտ</string>
-    <string name="psd_date_format_d_m">ԱԱԱԱ օ</string>
+    <string name="psd_date_format_d_m_y">Ամիս օր, տարեթիվ</string>
+    <string name="psd_date_format_d_m">Ամիս օր</string>
     <string name="psd_photo">Լուսանկար</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%dտարի առաջ</item>
@@ -43,8 +43,8 @@
     <string name="copied_text">Պատճենված տեքստ</string>
     <string name="psd_support">աջակցություն</string>
     <string name="psd_date_format_d">EEE</string>
-    <string name="psd_date_format_d_m_short">ԱԱ․օօ</string>
-    <string name="psd_date_format_d_m_y_short">ԱԱ․օօ․տտտտ</string>
+    <string name="psd_date_format_d_m_short">Ամիս․օր</string>
+    <string name="psd_date_format_d_m_y_short">Ամիս․օր․տարեթիվ</string>
     <string name="psd_evaluate_the_operators_performance">Գնահատել օպերատորի աշխատանքը</string>
     <string name="psd_close">Փակել</string>
     <string name="leave_your_comment">Թողնել ակնարկ</string>
