@@ -70,3 +70,8 @@
 "PleaseEvaluateQuality" = "Évaluer la qualité du service";
 "LeaveYourComment" = "Rédiger un avis";
 "Close" = "Fermer";
+"PrivicyCamera" = "Cela vous permet de scanner un code QR pour autoriser l'opération et d'y joindre des photos et des vidéos.";
+"PrivicyLocation" = "Vous devez trouver une entreprise à votre service.";
+"PrivicyMicrophone" = "Cela vous permet de joindre des messages vocaux et des fichiers vidéo aux tickets.";
+"InstantSupport" = "Votre service client";
+"Continue" = "Continuer";
