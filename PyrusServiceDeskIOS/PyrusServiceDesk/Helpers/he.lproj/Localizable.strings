@@ -70,3 +70,11 @@
 "LeaveYourComment" = "השאר תגובה";
 "Close" = "סגור";
 "Back" = "חזרה";
+"InviteQRCode" = "קוד QR להזמנה";
+"GoToChats" = "עבור לצ’אטים";
+"Audio" = "הודעה קולית";
+"HoldToRecord" = "הקש והחזק כדי להקליט שמע";
+"DTF_Full" = "ddMMyyyy_HHmmss";
+"PyrusCannotAccessYourMicrophone" = "הרשה גישה למיקרופון";
+"PleaseEnableAccessMicrophone" = "זה יאפשר לך להקליט הודעות קוליות ולצרף אותן למשימות.\nכדי לאפשר זאת, לחץ על \"הגדרות\" והפעל את \"מיקרופון\".";
+"Participants" = "משתתפים";
