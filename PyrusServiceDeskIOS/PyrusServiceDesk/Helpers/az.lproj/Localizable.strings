@@ -70,3 +70,11 @@
 "PleaseEvaluateQuality" = "Xidmətin keyfiyyətini qiymətləndirin";
 "LeaveYourComment" = "Rəy yazın";
 "Close" = "Bağla";
+"PrivicyCamera" = "Bu, sizi identifikasiya etmək və foto və videoları əlavə etmək üçün QR kodu skan etməyə imkan verir.";
+"PrivicyLocation" = "Yaxınlıqda şirkətləri tapa biləcəksiniz.";
+"PrivicyMicrophone" = "Bu, müraciətlərə səsli mesajlar və video faylları əlavə etməyə imkan verir.";
+"InstantSupport" = "Müştəri Dəstəyiniz";
+"EnterPhone" = "Telefon nömrənizi daxil edin";
+"ReceiveIikoSupport" = "Birdəfəlik giriş kodu göndərəcəyik";
+"AgreePrivacyPolicy" = "Davam Et seçiminə toxunmaqla \n\nbununla razılaşırsınız ";
+"Enter" = "Giriş edin";
