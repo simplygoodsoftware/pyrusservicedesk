@@ -70,4 +70,5 @@
 "PleaseEvaluateQuality" = "评估服务质量";
 "LeaveYourComment" = "撰写评价";
 "Close" = "关闭";
-"PrivicyCamera" = "这可让您扫描二维码以进行授权，并附加照片和视频。";
+"PrivicyCamera" = "这允许您扫描二维码进行授权并附加照片和视频。";
+"PrivicyMicrophone" = "这允许您将语音消息和视频文件附加到工单中。";
