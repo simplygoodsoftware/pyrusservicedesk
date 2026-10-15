@@ -101,3 +101,11 @@
 "ToHelpProcessFaster" = "Pour accélérer le traitement de la demande, veuillez choisir votre restaurant";
 "AnonymousMessagesInfo" = "Les messages anonymes prennent plus de temps à être traités. Veuillez indiquer votre restaurant";
 "AllowAccessSetting" = "Autorisez l'accès à votre caméra dans les paramètres de confidentialité de l'application";
+"AllowAccessForQr" = "Autorisez l’accès à l’appareil photo de votre téléphone pour scanner le code QR";
+"AllowAccessCamera" = "Autoriser l’accès à votre appareil photo";
+"PrivacySettings" = "Paramètres de confidentialité";
+"Search" = "Recherche...";
+"PleaseWait" = "Veuillez patienter. Cela pourrait prendre un certain temps.";
+"RestaurantNotFound" = "Restaurant introuvable";
+"ScanningAgain" = "Essayez de scanner à nouveau le code QR";
+"TurnOnNotifications" = "Activez les notifications";
