@@ -132,3 +132,15 @@
 "Version" = "Version";
 "Waiting_For_Network" = "En attente du réseau...";
 "CreatTicket" = "Créer un ticket";
+"InviteQRCode" = "Invitation par code QR";
+"GoToChats" = "Aller aux chats";
+"Participants" = "Participants";
+"PSDSearch" = "Recherche";
+"RateApp" = "Évaluez l'application";
+"NewTicket" = "Nouveau ticket";
+"SearchChats" = "Rechercher des tickets";
+"SupportDefaultName" = "soutien";
+"Helpy" = "Helpy";
+"Audio" = "Message vocal";
+"All" = "Tout";
+"AccessDeniedInfo" = "Contactez le responsable de votre organisation pour rétablir l’accès à %@";
