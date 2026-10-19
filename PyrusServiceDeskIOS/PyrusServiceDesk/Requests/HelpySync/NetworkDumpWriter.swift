@@ -26,8 +26,8 @@ struct NetworkDumpWriter {
         static let posixLocaleIdentifier = "en_US_POSIX"
         static let queueLabel = "com.pyrus.servicedesk.networkDump"
         static let identifierLength = 6
-        /// Сколько последних файлов хранить в каждой папке.
-        static let maxStoredFiles = 200
+        /// Сколько последних пар запрос/ответ хранить.
+        static let maxStoredPairs = 5
 
         enum Key {
             static let label = "label"
@@ -212,7 +212,7 @@ private extension NetworkDumpWriter {
                 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
                 try fileData.write(to: fileURL, options: .atomic)
                 print("Network dump saved: \(fileURL.path)")
-                removeOutdatedFiles(in: directory)
+                removeOutdatedPairs()
             } catch {
                 print("Network dump write failed: \(error)")
             }
@@ -262,27 +262,44 @@ private extension NetworkDumpWriter {
         return String(decoding: data, as: UTF8.self)
     }
 
-    static func removeOutdatedFiles(in directory: URL) {
+    /// Чистит дампы попарно: файлы запроса и ответа с общим именем
+    /// удаляются вместе, чтобы не оставалось осиротевших половинок.
+    static func removeOutdatedPairs() {
         let fileManager = FileManager.default
-        guard
-            let files = try? fileManager.contentsOfDirectory(
-                at: directory,
-                includingPropertiesForKeys: [.creationDateKey],
-                options: [.skipsHiddenFiles]
-            ),
-            files.count > Constants.maxStoredFiles
-        else {
-            return
-        }
+        guard let root = dumpsDirectoryURL else { return }
 
-        let sorted = files.sorted { lhs, rhs in
-            let lhsDate = (try? lhs.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
-            let rhsDate = (try? rhs.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
-            return lhsDate > rhsDate
+        let files = [Constants.requestsDirectoryName, Constants.responsesDirectoryName]
+            .map { root.appendingPathComponent($0, isDirectory: true) }
+            .flatMap { directory in
+                (try? fileManager.contentsOfDirectory(
+                    at: directory,
+                    includingPropertiesForKeys: [.creationDateKey],
+                    options: [.skipsHiddenFiles]
+                )) ?? []
+            }
+
+        let pairs = Dictionary(grouping: files, by: pairKey(for:))
+        guard pairs.count > Constants.maxStoredPairs else { return }
+
+        let sortedPairs = pairs.sorted { newestDate(of: $0.value) > newestDate(of: $1.value) }
+        for (_, pairFiles) in sortedPairs.dropFirst(Constants.maxStoredPairs) {
+            pairFiles.forEach { try? fileManager.removeItem(at: $0) }
         }
-        for file in sorted.dropFirst(Constants.maxStoredFiles) {
-            try? fileManager.removeItem(at: file)
+    }
+
+    static func pairKey(for fileURL: URL) -> String {
+        let name = fileURL.deletingPathExtension().lastPathComponent
+        let suffixes = ["_\(Constants.requestSuffix)", "_\(Constants.responseSuffix)"]
+        for suffix in suffixes where name.hasSuffix(suffix) {
+            return String(name.dropLast(suffix.count))
         }
+        return name
+    }
+
+    static func newestDate(of files: [URL]) -> Date {
+        files
+            .compactMap { try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate }
+            .max() ?? .distantPast
     }
 }
 
