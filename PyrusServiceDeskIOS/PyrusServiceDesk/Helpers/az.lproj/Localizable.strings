@@ -80,6 +80,6 @@
 "Enter" = "Giriş edin";
 "ConfirmPhone" = "Telefon nömrənizi təsdiqləyin";
 "CodeHasBeenSent" = "Kod göndərildi\n%@";
-"RequestTime" = "%@ sonra sorğu";
+"RequestTime" = "Kodu %@ sonra yenidən tələb edin";
 "RequestAgain" = "Kodu yenidən tələb edin";
 "Repeat" = "Təkrarla";
