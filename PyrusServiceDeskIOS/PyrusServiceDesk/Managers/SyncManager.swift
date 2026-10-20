@@ -4,6 +4,12 @@ import Network
 class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
+    /// Поколение кэша: инкрементируется при cleanCache. Ответ синка,
+    /// запущенного до очистки, отбрасывается — иначе он вернёт в кэш
+    /// данные старого пользователя. Доступ под локом: cleanCache может
+    /// прийти от хоста не с main.
+    private var cacheEpoch = 0
+    private let cacheEpochLock = NSLock()
     private let coreDataService: CoreDataServiceProtocol
     let chatsDataService: PSDChatsDataServiceProtocol
     var firstLoad = true
@@ -49,7 +55,6 @@ class SyncManager {
     func syncGetTickets(isFilter: Bool = false) {
         if isFilter {
             self.needFilter = true
-            print("filter 0")
         }
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         if ticketCommands.contains(where: { $0.type == TicketCommandType.createComment.rawValue }) {
@@ -76,7 +81,25 @@ class SyncManager {
             self?.sync(isFilter: false)
         }
     }
+
+    /// Вызывается из cleanCache: ответы запросов, стартовавших раньше,
+    /// будут проигнорированы.
+    func invalidateInFlightSync() {
+        cacheEpochLock.lock()
+        defer { cacheEpochLock.unlock() }
+        cacheEpoch += 1
+    }
 }
+
+private extension SyncManager {
+
+    var currentCacheEpoch: Int {
+        cacheEpochLock.lock()
+        defer { cacheEpochLock.unlock() }
+        return cacheEpoch
+    }
+}
+
 
 private extension SyncManager {
     
@@ -99,13 +122,16 @@ private extension SyncManager {
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         
-        if ticketCommands.count > 0 {
-            print("")
-        }
-        
         let userId = PyrusServiceDesk.customUserId
+        let requestEpoch = currentCacheEpoch
         let completion: (GetTicketsResponse) -> Void = { [weak self, userId] getTicketsResponse in
-            self?.handleSyncResponse(getTicketsResponse, isFilter: isFilter, requestUserId: userId)
+            guard let self else { return }
+            guard self.currentCacheEpoch == requestEpoch else {
+                PyrusLogger.shared.logEvent("Sync response dropped: cache was cleaned during request")
+                self.isRequestInProgress = false
+                return
+            }
+            self.handleSyncResponse(getTicketsResponse, isFilter: isFilter, requestUserId: userId)
         }
         
         // По спеке на новый запрос HelpySync переводится только приложение
@@ -155,7 +181,6 @@ private extension SyncManager {
                 }
                 UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                 
-                let startTime = CFAbsoluteTimeGetCurrent()
                 chatsDataService.saveChatModels(with: chats) { [weak self] saveResult in
                     DispatchQueue.main.async { [weak self] in
                         guard let self else { return }
@@ -166,8 +191,6 @@ private extension SyncManager {
                         
                         if let clients, clients.count > 0  {
                             updateChatsAndClients(clients: clients, userInfo: userInfo)
-                            let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-                            print("⏱ getAllChats completed in \(timeElapsed) seconds")
                         }
                         
                         if isFilter {

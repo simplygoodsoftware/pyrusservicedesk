@@ -6,7 +6,7 @@ enum EntityType {
 }
 
 final class CoreDataService {
-    private let currentSchemaVersion = 5
+    private let currentSchemaVersion = 6
 
     private let schemaVersionKey = "PSDChatsSchemaVersion"
     
@@ -366,9 +366,16 @@ extension CoreDataService: CoreDataServiceProtocol {
     }
 
     
-    func deleteCommands(excludingType type: TicketCommandType) {
+    /// Удаляет команды при очистке кэша, оставляя только setPushToken
+    /// с token == nil (отложенный разлогин). Команды с реальным токеном
+    /// удаляются: при смене пользователя без разлогина они подписали бы
+    /// старого пользователя на пуши в следующей сессии.
+    func deleteCommandsForCacheClean() {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBTicketCommand")
-        fetchRequest.predicate = NSPredicate(format: "type != %d", type.rawValue)
+        fetchRequest.predicate = NSPredicate(
+            format: "NOT (type == %d AND token == nil)",
+            TicketCommandType.setPushToken.rawValue
+        )
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         deleteRequest.resultType = .resultTypeObjectIDs
         do {

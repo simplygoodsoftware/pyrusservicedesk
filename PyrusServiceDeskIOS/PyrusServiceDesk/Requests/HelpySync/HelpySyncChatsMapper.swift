@@ -36,7 +36,8 @@ enum HelpySyncChatsMapper {
 
         for ticket in tickets {
             let cachedChat = cachedChatsById[ticket.ticketId]
-            let messages = makeMessages(from: ticket.comments ?? [])
+            let comments = (ticket.comments ?? []).sorted { $0.commentId < $1.commentId }
+            let messages = makeMessages(from: comments)
             let ticketCreatedAt = parseDate(ticket.createdAt)
 
             let lastMessage = messages.last ?? cachedChat?.lastComment
@@ -50,6 +51,10 @@ enum HelpySyncChatsMapper {
             )
 
             let chat = PSDChat(chatId: ticket.ticketId, date: chatDate, messages: messages)
+            // По сырой дельте, до фильтрации маппером: пустые комментарии
+            // в кэш не попадают, но сервер не должен присылать их повторно.
+            let maxDeltaCommentId = comments.last.map { Int64($0.commentId) } ?? 0
+            chat.lastSeenNoteId = max(cachedChat?.lastSeenNoteId ?? 0, maxDeltaCommentId)
             chat.subject = ticket.subject
             chat.userId = ticket.userIdString
             chat.appId = ticket.appId
@@ -62,7 +67,14 @@ enum HelpySyncChatsMapper {
                 cachedChat: cachedChat
             )
 
-            chat.showRating = ticket.showRating ?? false
+            let isRated = isTicketRated(
+                deltaMessages: messages,
+                cachedChat: cachedChat,
+                ticketId: ticket.ticketId
+            )
+            chat.isRated = isRated
+
+            chat.showRating = (ticket.showRating ?? false) && !isRated
             if isMoreThan24Hours(from: lastMessage?.date ?? Date()) {
                 chat.showRating = false
             }
@@ -123,7 +135,8 @@ private extension HelpySyncChatsMapper {
             return nil
         }
 
-        let isOutgoing = comment.author?.authorId == PyrusServiceDesk.authorId
+        let isOutgoing = comment.author?.authorId != nil
+            && comment.author?.authorId == PyrusServiceDesk.authorId
         let owner: PSDUser? = isOutgoing ? PSDUsers.user : makeSupportUser(from: comment.author)
 
         let message = PSDMessage(
@@ -199,6 +212,36 @@ private extension HelpySyncChatsMapper {
         )
     }
 
+    // MARK: Rating
+
+    /// Бэк в HelpySync не знает, выставлена ли оценка, — определяем на клиенте.
+    /// Флаг из кэша обязателен: сообщения с оценкой в кэш не сохраняются,
+    /// а из дельты после первого синка пропадают.
+    static func isTicketRated(
+        deltaMessages: [PSDMessage],
+        cachedChat: PSDChat?,
+        ticketId: Int
+    ) -> Bool {
+        if cachedChat?.isRated == true {
+            return true
+        }
+
+        var knownMessages = deltaMessages + (cachedChat?.messages ?? [])
+        if let lastComment = cachedChat?.lastComment {
+            knownMessages.append(lastComment)
+        }
+        if knownMessages.contains(where: hasUserRating) {
+            return true
+        }
+
+        // Оценка выставлена локально, команда ещё не подтверждена сервером.
+        return PSDMessagesStorage.getMessages(for: ticketId).contains(where: hasUserRating)
+    }
+
+    static func hasUserRating(_ message: PSDMessage) -> Bool {
+        return message.isRatingMessage || (message.rating ?? 0) > 0
+    }
+
     // MARK: Read state
 
     /// Тикет не прочитан, если среди известных клиенту комментариев
@@ -243,7 +286,7 @@ private extension HelpySyncChatsMapper {
         if message.isOutgoing || message.owner?.authorId == PyrusServiceDesk.authorId {
             return false
         }
-        if message.isRatingMessage || (message.rating ?? 0) > 0 {
+        if hasUserRating(message) {
             return false
         }
         return true

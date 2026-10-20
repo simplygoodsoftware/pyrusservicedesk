@@ -402,6 +402,9 @@ import UIKit
     
     @objc public static func cleanCache() {
         isStarted = false
+        // Ответы синков, стартовавших до очистки, игнорируются —
+        // иначе они вернут в кэш данные старого пользователя.
+        syncManager.invalidateInFlightSync()
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
             let imageRepository = ImageRepository()

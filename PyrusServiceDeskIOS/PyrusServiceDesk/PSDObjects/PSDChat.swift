@@ -10,6 +10,9 @@ class PSDChat: Hashable {
     var messages: [PSDMessage]
     var isRead = true
     var showRating = false
+    /// Оценка выставлена (HelpySync): ставится один раз и не сбрасывается,
+    /// сообщения с оценкой в кэш не сохраняются.
+    var isRated = false
     var showRatingText: String?
     var subject: String?
     var lastComment: PSDMessage? {

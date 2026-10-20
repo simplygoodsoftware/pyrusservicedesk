@@ -22,9 +22,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBAttachment")
         coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
-        // setPushToken (в т.ч. с token = nil при разлогине) должны
-        // пережить очистку кэша и уйти в следующем синке.
-        coreDataService.deleteCommands(excludingType: .setPushToken)
+        // Очистку кэша переживают только setPushToken с token = nil
+        // (отложенный разлогин) — уйдут в следующем синке.
+        coreDataService.deleteCommandsForCacheClean()
         coreDataService.deleteAllObjects(forEntityName: "DBAnnouncement")
     }
     
@@ -299,6 +299,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.lastReadedCommentId = Int64(chatModel.lastReadedCommentId ?? 0)
             dbChat.showRating = chatModel.showRating
             dbChat.showRatingText = chatModel.showRatingText
+            // Оценка ставится один раз, флаг не сбрасывается.
+            dbChat.isRated = dbChat.isRated || chatModel.isRated
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
 
@@ -306,12 +308,10 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbChat.appId = appId
             }
 
-            // Монотонно: часть комментариев дельты (например, оценки)
-            // не сохраняется в кэш, поэтому виденный id — отдельное поле.
-            let maxDeltaNoteId = chatModel.messages
-                .compactMap { Int64($0.messageId) }
-                .max() ?? 0
-            dbChat.lastSeenNoteId = max(dbChat.lastSeenNoteId, maxDeltaNoteId)
+            // Монотонно; модель считает id по сырой дельте (см. маппер) —
+            // пустые и оценочные комментарии в кэш не попадают, но виденными
+            // остаются.
+            dbChat.lastSeenNoteId = max(dbChat.lastSeenNoteId, chatModel.lastSeenNoteId)
 
             for message in chatModel.messages where (message.rating ?? 0) <= 0 {
 
@@ -386,6 +386,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.isRead = dbChat.isRead
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
+                    chat.isRated = dbChat.isRated
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
                     chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     chat.appId = dbChat.appId
@@ -499,6 +500,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.isRead = dbChat.isRead
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
+                chat.isRated = dbChat.isRated
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
                 chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 chat.appId = dbChat.appId
@@ -588,6 +590,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.isRead = dbChat.isRead
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
+                chat.isRated = dbChat.isRated
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
                 chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 
@@ -615,6 +618,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.isRead = dbChat.isRead
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
+                    chat.isRated = dbChat.isRated
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
                     chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     

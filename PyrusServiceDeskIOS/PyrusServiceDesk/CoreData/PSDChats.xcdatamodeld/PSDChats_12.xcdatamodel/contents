@@ -45,6 +45,7 @@
         <attribute name="chatId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="isActive" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isRated" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isRead" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="lastReadedCommentId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="lastSeenNoteId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
