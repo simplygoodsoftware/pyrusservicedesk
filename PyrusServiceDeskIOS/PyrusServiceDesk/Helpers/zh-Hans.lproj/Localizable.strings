@@ -15,7 +15,7 @@
 "New_Conversation_Short" = "新";
 "Cancel" = "取消";
 "Send" = "发送";
-"Back" = "返回";
+"Back" = " 返回";
 "Done" = "完成";
 "CancelDownload" = "取消下载";
 "FileLoadError" = "无法加载文件预览";
@@ -70,3 +70,5 @@
 "PleaseEvaluateQuality" = "评估服务质量";
 "LeaveYourComment" = "撰写评价";
 "Close" = "关闭";
+"PrivicyCamera" = "这允许您扫描二维码进行授权并附加照片和视频。";
+"PrivicyMicrophone" = "这允许您将语音消息和视频文件附加到工单中。";

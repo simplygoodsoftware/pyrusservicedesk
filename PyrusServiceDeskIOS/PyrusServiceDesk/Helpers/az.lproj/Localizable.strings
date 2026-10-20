@@ -78,3 +78,8 @@
 "ReceiveIikoSupport" = "Birdəfəlik giriş kodu göndərəcəyik";
 "AgreePrivacyPolicy" = "Davam Et seçiminə toxunmaqla \n\nbununla razılaşırsınız ";
 "Enter" = "Giriş edin";
+"ConfirmPhone" = "Telefon nömrənizi təsdiqləyin";
+"CodeHasBeenSent" = "Kod göndərildi\n%@";
+"RequestTime" = "%@ sonra sorğu";
+"RequestAgain" = "Kodu yenidən tələb edin";
+"Repeat" = "Təkrarla";
