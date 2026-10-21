@@ -4,7 +4,7 @@ extension PyrusServiceDesk {
 
     /// Выход из пользователя по инициативе клиента (свайп на «Мои команды»).
     ///
-    /// Чистит состояние SDK (пользователи, клиенты, чаты и их кэш),
+    /// Чистит состояние SDK (пользователи, клиенты, чаты, объявления и их кэш),
     /// ставит отложенный разлогин пушей — setPushToken с token = nil,
     /// как в `logoutAllUsers()` — и дергает `deniedAccessCallback`,
     /// чтобы приложение удалило пользователя у себя готовой цепочкой
@@ -38,8 +38,7 @@ extension PyrusServiceDesk {
         )
 
         if userId == customUserId {
-            // Повышение следующего пользователя до основного — как в denyAccesses
-            // и PersonInfoRepository.deleteUsers(userIds:).
+            // Повторяет повышение пользователя из denyAccesses и PersonInfoRepository.deleteUsers.
             let nextUser = additionalUsers.removeLast()
             customUserId = nextUser.userId
             clientId = nextUser.clientId
@@ -68,7 +67,7 @@ extension PyrusServiceDesk {
 private extension PyrusServiceDesk {
 
     /// Убирает клиентов, у которых не осталось ни одного пользователя
-    /// (критерии — как в SyncManager.checkAccesses).
+    /// (критерии — как в SyncManager.checkAccesses), вместе с их объявлениями.
     static func removeOrphanedClients() {
         var removedIds = [String]()
         clients.removeAll { client in
@@ -83,6 +82,7 @@ private extension PyrusServiceDesk {
             PyrusServiceDesk.currentClientId = nil
         }
         syncManager.chatsDataService.saveClientModels(with: clients)
+        removeAnnouncements(of: removedIds)
     }
 
     static func removeChats(of userId: String) {
@@ -90,5 +90,15 @@ private extension PyrusServiceDesk {
         chats.removeAll(where: { $0.userId == userId })
         // saveChatModels удаляет из CoreData всё, чего нет в переданном списке.
         syncManager.chatsDataService.saveChatModels(with: chats, completion: nil)
+    }
+
+    static func removeAnnouncements(of appIds: [String]) {
+        let removedAnnouncementIds = announcements
+            .filter { appIds.contains($0.appId) }
+            .compactMap { $0.id }
+        AnnouncementsReadStorage.shared.clear(clientIds: appIds)
+        guard !removedAnnouncementIds.isEmpty else { return }
+        announcements.removeAll(where: { appIds.contains($0.appId) })
+        syncManager.chatsDataService.deleteAnnouncements(ids: removedAnnouncementIds)
     }
 }
