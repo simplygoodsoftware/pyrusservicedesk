@@ -331,7 +331,10 @@ struct PSDGetChats {
     
     /// Разбор блока applications ответа. Схема блока не менялась при переходе
     /// на HelpySync, поэтому метод переиспользуется из `PSDHelpySync`.
-    static func generateClients(from response: NSArray) -> ClientsResult {
+    /// allowedExtraUserIds — фильтр extra_users по переносу тикетов
+    /// (см. HelpySyncExtraUsersFilter); nil — прежнее безусловное добавление
+    /// (старый путь GetTickets).
+    static func generateClients(from response: NSArray, allowedExtraUserIds: Set<String>? = nil) -> ClientsResult {
         let updateAccessCommands = PyrusServiceDesk.repository.getCommands().filter({ $0.type == TicketCommandType.updateAccess.rawValue }).sorted(by: { $0.params.date ?? Date() > $1.params.date ?? Date() })
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
@@ -397,6 +400,10 @@ struct PSDGetChats {
                     continue
                 }
                 let userId = extraUserDic["user_id"] as? String ?? ""
+                // Extra user добавляется только при переносе тикета на него.
+                if let allowedExtraUserIds, !allowedExtraUserIds.contains(userId) {
+                    continue
+                }
                 let userName = extraUserDic["title"] as? String ?? ""
                 let user = PSDUserInfo(appId: clientId, clientName: clientName, userId: userId, userName: userName, secretKey: nil)
                 if PyrusServiceDesk.clientId == clientId && PyrusServiceDesk.customUserId?.count ?? 0 == 0  {

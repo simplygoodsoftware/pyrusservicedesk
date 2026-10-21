@@ -174,7 +174,16 @@ private extension PSDHelpySync {
         // (глобальные lastNoteId, список пользователей поддержки, clients)
         // и итерируют reference-типы снапшота, живущие на main.
         DispatchQueue.main.async {
-            let clientsResult = PSDGetChats.generateClients(from: clientsArray)
+            // Extra users добавляются только при переносе тикета на них
+            // (см. HelpySyncExtraUsersFilter).
+            let allowedExtraUserIds = HelpySyncExtraUsersFilter.reassignedUserIds(
+                tickets: syncResponse.tickets ?? [],
+                cachedChats: cachedChats
+            )
+            let clientsResult = PSDGetChats.generateClients(
+                from: clientsArray,
+                allowedExtraUserIds: allowedExtraUserIds
+            )
             let announcementsResult = PSDGetChats.generateAnnouncements(
                 from: clientsResult.serverAnnouncements
             )
