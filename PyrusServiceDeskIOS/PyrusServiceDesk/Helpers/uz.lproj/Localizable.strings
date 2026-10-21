@@ -72,7 +72,7 @@
 "Close" = "Yopish";
 "PrivicyCamera" = "Bu sizga avtorizatsiya qilish uchun QR-kodni skanerlash hamda fotosurat va videolarni ilova qilish imkonini beradi.";
 "PrivicyLocation" = "Yaqin atrofdagi kompaniyalarni topishingiz mumkin.";
-"PrivicyMicrophone" = "Bu sizga so‘rovlarga ovozli xabarlar va video fayllarni biriktirish imkonini beradi.";
+"PrivicyMicrophone" = "Bu sizga murojaatlarga ovozli xabarlar va video fayllarni biriktirish imkonini beradi.";
 "InstantSupport" = "Mijozlarni qo‘llab-quvvatlash xizmati";
 "EnterPhone" = "Telefon raqamingizni kiriting";
 "ReceiveIikoSupport" = "Biz bir martalik kirish kodini yuboramiz";
