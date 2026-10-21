@@ -37,9 +37,25 @@ extension PyrusServiceDesk {
             )
         )
 
+        removeUserState(userId: userId)
+        cleanupAfterUsersRemoval(removedUserIds: [userId])
+
+        repository.add(commands: [command]) {
+            syncManager.syncImmediately()
+        }
+
+        deniedAccessCallback?.deleteUsers(userIds: [userId])
+        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+        NotificationCenter.default.post(name: .createMenuNotification, object: nil)
+    }
+
+    /// Выбытие пользователя из состояния SDK; для основного — повышение
+    /// следующего, как в PersonInfoRepository.deleteUsers(userIds:).
+    /// Общий код ручного выхода и denied access (ChatsInteractor.denyAccesses).
+    /// Ожидает вызова с главного потока.
+    static func removeUserState(userId: String) {
         if userId == customUserId {
-            // Повторяет повышение пользователя из denyAccesses и PersonInfoRepository.deleteUsers.
-            let nextUser = additionalUsers.removeLast()
+            guard let nextUser = additionalUsers.popLast() else { return }
             customUserId = nextUser.userId
             clientId = nextUser.clientId
             clientName = nextUser.clientName
@@ -50,17 +66,16 @@ extension PyrusServiceDesk {
         if currentUserId == userId {
             currentUserId = customUserId
         }
+    }
 
+    /// Чистка после выбытия пользователей: осиротевшие клиенты,
+    /// их объявления (память, CoreData, указатели прочитанности
+    /// в UserDefaults) и чаты выбывших пользователей.
+    /// Вызывать после `removeUserState`. Ожидает вызова с главного потока.
+    static func cleanupAfterUsersRemoval(removedUserIds: [String]) {
+        guard !removedUserIds.isEmpty else { return }
         removeOrphanedClients()
-        removeChats(of: userId)
-
-        repository.add(commands: [command]) {
-            syncManager.syncImmediately()
-        }
-
-        deniedAccessCallback?.deleteUsers(userIds: [userId])
-        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
-        NotificationCenter.default.post(name: .createMenuNotification, object: nil)
+        removeChats(of: removedUserIds)
     }
 }
 
@@ -85,9 +100,9 @@ private extension PyrusServiceDesk {
         removeAnnouncements(of: removedIds)
     }
 
-    static func removeChats(of userId: String) {
-        guard chats.contains(where: { $0.userId == userId }) else { return }
-        chats.removeAll(where: { $0.userId == userId })
+    static func removeChats(of userIds: [String]) {
+        guard chats.contains(where: { userIds.contains($0.userId ?? "") }) else { return }
+        chats.removeAll(where: { userIds.contains($0.userId ?? "") })
         // saveChatModels удаляет из CoreData всё, чего нет в переданном списке.
         syncManager.chatsDataService.saveChatModels(with: chats, completion: nil)
     }
