@@ -18,6 +18,16 @@ class PSDTableView : UITableView{
     
     var isVisible: Bool = false
     
+    ///Внешний отступ по нижнему краю контента — в дополнение к отступу под лоадер.
+    ///У `contentInset.bottom` один владелец: эта таблица. Снаружи в `contentInset.bottom`
+    ///писать нельзя — `changeInset()` при смене `isLoading` перезапишет его целиком.
+    var additionalBottomInset: CGFloat = 0 {
+        didSet {
+            guard oldValue != additionalBottomInset else { return }
+            changeInset()
+        }
+    }
+    
     private lazy var activity : UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
         activity.style = UIActivityIndicatorView.Style.whiteLarge
@@ -147,7 +157,7 @@ class PSDTableView : UITableView{
     }
     private func changeInset(){
         var oldInset : UIEdgeInsets  = self.contentInset
-        oldInset.bottom = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
+        oldInset.bottom = (isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0) + additionalBottomInset
         self.contentInset = oldInset
     }
     private static let MAX_LOADER_Y : CGFloat = 160
