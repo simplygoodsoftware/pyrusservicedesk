@@ -250,14 +250,14 @@ import UIKit
             for user in users {
                 let userId = user.userId
                 let appId = user.clientId
-                let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
+                let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: DeviceType.ios.legacyName))
                 PyrusServiceDesk.repository.add(command: command)
                 ///todo - добавить обработку ошибки
                 completion(nil)
             }
             
         } else {
-            let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: clientId, userId: customUserId, params: TicketCommandParams(ticketId: nil, appId: clientId, userId: customUserId, token: token, type: "ios"))
+            let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: clientId, userId: customUserId, params: TicketCommandParams(ticketId: nil, appId: clientId, userId: customUserId, token: token, type: DeviceType.ios.legacyName))
             PyrusServiceDesk.repository.add(command: command, needSync: false)
             ///todo - добавить обработку ошибки
             completion(nil)
@@ -402,6 +402,9 @@ import UIKit
     
     @objc public static func cleanCache() {
         isStarted = false
+        // Ответы синков, стартовавших до очистки, игнорируются —
+        // иначе они вернут в кэш данные старого пользователя.
+        syncManager.invalidateInFlightSync()
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
             let imageRepository = ImageRepository()
@@ -522,7 +525,7 @@ import UIKit
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
         PyrusServiceDesk.syncManager.firstLoad = true
-        PyrusServiceDesk.syncManager.loadCache()        
+        PyrusServiceDesk.syncManager.loadCache()
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {

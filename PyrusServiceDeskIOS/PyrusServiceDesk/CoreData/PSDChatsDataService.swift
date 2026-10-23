@@ -22,7 +22,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBAttachment")
         coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
-        coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
+        // Очистку кэша переживают только setPushToken с token = nil
+        // (отложенный разлогин) — уйдут в следующем синке.
+        coreDataService.deleteCommandsForCacheClean()
         coreDataService.deleteAllObjects(forEntityName: "DBAnnouncement")
     }
     
@@ -297,12 +299,19 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.lastReadedCommentId = Int64(chatModel.lastReadedCommentId ?? 0)
             dbChat.showRating = chatModel.showRating
             dbChat.showRatingText = chatModel.showRatingText
+            // Оценка ставится один раз, флаг не сбрасывается.
+            dbChat.isRated = dbChat.isRated || chatModel.isRated
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
 
             if let appId = chatModel.appId, !appId.isEmpty {
                 dbChat.appId = appId
             }
+
+            // Монотонно; модель считает id по сырой дельте (см. маппер) —
+            // пустые и оценочные комментарии в кэш не попадают, но виденными
+            // остаются.
+            dbChat.lastSeenNoteId = max(dbChat.lastSeenNoteId, chatModel.lastSeenNoteId)
 
             for message in chatModel.messages where (message.rating ?? 0) <= 0 {
 
@@ -317,7 +326,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.commandId = message.commandId
                 dbMessage.date = message.date
                 dbMessage.fromStorage = message.fromStrorage
-                dbMessage.isOutgoing = message.isSupportMessage
+                // Легаси-формат БД: поле хранит инвертированное значение,
+                // все загрузчики читают isSupportMessage = !isOutgoing.
+                dbMessage.isOutgoing = !message.isSupportMessage
                 dbMessage.isRatingMessage = message.isRatingMessage
                 dbMessage.isWelcomeMessage = message.isWelcomeMessage
                 dbMessage.requestNewTicket = message.requestNewTicket
@@ -375,7 +386,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.isRead = dbChat.isRead
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
+                    chat.isRated = dbChat.isRated
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     chat.appId = dbChat.appId
                     
                     if let dbMessages = dbChat.messages?.array as? [DBMessage] {
@@ -487,7 +500,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.isRead = dbChat.isRead
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
+                chat.isRated = dbChat.isRated
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 chat.appId = dbChat.appId
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
@@ -575,7 +590,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.isRead = dbChat.isRead
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
+                chat.isRated = dbChat.isRated
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                chat.lastSeenNoteId = dbChat.lastSeenNoteId
                 
                 return chat
             }
@@ -601,7 +618,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.isRead = dbChat.isRead
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
+                    chat.isRated = dbChat.isRated
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    chat.lastSeenNoteId = dbChat.lastSeenNoteId
                     
                     return chat
                 }

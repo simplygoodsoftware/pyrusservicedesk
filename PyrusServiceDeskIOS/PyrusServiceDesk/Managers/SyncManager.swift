@@ -4,6 +4,12 @@ import Network
 class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
+    /// Поколение кэша: инкрементируется при cleanCache. Ответ синка,
+    /// запущенного до очистки, отбрасывается — иначе он вернёт в кэш
+    /// данные старого пользователя. Доступ под локом: cleanCache может
+    /// прийти от хоста не с main.
+    private var cacheEpoch = 0
+    private let cacheEpochLock = NSLock()
     private let coreDataService: CoreDataServiceProtocol
     let chatsDataService: PSDChatsDataServiceProtocol
     var firstLoad = true
@@ -49,7 +55,6 @@ class SyncManager {
     func syncGetTickets(isFilter: Bool = false) {
         if isFilter {
             self.needFilter = true
-            print("filter 0")
         }
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         if ticketCommands.contains(where: { $0.type == TicketCommandType.createComment.rawValue }) {
@@ -68,7 +73,33 @@ class SyncManager {
     func loadCache() {
         firstLoadUpdates()
     }
+    
+    /// Синк без троттлинга — когда команды нужно доставить немедленно
+    /// (например, setPushToken(nil) при разлогине перед cleanCache).
+    func syncImmediately() {
+        DispatchQueue.main.async { [weak self] in
+            self?.sync(isFilter: false)
+        }
+    }
+
+    /// Вызывается из cleanCache: ответы запросов, стартовавших раньше,
+    /// будут проигнорированы.
+    func invalidateInFlightSync() {
+        cacheEpochLock.lock()
+        defer { cacheEpochLock.unlock() }
+        cacheEpoch += 1
+    }
 }
+
+private extension SyncManager {
+
+    var currentCacheEpoch: Int {
+        cacheEpochLock.lock()
+        defer { cacheEpochLock.unlock() }
+        return cacheEpoch
+    }
+}
+
 
 private extension SyncManager {
     
@@ -91,83 +122,103 @@ private extension SyncManager {
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         
-        if ticketCommands.count > 0 {
-            print("")
-        }
-        
         let userId = PyrusServiceDesk.customUserId
-        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] getTicketsResponse in
-            guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
-            if !PyrusServiceDesk.multichats && userId != PyrusServiceDesk.customUserId {
+        let requestEpoch = currentCacheEpoch
+        let completion: (GetTicketsResponse) -> Void = { [weak self, userId] getTicketsResponse in
+            guard let self else { return }
+            guard self.currentCacheEpoch == requestEpoch else {
+                PyrusLogger.shared.logEvent("Sync response dropped: cache was cleaned during request")
+                self.isRequestInProgress = false
                 return
             }
-            guard let self = self else { return }
+            self.handleSyncResponse(getTicketsResponse, isFilter: isFilter, requestUserId: userId)
+        }
+        
+        // По спеке на новый запрос HelpySync переводится только приложение
+        // Помощник (режим мультичатов) — остальные потребители библиотеки
+        // остаются на GetTickets, чтобы не затрагивать их функционал.
+        if PyrusServiceDesk.multichats {
+            PSDHelpySync.get(commands: ticketCommands, completion: completion)
+        } else {
+            PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() }), completion: completion)
+        }
+    }
+    
+    func handleSyncResponse(
+        _ getTicketsResponse: GetTicketsResponse,
+        isFilter: Bool,
+        requestUserId: String?
+    ) {
+        guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
+        if !PyrusServiceDesk.multichats && requestUserId != PyrusServiceDesk.customUserId {
+            return
+        }
+        
+        let userInfo = ["isFilter": isFilter]
+        var clients = getTicketsResponse.clients
+        
+        // Проверяем доступы и удаляем вендоров (clients) при необходимости
+        checkAccesses(authorAccessDenied: getTicketsResponse.authorAccessDenied, clientsArray: getTicketsResponse.clients, clients: &clients, userInfo: userInfo)
+        
+        // Обрабатываем результаты команд
+        updateCommandsAndMessageStorage(commandsResult: getTicketsResponse.commandsResult)
+        
+        if let announcementsResult = getTicketsResponse.announcementsResult {
+            updateAnnouncements(announcementsResult: announcementsResult)
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             
-            let userInfo = ["isFilter": isFilter]
-            var clients = getTicketsResponse.clients
-            
-            // Проверяем доступы и удаляем вендоров (clients) при необходимости
-            checkAccesses(authorAccessDenied: getTicketsResponse.authorAccessDenied, clientsArray: getTicketsResponse.clients, clients: &clients, userInfo: userInfo)
-            
-            // Обрабатываем результаты команд
-            updateCommandsAndMessageStorage(commandsResult: getTicketsResponse.commandsResult)
-            
-            if let announcementsResult = getTicketsResponse.announcementsResult {
-                updateAnnouncements(announcementsResult: announcementsResult)
-            }
-            
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                
-                if let chats = getTicketsResponse.chats, getTicketsResponse.complete {
-                    var unreadChats = 0
-                    var lasMessage: PSDMessage?
-                    if let chat = chats.first {
-                        if !chat.isRead {
-                            unreadChats += 1
-                            lasMessage = chat.lastComment
-                        }
+            if let chats = getTicketsResponse.chats, getTicketsResponse.complete {
+                var unreadChats = 0
+                var lasMessage: PSDMessage?
+                if let chat = chats.first {
+                    if !chat.isRead {
+                        unreadChats += 1
+                        lasMessage = chat.lastComment
                     }
-                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-                    
-                    let startTime = CFAbsoluteTimeGetCurrent()
-                    chatsDataService.saveChatModels(with: chats) { [weak self] _ in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let self else { return }
-                            
-                            if let clients, clients.count > 0  {
-                                updateChatsAndClients(clients: clients, userInfo: userInfo)
-                                let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-                                print("⏱ getAllChats completed in \(timeElapsed) seconds")
-                            }
-                            
-                            if isFilter {
-                                self.isFilter = false
-                            }
-                            clearTimer()
-                            previousDelay = nil
-                            networkAvailability = true
-                            isRequestInProgress = false
-                            
-                            if shouldSendAnotherRequest {
-                                syncGetTickets(isFilter: self.isFilter)
-                            }
-                        }
-                    }
-                    
-                } else if !getTicketsResponse.complete {
-                    updateRepeatSyncTimer()
-                    networkAvailability = false
-                    isRequestInProgress = false
-                    if shouldSendAnotherRequest {
-                        syncGetTickets(isFilter: self.isFilter)
-                    }
-                } else {
-                    clearTimer()
-                    previousDelay = nil
-                    networkAvailability = true
-                    isRequestInProgress = false
                 }
+                UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+                
+                chatsDataService.saveChatModels(with: chats) { [weak self] saveResult in
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        
+                        if PyrusServiceDesk.multichats, case .success = saveResult {
+                            HelpySyncFullResyncFlag.clear()
+                        }
+                        
+                        if let clients, clients.count > 0  {
+                            updateChatsAndClients(clients: clients, userInfo: userInfo)
+                        }
+                        
+                        if isFilter {
+                            self.isFilter = false
+                        }
+                        clearTimer()
+                        previousDelay = nil
+                        networkAvailability = true
+                        isRequestInProgress = false
+                        
+                        if shouldSendAnotherRequest {
+                            syncGetTickets(isFilter: self.isFilter)
+                        }
+                    }
+                }
+                
+            } else if !getTicketsResponse.complete {
+                updateRepeatSyncTimer()
+                networkAvailability = false
+                isRequestInProgress = false
+                if shouldSendAnotherRequest {
+                    syncGetTickets(isFilter: self.isFilter)
+                }
+            } else {
+                clearTimer()
+                previousDelay = nil
+                networkAvailability = true
+                isRequestInProgress = false
             }
         }
     }
@@ -200,11 +251,19 @@ private extension SyncManager {
             for user in PyrusServiceDesk.additionalUsers {
                 user.lastNoteId = 0
             }
+            // HelpySync не использует lastNoteId — полную перезагрузку
+            // обеспечивает флаг (блоб tickets не отправляется до успешного синка).
+            HelpySyncFullResyncFlag.raise()
         }
         
         let commands = PyrusServiceDesk.repository.getCommands()
-        if commands.count > 0,
-           commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue }) {
+        // setPushToken с token = nil — отложенный разлогин,
+        // доставляем не дожидаясь обычного синка.
+        let hasLogoutTokens = commands.contains {
+            $0.type == TicketCommandType.setPushToken.rawValue && $0.params.token == nil
+        }
+        if commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue })
+            || hasLogoutTokens {
             syncGetTickets()
         }
     }

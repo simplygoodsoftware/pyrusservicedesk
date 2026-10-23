@@ -186,7 +186,10 @@ struct PSDGetChats {
         }
     }
     
-    private static func generateAnnouncements(from announcementsResponse: [String: AnnouncementsResponse]) -> AnnouncementsResult {
+    /// Обработка дельты объявлений. Схема не менялась при переходе
+    /// на HelpySync, поэтому метод переиспользуется из `PSDHelpySync`
+    /// (в т.ч. общий счётчик lastAssignedOrderIndex остаётся единым).
+    static func generateAnnouncements(from announcementsResponse: [String: AnnouncementsResponse]) -> AnnouncementsResult {
         var result: [PSDAnnouncement] = []
         var deletedAnnouncementsIds = Set<String>()
         
@@ -326,7 +329,9 @@ struct PSDGetChats {
         }
     }
     
-    private static func generateClients(from response: NSArray) -> ClientsResult {
+    /// Разбор блока applications ответа. Схема блока не менялась при переходе
+    /// на HelpySync, поэтому метод переиспользуется из `PSDHelpySync`.
+    static func generateClients(from response: NSArray) -> ClientsResult {
         let updateAccessCommands = PyrusServiceDesk.repository.getCommands().filter({ $0.type == TicketCommandType.updateAccess.rawValue }).sorted(by: { $0.params.date ?? Date() > $1.params.date ?? Date() })
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
@@ -463,27 +468,9 @@ struct PSDGetChats {
                 options: []
             )
             
-            let decoder = JSONDecoder()
-            
-            // Сервер может прислать дату как с миллисекундами, так и без —
-            // пробуем оба формата. Force unwrap здесь ронял всё приложение
-            // на любой нестандартной дате.
-            let fractionalFormatter = ISO8601DateFormatter()
-            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let plainFormatter = ISO8601DateFormatter()
-            plainFormatter.formatOptions = [.withInternetDateTime]
-            
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let string = try container.decode(String.self)
-                if let date = fractionalFormatter.date(from: string) ?? plainFormatter.date(from: string) {
-                    return date
-                }
-                throw DecodingError.dataCorruptedError(
-                    in: container,
-                    debugDescription: "Unsupported ISO8601 date: \(string)"
-                )
-            }
+            // Толерантный к формату ISO8601-дат декодер (с миллисекундами и без)
+            // вынесен в общую фабрику и используется также для ответа HelpySync.
+            let decoder = PSDJSONDecoderFactory.makeServerResponseDecoder()
             
             let announcementsResponse = try decoder.decode(AnnouncementsResponse.self, from: data)
             return announcementsResponse

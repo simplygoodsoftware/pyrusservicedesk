@@ -9,6 +9,60 @@ enum TicketCommandType: Int {
     case readAnnouncemnts = 5
 }
 
+/// Тип устройства для команды setPushToken.
+/// По спеке HelpySync передаётся числом; исторически SDK хранит
+/// и передаёт строку ("ios"/"android") — маппинг между форматами здесь.
+enum DeviceType: Int {
+    case ios = 0
+    case android = 1
+
+    init?(legacyName: String) {
+        switch legacyName.lowercased() {
+        case DeviceType.ios.legacyName:
+            self = .ios
+        case DeviceType.android.legacyName:
+            self = .android
+        default:
+            return nil
+        }
+    }
+
+    var legacyName: String {
+        switch self {
+        case .ios:
+            return "ios"
+        case .android:
+            return "android"
+        }
+    }
+}
+
+/// Признак кодирования команд в формат запроса HelpySync.
+///
+/// Нужен, потому что один и тот же `TicketCommand` кодируется в трёх местах:
+/// - персистентность (файл/кэш) — формат менять нельзя;
+/// - легаси-запрос GetTickets — формат менять нельзя;
+/// - новый запрос HelpySync — тип устройства по спеке передаётся как Int.
+enum HelpySyncWireFormat {
+    static let userInfoKey = CodingUserInfoKey(rawValue: "psd.helpySyncWireFormat")
+
+    /// Энкодер для тела запроса HelpySync.
+    static func makeEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        if let userInfoKey {
+            encoder.userInfo[userInfoKey] = true
+        }
+        return encoder
+    }
+
+    static func isEnabled(in encoder: Encoder) -> Bool {
+        guard let userInfoKey else {
+            return false
+        }
+        return encoder.userInfo[userInfoKey] as? Bool ?? false
+    }
+}
+
 struct AttachmentData: Codable {
     let type: Int
     let name: String
@@ -74,6 +128,88 @@ class TicketCommandParams: Codable {
         case ratingComment = "rating_comment"
         case extraFields = "extra_fields"
         case lastReadAnnouncementId = "last_read_announcement_id"
+    }
+
+    // MARK: Codable
+    //
+    // Кастомная реализация вместо синтезированной ради двух отличий wire-формата:
+    // 1) поле `type` (тип устройства) по спеке HelpySync кодируется числом
+    //    (DeviceType), в остальных местах — легаси-строкой;
+    // 2) для setPushToken с token == nil кодируется явный null —
+    //    по спеке null-токен означает удаление токена на бэке
+    //    (так же делал старый PSDPushToken через NSNull).
+    // `date` и `messageClientId` в кодирование не входят — как и раньше.
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        ticketId = try container.decodeIfPresent(Int.self, forKey: .ticketId)
+        appId = try container.decodeIfPresent(String.self, forKey: .appId)
+        requestNewTicket = try container.decodeIfPresent(Bool.self, forKey: .requestNewTicket)
+        userId = try container.decodeIfPresent(String.self, forKey: .userId)
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+        attachments = try container.decodeIfPresent([AttachmentData].self, forKey: .attachments)
+        token = try container.decodeIfPresent(String.self, forKey: .token)
+        // Тип устройства: принимаем и новый числовой формат,
+        // и легаси-строку из ранее сохранённых команд.
+        if let deviceTypeRawValue = try? container.decode(Int.self, forKey: .type) {
+            type = DeviceType(rawValue: deviceTypeRawValue)?.legacyName
+        } else {
+            type = try container.decodeIfPresent(String.self, forKey: .type)
+        }
+        messageId = try container.decodeIfPresent(Int.self, forKey: .messageId)
+        rating = try container.decodeIfPresent(Int.self, forKey: .rating)
+        authorId = try container.decodeIfPresent(String.self, forKey: .authorId)
+        hasAccess = try container.decodeIfPresent(Bool.self, forKey: .hasAccess)
+        hasAdminAccess = try container.decodeIfPresent(Bool.self, forKey: .hasAdminAccess)
+        ratingComment = try container.decodeIfPresent(String.self, forKey: .ratingComment)
+        extraFields = try container.decodeIfPresent([String: String].self, forKey: .extraFields)
+        lastReadAnnouncementId = try container.decodeIfPresent(String.self, forKey: .lastReadAnnouncementId)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(ticketId, forKey: .ticketId)
+        try container.encodeIfPresent(appId, forKey: .appId)
+        try container.encodeIfPresent(requestNewTicket, forKey: .requestNewTicket)
+        try container.encodeIfPresent(userId, forKey: .userId)
+        try container.encodeIfPresent(message, forKey: .message)
+        try container.encodeIfPresent(attachments, forKey: .attachments)
+        try encodeToken(to: &container)
+        try encodeDeviceType(to: &container, encoder: encoder)
+        try container.encodeIfPresent(messageId, forKey: .messageId)
+        try container.encodeIfPresent(rating, forKey: .rating)
+        try container.encodeIfPresent(authorId, forKey: .authorId)
+        try container.encodeIfPresent(hasAccess, forKey: .hasAccess)
+        try container.encodeIfPresent(hasAdminAccess, forKey: .hasAdminAccess)
+        try container.encodeIfPresent(ratingComment, forKey: .ratingComment)
+        try container.encodeIfPresent(extraFields, forKey: .extraFields)
+        try container.encodeIfPresent(lastReadAnnouncementId, forKey: .lastReadAnnouncementId)
+    }
+
+    private func encodeToken(to container: inout KeyedEncodingContainer<CodingKeys>) throws {
+        if let token {
+            try container.encode(token, forKey: .token)
+            return
+        }
+        // Наличие типа устройства означает команду setPushToken:
+        // nil-токен для неё кодируем явным null (удаление токена на бэке).
+        if type != nil {
+            try container.encodeNil(forKey: .token)
+        }
+    }
+
+    private func encodeDeviceType(
+        to container: inout KeyedEncodingContainer<CodingKeys>,
+        encoder: Encoder
+    ) throws {
+        guard let type else {
+            return
+        }
+        if HelpySyncWireFormat.isEnabled(in: encoder), let deviceType = DeviceType(legacyName: type) {
+            try container.encode(deviceType.rawValue, forKey: .type)
+        } else {
+            try container.encode(type, forKey: .type)
+        }
     }
 }
 
