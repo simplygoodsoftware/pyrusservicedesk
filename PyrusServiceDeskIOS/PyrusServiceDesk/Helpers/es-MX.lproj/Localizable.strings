@@ -70,9 +70,9 @@
 "PleaseEvaluateQuality" = "Evaluar la calidad del servicio";
 "LeaveYourComment" = "Escribir una reseña";
 "Close" = "Cerrar";
-"PrivicyCamera" = "Esto le permite escanear el código QR para iniciar sesión y adjuntar fotos y videos.";
+"PrivicyCamera" = "Esto le permite escanear un código QR para autorizar y adjuntar fotos y vídeos.";
 "PrivicyLocation" = "Podrá encontrar empresas cercanas.";
-"PrivicyMicrophone" = "Esto le permite adjuntar mensajes de voz y archivos de video a los tickets.";
+"PrivicyMicrophone" = "Esto le permite adjuntar los mensajes de voz y los archivos de vídeo a los tiques.";
 "InstantSupport" = "Su servicio de atención al cliente";
 "EnterPhone" = "Introduzca su número telefónico";
 "ReceiveIikoSupport" = "Enviaremos un código de acceso de un solo uso";
