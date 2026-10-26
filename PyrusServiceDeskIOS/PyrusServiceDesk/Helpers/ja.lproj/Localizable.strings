@@ -145,4 +145,4 @@
 "Video" = "ビデオ";
 "PyrusCannotAccessYourMicrophone" = "マイクへのアクセスを許可";
 "PleaseEnableAccessMicrophone" = "これにより、音声メッセージを録音してタスクに添付できるようになります。\n有効にするには、「設定」をクリックして「マイク」をオンにしてください。";
-"DTF_Full" = "ddMMyyyy_HHmmss";
+"DTF_Full" = "月日年_時分秒";
