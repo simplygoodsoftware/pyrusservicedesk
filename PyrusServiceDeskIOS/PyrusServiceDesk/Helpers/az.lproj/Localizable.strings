@@ -83,3 +83,14 @@
 "RequestTime" = "Kodu %@ sonra yenidən tələb edin";
 "RequestAgain" = "Kodu yenidən tələb edin";
 "Repeat" = "Təkrarla";
+"YourRestaurant" = "Dəstək söhbətinə qoşulun";
+"ScanTerminal" = "QR kodunu skan edin";
+"ScanQR" = "QR kodunu skan edin";
+"IncorrectQR" = "Yanlış QR kodu, başqasını sınayın";
+"SkipSelection" = "Restoran seçimini atlayın";
+"NoAccessToCamera" = "Kameraya giriş yoxdur";
+"ToHelpProcessFaster" = "Sorğunu daha sürətli emal etmək üçün restoranınızı seçin";
+"AnonymousMessagesInfo" = "Anonim mesajların işlənməsi daha uzun çəkir. Zəhmət olmasa restoranınızı qeyd edin";
+"AllowAccessSetting" = "Tətbiq məxfilik ayarlarında kameranıza girişə icazə verin";
+"AllowAccessForQr" = "QR kodunu skan etmək üçün telefonunuzun kamerasına girişə icazə verin";
+"AllowAccessCamera" = "Kameranıza girişə icazə verin";
