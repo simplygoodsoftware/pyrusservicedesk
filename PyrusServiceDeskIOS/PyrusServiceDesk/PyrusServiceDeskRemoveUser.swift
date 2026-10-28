@@ -1,5 +1,11 @@
 import Foundation
 
+extension Notification.Name {
+    /// Пользователь удалён через PyrusServiceDesk.removeUser —
+    /// экран чатов должен сбросить фильтр.
+    static let userRemovedNotification = Notification.Name("PSDUserRemovedNotification")
+}
+
 extension PyrusServiceDesk {
 
     /// Выход из пользователя по инициативе клиента (свайп на «Мои команды»).
@@ -9,13 +15,55 @@ extension PyrusServiceDesk {
     /// как в `logoutAllUsers()` — и дергает `deniedAccessCallback`,
     /// чтобы приложение удалило пользователя у себя готовой цепочкой
     /// denied access. Последнего пользователя не удаляет: для этого
-    /// есть полный разлогин. Ожидает вызова с главного потока.
+    /// есть полный разлогин. Можно вызывать с любого потока.
     @objc public static func removeUser(userId: String) {
+        DispatchQueue.main.async {
+            removeUserOnMain(userId: userId)
+        }
+    }
+
+    /// Выбытие пользователя из состояния SDK; для основного — повышение
+    /// следующего, как в PersonInfoRepository.deleteUsers(userIds:).
+    /// Копии основного в additionalUsers (допустимы, см. logoutAllUsers)
+    /// убираются перед повышением. Общий код ручного выхода и denied access
+    /// (ChatsInteractor.denyAccesses). Ожидает вызова с главного потока.
+    static func removeUserState(userId: String) {
+        if userId == customUserId {
+            additionalUsers.removeAll(where: { $0.userId == userId })
+            guard let nextUser = additionalUsers.popLast() else { return }
+            customUserId = nextUser.userId
+            clientId = nextUser.clientId
+            clientName = nextUser.clientName
+            userName = nextUser.userName
+        } else {
+            additionalUsers.removeAll(where: { $0.userId == userId })
+        }
+        // currentUserId — фильтр списка чатов, nil = без фильтра.
+        if currentUserId == userId {
+            currentUserId = nil
+        }
+    }
+
+    /// Чистка после выбытия пользователей: осиротевшие клиенты,
+    /// их объявления (память, CoreData, указатели прочитанности
+    /// в UserDefaults) и чаты выбывших пользователей.
+    /// Вызывать после `removeUserState`. Ожидает вызова с главного потока.
+    static func cleanupAfterUsersRemoval(removedUserIds: [String]) {
+        guard !removedUserIds.isEmpty else { return }
+        removeOrphanedClients()
+        removeChats(of: removedUserIds)
+    }
+}
+
+private extension PyrusServiceDesk {
+
+    static func removeUserOnMain(userId: String) {
         guard !userId.isEmpty else { return }
 
         let appId: String
         if userId == customUserId {
-            guard let clientId, !clientId.isEmpty, !additionalUsers.isEmpty else { return }
+            guard let clientId, !clientId.isEmpty,
+                  additionalUsers.contains(where: { $0.userId != userId }) else { return }
             appId = clientId
         } else if let user = additionalUsers.first(where: { $0.userId == userId }) {
             appId = user.clientId
@@ -37,6 +85,10 @@ extension PyrusServiceDesk {
             )
         )
 
+        // Ответ синка, стартовавшего до удаления, содержит тикеты и клиента
+        // этого пользователя — игнорируем его, как делает cleanCache.
+        syncManager.invalidateInFlightSync()
+
         removeUserState(userId: userId)
         cleanupAfterUsersRemoval(removedUserIds: [userId])
 
@@ -45,41 +97,14 @@ extension PyrusServiceDesk {
         }
 
         deniedAccessCallback?.deleteUsers(userIds: [userId])
-        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+        NotificationCenter.default.post(
+            name: PyrusServiceDesk.chatsUpdateNotification,
+            object: nil,
+            userInfo: ["isFilter": false]
+        )
+        NotificationCenter.default.post(name: .userRemovedNotification, object: nil)
         NotificationCenter.default.post(name: .createMenuNotification, object: nil)
     }
-
-    /// Выбытие пользователя из состояния SDK; для основного — повышение
-    /// следующего, как в PersonInfoRepository.deleteUsers(userIds:).
-    /// Общий код ручного выхода и denied access (ChatsInteractor.denyAccesses).
-    /// Ожидает вызова с главного потока.
-    static func removeUserState(userId: String) {
-        if userId == customUserId {
-            guard let nextUser = additionalUsers.popLast() else { return }
-            customUserId = nextUser.userId
-            clientId = nextUser.clientId
-            clientName = nextUser.clientName
-            userName = nextUser.userName
-        } else {
-            additionalUsers.removeAll(where: { $0.userId == userId })
-        }
-        if currentUserId == userId {
-            currentUserId = customUserId
-        }
-    }
-
-    /// Чистка после выбытия пользователей: осиротевшие клиенты,
-    /// их объявления (память, CoreData, указатели прочитанности
-    /// в UserDefaults) и чаты выбывших пользователей.
-    /// Вызывать после `removeUserState`. Ожидает вызова с главного потока.
-    static func cleanupAfterUsersRemoval(removedUserIds: [String]) {
-        guard !removedUserIds.isEmpty else { return }
-        removeOrphanedClients()
-        removeChats(of: removedUserIds)
-    }
-}
-
-private extension PyrusServiceDesk {
 
     /// Убирает клиентов, у которых не осталось ни одного пользователя
     /// (критерии — как в SyncManager.checkAccesses), вместе с их объявлениями.

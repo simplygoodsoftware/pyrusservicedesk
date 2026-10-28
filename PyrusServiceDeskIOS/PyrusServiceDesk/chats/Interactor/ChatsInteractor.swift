@@ -63,6 +63,7 @@ final class ChatsInteractor: NSObject {
     private var announcementsReadObserver: NSObjectProtocol?
     private var announcementsUpdateObserver: NSObjectProtocol?
     private var accessesUpdateObserver: NSObjectProtocol?
+    private var userRemovedObserver: NSObjectProtocol?
     private var hideBannerWorkItem: DispatchWorkItem?
 
     // MARK: - Init
@@ -83,6 +84,16 @@ final class ChatsInteractor: NSObject {
                let isFilter = userInfo["isFilter"] as? Bool {
                 self?.updateChats(isFilter: isFilter)
             }
+        }
+
+        userRemovedObserver = NotificationCenter.default.addObserver(
+            forName: .userRemovedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.deleteFilter()
+            self?.presenter.doWork(.deleteFilter)
+            self?.createMenuActions()
         }
 
         announcementsReadObserver = NotificationCenter.default.addObserver(
@@ -106,7 +117,7 @@ final class ChatsInteractor: NSObject {
 
     deinit {
         hideBannerWorkItem?.cancel()
-        [chatsUpdateObserver, announcementsReadObserver, announcementsUpdateObserver, accessesUpdateObserver]
+        [chatsUpdateObserver, announcementsReadObserver, announcementsUpdateObserver, accessesUpdateObserver, userRemovedObserver]
             .compactMap { $0 }
             .forEach { NotificationCenter.default.removeObserver($0) }
         NotificationCenter.default.removeObserver(self)
