@@ -20,6 +20,7 @@ struct PSDHelpySync {
         /// Сколько тикетов с дельтой максимум печатать в лог ответа.
         static let maxLoggedDeltaTickets = 30
         static let dumpLabel = "HelpySync"
+        static let detachedDumpLabel = "HelpySyncLogout"
     }
 
     private static var sessionTask: URLSessionDataTask?
@@ -106,6 +107,61 @@ struct PSDHelpySync {
     static func remove() {
         sessionTask?.cancel()
         sessionTask = nil
+    }
+
+    /// Отправка команд вне sessionTask и без применения ответа:
+    /// не отменяет обычный синк и не отменяется им. Используется
+    /// разлогином: запрос собирается синхронно (до cleanCache),
+    /// доставка не гарантируется — команды переживают очистку кэша
+    /// и при неудаче уйдут в следующей сессии.
+    /// Ожидает вызова с главного потока (сборка запроса читает
+    /// состояние пользователей и кэш чатов).
+    static func sendDetached(commands: [TicketCommand]) {
+        guard !commands.isEmpty else {
+            return
+        }
+
+        let requestBody = HelpySyncRequestBuilder.makeRequest(
+            commands: commands,
+            cachedChats: PyrusServiceDesk.chats
+        )
+        guard
+            let request = URLRequest.createRequest(
+                type: .helpySync,
+                body: requestBody,
+                encoder: HelpySyncWireFormat.makeEncoder()
+            )
+        else {
+            PyrusLogger.shared.logEvent("HelpySync detached: failed to create request")
+            return
+        }
+
+        PyrusLogger.shared.logEvent("HelpySync detached send, commands: \(commands.count)")
+        #if DEBUG
+        let dumpToken = NetworkDumpWriter.saveRequest(
+            label: Constants.detachedDumpLabel,
+            request: request,
+            fallbackBody: try? HelpySyncWireFormat.makeEncoder().encode(requestBody)
+        )
+        #endif
+
+        let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
+            let statusCode = (response as? HTTPURLResponse)?.statusCode
+            #if DEBUG
+            NetworkDumpWriter.saveResponse(
+                for: dumpToken,
+                body: data,
+                statusCode: statusCode,
+                error: error,
+                duration: nil
+            )
+            #endif
+            PyrusLogger.shared.logEvent(
+                "HelpySync detached finished, status: \(statusCode ?? 0),"
+                + " error: \(error?.localizedDescription ?? "none")"
+            )
+        }
+        task.resume()
     }
 }
 

@@ -2,33 +2,60 @@ import Foundation
 
 extension PyrusServiceDesk {
 
-    /// Разлогин пользователя.
+    /// Разлогин: ставит команды setPushToken(token = nil) для всех user_id,
+    /// запускает их отправку fire-and-forget и чистит кэш. Кэш чистится
+    /// всегда и сразу, не дожидаясь сети, — отдельный `cleanCache()`
+    /// хосту не нужен.
     ///
-    /// По спеке HelpySync («Доработки на мобилках», п. 7) при разлогине
-    /// для всех user_id необходимо отправить команду setPushToken
-    /// с token = nil — бэкенд удалит пуш-токены этих пользователей.
+    /// По спеке HelpySync («Доработки на мобилках», п. 7) бэкенд по этим
+    /// командам удаляет пуш-токены пользователей.
     ///
-    /// Синк запускается сразу после постановки команд в очередь, без
-    /// троттлинга. Команды setPushToken переживают `cleanCache()`
-    /// (см. `PSDChatsDataService.deleteAllObjects`), поэтому при обрыве
-    /// доставятся в следующей сессии — бэк дедуплицирует по command_id.
-    @objc public static func logoutAllUsers() {
+    /// Доставка не гарантируется в этой сессии: команды переживают очистку
+    /// кэша (см. `deleteCommandsForCacheClean`) и уйдут в следующей —
+    /// бэк дедуплицирует по command_id. Удалит их обычный синк
+    /// по `commandsResult`.
+    ///
+    /// Completion вызывается на main после постановки команд и очистки
+    /// кэша; повторный вход следует начинать после него.
+    @objc public static func logoutAllUsers(completion: (() -> Void)? = nil) {
         guard let clientId, !clientId.isEmpty else {
             EventsLogger.logEvent(.emptyClientId)
+            finishLogout(completion: completion)
+            return
+        }
+        guard multichats else {
+            finishLogout(completion: completion)
             return
         }
 
-        var logoutTargets: [(appId: String, userId: String?)] = [(clientId, customUserId)]
+        repository.add(commands: makeLogoutCommands(clientId: clientId)) {
+            // Отправка до cleanCache: запрос собирается синхронно
+            // из ещё нетронутого состояния SDK.
+            PSDHelpySync.sendDetached(commands: repository.getCommands())
+            finishLogout(completion: completion)
+        }
+    }
+}
+
+private extension PyrusServiceDesk {
+
+    static func finishLogout(completion: (() -> Void)?) {
+        cleanCache()
+        DispatchQueue.main.async { completion?() }
+    }
+
+    static func makeLogoutCommands(clientId: String) -> [TicketCommand] {
+        var targets: [(appId: String, userId: String?)] = [(clientId, customUserId)]
         for user in additionalUsers {
-            logoutTargets.append((user.clientId, user.userId))
+            targets.append((user.clientId, user.userId))
         }
         // Основной пользователь может дублироваться в additionalUsers.
         var seenPairs = Set<String>()
-        let uniqueTargets = logoutTargets.filter {
+        let uniqueTargets = targets.filter {
             seenPairs.insert("\($0.appId)|\($0.userId ?? "")").inserted
         }
 
-        let commands = uniqueTargets.map { target in
+        return uniqueTargets.map { target in
             TicketCommand(
                 commandId: UUID().uuidString,
                 type: .setPushToken,
@@ -42,10 +69,6 @@ extension PyrusServiceDesk {
                     type: DeviceType.ios.legacyName
                 )
             )
-        }
-
-        repository.add(commands: commands) {
-            syncManager.syncImmediately()
         }
     }
 }
