@@ -65,6 +65,21 @@ final class AnnouncementsReadStorage {
         defaults.removeObject(forKey: Constants.storageKey)
     }
 
+    /// Сбрасывает локальные пометки перечисленных клиентов —
+    /// при выходе из всех пользователей app_id (см. PyrusServiceDesk.removeUser).
+    func clear(clientIds: [String]) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard clientIds.contains(where: { localReadIds[$0] != nil }) else { return }
+        for clientId in clientIds {
+            localReadIds[clientId] = nil
+        }
+        if localReadIds.isEmpty {
+            defaults.removeObject(forKey: Constants.storageKey)
+        } else {
+            defaults.set(localReadIds, forKey: Constants.storageKey)
+        }
+    }
+
     // MARK: - Чтение
 
     /// Граница «прочитано/непрочитано» для разделителя на экране

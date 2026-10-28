@@ -1194,6 +1194,10 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
 
+    func deleteAnnouncements(ids: [String]) {
+        coreDataService.deleteAnnouncements(ids: ids)
+    }
+
     func getAllAnnouncements(completion: @escaping ([PSDAnnouncement]) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
