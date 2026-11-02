@@ -76,10 +76,10 @@
 "InstantSupport" = "您的客户支持";
 "EnterPhone" = "输入您的电话号码";
 "ReceiveIikoSupport" = "我们将向您发送一次性访问代码";
-"AgreePrivacyPolicy" = "点击“继续”即表示您同意\n以下内容 ";
-"Enter" = "输入";
+"AgreePrivacyPolicy" = "点击“继续”即表示您同意\n ";
+"Enter" = "登录";
 "NoConnection" = "无网络连接";
-"SMSLimit" = "您已超过短信发送限制。 请稍后重试。";
+"SMSLimit" = "您已超过短信发送限制。请稍后重试。";
 "CannotSendSMS" = "无法向 %@ 发送短信";
 "IncorrectPhone" = "电话号码不正确";
 "ChangePhone" = " 更改号码";
@@ -88,8 +88,8 @@
 "RequestTime" = "%@ 后重新请求";
 "RequestAgain" = "重新请求验证码";
 "Repeat" = "重复";
-"TryAgainLater" = "您输入验证码的尝试次数已超出限制。 请稍后重试。";
+"TryAgainLater" = "您输入验证码的尝试次数已超出限制。请稍后重试。";
 "WhatsName" = "名字";
 "SoWeKnowHowToAddressYou" = "这样我们就知道该如何称呼您";
 "YourRestaurant" = "加入支持聊天";
-"ScanTerminal" = "扫码二维码";
+"ScanTerminal" = "扫描二维码";

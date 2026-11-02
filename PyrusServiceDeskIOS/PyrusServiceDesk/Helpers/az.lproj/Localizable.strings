@@ -91,7 +91,7 @@
 "NoAccessToCamera" = "Kameraya giriş yoxdur";
 "ToHelpProcessFaster" = "Sorğunu daha sürətli emal etmək üçün restoranınızı seçin";
 "AnonymousMessagesInfo" = "Anonim mesajların işlənməsi daha uzun çəkir. Zəhmət olmasa restoranınızı qeyd edin";
-"AllowAccessSetting" = "Tətbiq məxfilik ayarlarında kameranıza girişə icazə verin";
+"AllowAccessSetting" = "Tətbiqin məxfilik parametrlərində kameranıza girişə icazə verin";
 "AllowAccessForQr" = "QR kodunu skan etmək üçün telefonunuzun kamerasına girişə icazə verin";
 "AllowAccessCamera" = "Kameranıza girişə icazə verin";
 "NoConnection" = "Şəbəkə bağlantısı yoxdur";
@@ -101,9 +101,9 @@
 "ChangePhone" = " Nömrəni dəyişdirin";
 "TryAgainLater" = "Siz kodu daxil etmək cəhdlərinin sayını keçmisiniz. Daha sonra yenidən cəhd edin.";
 "WhatsName" = "Ad";
-"SoWeKnowHowToAddressYou" = "İndi sizə necə müraciət edəcəyimizi bilirik";
+"SoWeKnowHowToAddressYou" = "Sizə necə müraciət edəcəyimizi bilməyimiz üçün";
 "PrivacySettings" = "Məxfilik parametrləri";
-"Search" = "Axtarılır...";
+"Search" = "Axtarış...";
 "PleaseWait" = "Zəhmət olmasa gözləyin. Bu bir az vaxt apara bilər.";
 "RestaurantNotFound" = "Restoran tapılmadı";
 "ScanningAgain" = "QR kodunu yenidən skan etməyə cəhd edin";
@@ -111,7 +111,7 @@
 "ToReceiveReplies" = "Mesajlar göndərin və alın";
 "AllowSendingNotifications" = "Bildirişlərə icazə verin";
 "NotificationsAreTurnedOff" = "Bildirişlər söndürülüb :(";
-"YouWillNotReceiveReplies" = "Siz proqrama daxil olana qədər mesajlarınıza cavab almayacaqsınız. Bildirişləri aktiv yapmaq üçün bu tətbiq açın Parametrlər -> Bildirişlər -> Helpy";
+"YouWillNotReceiveReplies" = "Siz tətbiqə daxil olana qədər mesajlarınıza cavab almayacaqsınız. Bildirişləri aktiv etmək üçün bu tətbiqi açın Parametrlər -> Bildirişlər -> Helpy";
 "OpenSettings" = "Parametrləri aç";
 "Continue" = "Davam et";
 "YouPhoneNumber" = "Telefon nömrəsi";
@@ -126,7 +126,7 @@
 "ErrorInviteLink" = "Etibarsız keçid";
 "ToInviteLink" = "Dəvət keçidini yapışdırın";
 "ToAuthorization" = "QR kodu vasitəsilə dəstək söhbətini açmaq üçün tətbiqin kameranıza daxil olmasına icazə verin";
-"nameApplication" = "name_az";
+"nameApplication" = "name_en";
 "Edit" = "Redaktə edin";
 "Logout" = "Çıxın";
 "Version" = "Versiya";

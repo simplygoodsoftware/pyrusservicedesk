@@ -72,7 +72,7 @@
 "Close" = "Cerrar";
 "PrivicyCamera" = "Esto le permite escanear un código QR para autorizar y adjuntar fotos y vídeos.";
 "PrivicyLocation" = "Podrá encontrar empresas cercanas.";
-"PrivicyMicrophone" = "Esto le permite adjuntar los mensajes de voz y los archivos de vídeo a los tiques.";
+"PrivicyMicrophone" = "Esto le permite adjuntar los mensajes de voz y los archivos de vídeo a los tickets.";
 "InstantSupport" = "Su servicio de atención al cliente";
 "EnterPhone" = "Introduzca su número telefónico";
 "ReceiveIikoSupport" = "Enviaremos un código de acceso de un solo uso";
