@@ -29,6 +29,7 @@ protocol PSDChatsDataServiceProtocol {
     func saveAnnouncementsModels(with announcements: [PSDAnnouncement], completion: ((Result<Void, Error>) -> Void)?)
     func getAllAnnouncements(completion: @escaping ([PSDAnnouncement]) -> Void)
     func getAllAnnouncements() -> [PSDAnnouncement]
+    func deleteAnnouncements(ids: [String])
     
     func deleteAllObjects()
 }

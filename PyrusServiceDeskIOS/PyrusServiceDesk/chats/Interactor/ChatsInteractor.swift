@@ -63,6 +63,7 @@ final class ChatsInteractor: NSObject {
     private var announcementsReadObserver: NSObjectProtocol?
     private var announcementsUpdateObserver: NSObjectProtocol?
     private var accessesUpdateObserver: NSObjectProtocol?
+    private var userRemovedObserver: NSObjectProtocol?
     private var hideBannerWorkItem: DispatchWorkItem?
 
     // MARK: - Init
@@ -83,6 +84,16 @@ final class ChatsInteractor: NSObject {
                let isFilter = userInfo["isFilter"] as? Bool {
                 self?.updateChats(isFilter: isFilter)
             }
+        }
+
+        userRemovedObserver = NotificationCenter.default.addObserver(
+            forName: .userRemovedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.deleteFilter()
+            self?.presenter.doWork(.deleteFilter)
+            self?.createMenuActions()
         }
 
         announcementsReadObserver = NotificationCenter.default.addObserver(
@@ -106,7 +117,7 @@ final class ChatsInteractor: NSObject {
 
     deinit {
         hideBannerWorkItem?.cancel()
-        [chatsUpdateObserver, announcementsReadObserver, announcementsUpdateObserver, accessesUpdateObserver]
+        [chatsUpdateObserver, announcementsReadObserver, announcementsUpdateObserver, accessesUpdateObserver, userRemovedObserver]
             .compactMap { $0 }
             .forEach { NotificationCenter.default.removeObserver($0) }
         NotificationCenter.default.removeObserver(self)
@@ -354,16 +365,13 @@ private extension ChatsInteractor {
     @objc func denyAccesses(isFilter: Bool) {
         DispatchQueue.main.async { [weak self] in
             var userNames = ""
+            var removedUserIds = [String]()
             for userId in PyrusServiceDesk.accessDeniedIds {
                 if PyrusServiceDesk.customUserId == userId {
                     userNames += "\(PyrusServiceDesk.userName ?? ""), "
                     if PyrusServiceDesk.additionalUsers.count > 0 {
-                        let user = PyrusServiceDesk.additionalUsers.last
-                        PyrusServiceDesk.customUserId = user?.userId
-                        PyrusServiceDesk.clientId = user?.clientId
-                        PyrusServiceDesk.clientName = user?.clientName
-                        PyrusServiceDesk.userName = user?.userName
-                        PyrusServiceDesk.additionalUsers.removeLast()
+                        PyrusServiceDesk.removeUserState(userId: userId)
+                        removedUserIds.append(userId)
                     } else {
                         userNames = String(userNames.dropLast(2))
                         DispatchQueue.main.async { [weak self] in
@@ -373,10 +381,12 @@ private extension ChatsInteractor {
                     }
                 } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
                     userNames += "\(user.userName ?? ""), "
-                    PyrusServiceDesk.additionalUsers.removeAll(where: { $0.userId == userId })
+                    PyrusServiceDesk.removeUserState(userId: userId)
+                    removedUserIds.append(userId)
                 }
             }
 
+            PyrusServiceDesk.cleanupAfterUsersRemoval(removedUserIds: removedUserIds)
             self?.deleteFilter()
             self?.presenter.doWork(.deleteFilter)
             self?.createMenuActions()
