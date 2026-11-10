@@ -327,8 +327,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 {
                     if #available(iOS 26.0, *) {
                         if abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20 {
-                            self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
-                            self.tableView.contentOffset.y -= self.view.safeAreaInsets.bottom
+                            var extra = self.view.safeAreaInsets.bottom
+                            if #available(iOS 27.0, *) {
+                                //Accessory frame pinned to the screen edge already contains the safe area.
+                                extra = min(self.inputViewGapBelow() ?? extra, extra)
+                            }
+                            self.tableView.contentInset.top = self.messageInputView.frame.size.height + extra
+                            self.tableView.contentOffset.y -= extra
                         } else {
                             //Repeated willHide with accessory-only frame must not strip safe area inset.
                             self.logKB("willHide accessory-only, inset kept")
@@ -863,6 +868,16 @@ extension PSDChatViewController: PSDChatViewProtocol {
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func deletedAllAttachments() {
         logKB("deletedAllAttachments")
+        if #available(iOS 27.0, *) {
+            //Exact inverse of addAttachment(). Offset is assigned absolutely: shrinking the inset
+            //clamps the out-of-range offset by itself, so a relative "+=" would double the shift.
+            let newInset = tableView.contentInset.top - PSDMessageInputView.attachmentsHeight
+            let newOffset = tableView.contentOffset.y + PSDMessageInputView.attachmentsHeight
+            tableView.contentInset.top = newInset
+            tableView.contentOffset.y = newOffset
+            logKB("deletedAllAttachments applied", extra: "newInset=\(newInset) newOffset=\(newOffset)")
+            return
+        }
         if #available(iOS 26.0, *) {
             if isKeyBoardOpen {
                 tableView.contentInset.top = currkeyboardHeight
