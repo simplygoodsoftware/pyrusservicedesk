@@ -447,8 +447,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         var targetInset = messageInputView.frame.size.height
         if #available(iOS 27.0, *) {
             //Accessory frame pinned to the screen edge already contains the safe area.
-            let safeBottom = view.safeAreaInsets.bottom
-            targetInset += min(inputViewGapBelow() ?? safeBottom, safeBottom)
+            //System alerts report a transient gap below the bar; track only the bar height then.
+            let insetMatchesBar = tableView.contentInset.top >= targetInset - Self.safeAreaDetectTolerance
+            if !insetMatchesBar {
+                let safeBottom = view.safeAreaInsets.bottom
+                targetInset += min(inputViewGapBelow() ?? safeBottom, safeBottom)
+            }
         }
         guard targetInset > 0, tableView.contentInset.top < targetInset else { return }
         let delta = targetInset - tableView.contentInset.top
