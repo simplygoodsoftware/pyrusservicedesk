@@ -28,7 +28,6 @@
 		1E3716EB2E608E47003EACE1 /* PSDRatingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EA2E608E47003EACE1 /* PSDRatingSettings.swift */; };
 		1E3716F02E608E9B003EACE1 /* PSDTextRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */; };
 		1E3716F12E608E9B003EACE1 /* PSDEmojiRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */; };
-		1E3716F22E608E9B003EACE1 /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */; };
 		1E3716F92E608F2F003EACE1 /* RateViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716F82E608F2F003EACE1 /* RateViewCell.swift */; };
 		1E50689A2CEB1457001A9E2D /* PSDChatInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */; };
 		1E50689B2CEB1457001A9E2D /* PSDChatInteractorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */; };
@@ -64,6 +63,7 @@
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
+		1E53D32E2E25082100325A49 /* PSDRatingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32D2E25082100325A49 /* PSDRatingSettings.swift */; };
 		1E7535CF2F7A44A100B7F20D /* PSDLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */; };
 		1E7535D12F7A44AA00B7F20D /* PSDLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */; };
 		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
@@ -402,6 +402,7 @@
 		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
+		6A7806C730A3120A00F9940B /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B93E9322E3BB47E00883C3C /* InternalHeader.h */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
@@ -442,7 +443,6 @@
 		1E3716EA2E608E47003EACE1 /* PSDRatingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDRatingSettings.swift; sourceTree = "<group>"; };
 		1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDEmojiRateView.swift; sourceTree = "<group>"; };
 		1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDTextRateView.swift; sourceTree = "<group>"; };
-		1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingCommentViewController.swift; sourceTree = "<group>"; };
 		1E3716F82E608F2F003EACE1 /* RateViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateViewCell.swift; sourceTree = "<group>"; };
 		1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractor.swift; sourceTree = "<group>"; };
 		1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractorProtocol.swift; sourceTree = "<group>"; };
@@ -478,6 +478,8 @@
 		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
 		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
 		1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatSectionModel.swift; sourceTree = "<group>"; };
+		1E53D32D2E25082100325A49 /* PSDRatingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDRatingSettings.swift; sourceTree = "<group>"; };
+		1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingCommentViewController.swift; sourceTree = "<group>"; };
 		1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLogHelper.swift; sourceTree = "<group>"; };
 		1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLogService.swift; sourceTree = "<group>"; };
 		1E809C682E3A67950097E311 /* AudioRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRepository.swift; sourceTree = "<group>"; };
@@ -953,7 +955,6 @@
 			children = (
 				1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */,
 				1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */,
-				1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */,
 				1E3716F82E608F2F003EACE1 /* RateViewCell.swift */,
 			);
 			path = Rating;
@@ -1073,6 +1074,14 @@
 				1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		1E53D3302E25084000325A49 /* RatingComment */ = {
+			isa = PBXGroup;
+			children = (
+				1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */,
+			);
+			path = RatingComment;
 			sourceTree = "<group>";
 		};
 		1E809C7B2E3A68590097E311 /* opusfile */ = {
@@ -1263,6 +1272,7 @@
 		4B2E650F220DE1E000E70A2F /* PSDObjects */ = {
 			isa = PBXGroup;
 			children = (
+				1E53D32D2E25082100325A49 /* PSDRatingSettings.swift */,
 				1E5068B22CEB153C001A9E2D /* TicketCommand.swift */,
 				1E1279BE2CC271430080CB19 /* MultiChats */,
 				4B2E650D220DE1C300E70A2F /* PSDMessage.swift */,
@@ -1301,6 +1311,7 @@
 		4B5AFEA721FB034F00AAF233 /* messageInput */ = {
 			isa = PBXGroup;
 			children = (
+				1E53D3302E25084000325A49 /* RatingComment */,
 				1E809CDA2E3A697A0097E311 /* AudioInputView.swift */,
 				4B5AFEA521FB00B700AAF233 /* PSDMessageInputView.swift */,
 				4BCEB438220C5FF2008B29B6 /* PSDMessageTextView.swift */,
@@ -2258,10 +2269,10 @@
 				1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */,
 				1E3716F02E608E9B003EACE1 /* PSDTextRateView.swift in Sources */,
 				1E3716F12E608E9B003EACE1 /* PSDEmojiRateView.swift in Sources */,
-				1E3716F22E608E9B003EACE1 /* RatingCommentViewController.swift in Sources */,
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
+				1E53D32E2E25082100325A49 /* PSDRatingSettings.swift in Sources */,
 				1E1279CD2CC271C00080CB19 /* ChatsViewProtocol.swift in Sources */,
 				4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */,
 				1E1279DD2CC271DC0080CB19 /* ChatPresenterModel.swift in Sources */,
@@ -2289,6 +2300,7 @@
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
 				4BAF0A422822B767008D5B0F /* XmlHelper.swift in Sources */,
 				4B2F47AC224A22FF00E3B23A /* PSDChooser.swift in Sources */,
+				6A7806C730A3120A00F9940B /* RatingCommentViewController.swift in Sources */,
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,

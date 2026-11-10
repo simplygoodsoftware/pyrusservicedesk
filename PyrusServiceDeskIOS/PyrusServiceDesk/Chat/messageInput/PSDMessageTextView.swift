@@ -88,11 +88,11 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     }
     
     func maxVerticalHeight() -> CGFloat {
-        return (self.font?.lineHeight)! * 3.5;
+        return (font ?? .textFont).lineHeight * 3.5
     }
     
     func maxHorizontalHeight() -> CGFloat {
-        return (self.font?.lineHeight)! * 2.5;
+        return (font ?? .textFont).lineHeight * 2.5
     }
     
     ///Save current text in UserDefaults.
@@ -130,6 +130,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
         defineNeedPlaceholder()
+        saveDraft()
         self.messageDelegate?.textViewChanged()
         self.invalidateIntrinsicContentSize()
     }
