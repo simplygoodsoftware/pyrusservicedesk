@@ -169,6 +169,17 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return max(0, inputWindow.bounds.maxY - frameInWindow.maxY)
     }
     
+    ///True when the accessory frame is pinned to the screen edge and already contains the safe area.
+    private func inputViewFrameIncludesSafeArea() -> Bool {
+        guard defaultMessageInputViewHeight > 0 else { return false }
+        var diff = messageInputView.frame.size.height - defaultMessageInputViewHeight
+        let attachmentsHeight = PSDMessageInputView.attachmentsHeight
+        while attachmentsHeight > 0, diff >= attachmentsHeight {
+            diff -= attachmentsHeight
+        }
+        return abs(diff - view.safeAreaInsets.bottom) < Self.safeAreaDetectTolerance
+    }
+    
     ///Detects detached (floating/undocked) keyboard. Falls back to end frame when private key is missing (iOS 27+).
     private func isKeyboardDetached(_ notification: NSNotification, endFrame: CGRect) -> Bool {
         if let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
@@ -307,6 +318,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     private static let staleKeyboardInsetThreshold: CGFloat = 150
+    private static let safeAreaDetectTolerance: CGFloat = 10
     private var hasAttachmentsInset = false
     private var oldHeight: CGFloat = 0
     private var isAddButtonTapped: Bool = false
@@ -332,7 +344,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                             var extra = self.view.safeAreaInsets.bottom
                             if #available(iOS 27.0, *) {
                                 //Accessory frame pinned to the screen edge already contains the safe area.
-                                extra = min(self.inputViewGapBelow() ?? extra, extra)
+                                if let gap = self.inputViewGapBelow() {
+                                    extra = min(gap, extra)
+                                } else if self.inputViewFrameIncludesSafeArea() {
+                                    extra = 0
+                                }
                             }
                             self.tableView.contentInset.top = self.messageInputView.frame.size.height + extra
                             self.tableView.contentOffset.y -= extra
@@ -341,7 +357,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                             if #available(iOS 27.0, *) {
                                 let gapBelow = self.inputViewGapBelow()
                                 let accessoryExtra = min(gapBelow ?? self.view.safeAreaInsets.bottom, self.view.safeAreaInsets.bottom)
-                                let expectedInset = self.messageInputView.frame.size.height + accessoryExtra
+                                var expectedInset = self.messageInputView.frame.size.height + accessoryExtra
+                                if self.defaultMessageInputViewHeight > 0 {
+                                    //The bar may still be in transient geometry (no safe area in height, gap 0).
+                                    expectedInset = max(expectedInset, self.defaultMessageInputViewHeight + self.view.safeAreaInsets.bottom)
+                                }
                                 //gapBelow ~ keyboard height means the keyboard is actually on screen.
                                 let keyboardReallyGone = (gapBelow ?? 0) <= self.view.safeAreaInsets.bottom + 20
                                 if !self.isKeyBoardOpen, keyboardReallyGone,
