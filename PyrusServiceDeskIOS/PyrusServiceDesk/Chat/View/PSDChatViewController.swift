@@ -340,9 +340,23 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                 {
                     if #available(iOS 26.0, *) {
-                        if abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20 {
-                            var extra = self.view.safeAreaInsets.bottom
+                        var settledCeiling = self.messageInputView.frame.size.height + Self.safeAreaDetectTolerance
+                        if #unavailable(iOS 27.0) {
+                            //On iOS 26 the resting inset is inputH + safe area.
+                            settledCeiling += self.view.safeAreaInsets.bottom
+                        }
+                        let keyboardInsetAbsent = self.tableView.contentInset.top <= settledCeiling
+                        //Attach button dismisses the keyboard, but the first willHide carries only the accessory frame.
+                        let isRealHide = abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20
+                            || self.isAddButtonTapped
+                        if isRealHide, keyboardInsetAbsent {
+                            //Late willHide with a keyboard-sized frame after the inset already settled.
+                            self.logKB("willHide skipped, inset already settled")
+                        } else
+                        if isRealHide {
+                            var extra: CGFloat = 0
                             if #available(iOS 27.0, *) {
+                                extra = self.view.safeAreaInsets.bottom
                                 //Accessory frame pinned to the screen edge already contains the safe area.
                                 if let gap = self.inputViewGapBelow() {
                                     extra = min(gap, extra)
