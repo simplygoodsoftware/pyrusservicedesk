@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
 import android.util.Log
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import androidx.core.net.toUri
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
@@ -58,6 +59,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 internal class TicketFeatureFactory(
     private val accountStore: AccountStore,
@@ -421,9 +423,15 @@ private class TicketActor(
                 ticketId = effect.ticketId,
                 force = effect.force
             )
+            Log.d("TicketActor", "ET UpdateComments: ticketId=${effect.ticketId} force=${effect.force} success=${commentsTry.isSuccess()}")
+            PLog.d("TicketActor", "ET UpdateComments: ticketId=${effect.ticketId} force=${effect.force} success=${commentsTry.isSuccess()}")
             when {
                 commentsTry.isSuccess() -> {
-                    val application = localTicketsStore.getApplications().find { accountStore.getAccount().getUsers().find { user -> user.userId == commentsTry.value.userId }?.appId == it.appId }
+                    val application = localTicketsStore.getApplications().find {
+                        accountStore.getAccount().getUsers().find { user ->
+                            user.userId == commentsTry.value.userId
+                        }?.appId == it.appId
+                    }
                     var needAnotherOneWelcomeMessage = false
                     if (((accountStore.getAccount().getVersion() == API_VERSION_1
                             ||accountStore.getAccount().getVersion() == API_VERSION_2)
@@ -451,6 +459,8 @@ private class TicketActor(
         }
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            Log.d("TicketActor", "ET FeedFlow: bound ticketId=$ticketId localTickets=${localTicketsStore.getTickets().size} (flow watches this id; won't self-heal if it's a local id)")
+            PLog.d("TicketActor", "ET FeedFlow: bound ticketId=$ticketId localTickets=${localTicketsStore.getTickets().size}")
             idStore.setTicketId(ticketId)
             repository.getFeedFlowByTicketIdFlow(user, idStore.ticketIdFlow)
                 .map {
@@ -494,9 +504,9 @@ private class TicketActor(
 
         }
         is Effect.Inner.SendRatingComment -> flow {
-            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             if (effect.rating == null && effect.ratingComment == null)
                 return@flow
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             idStore.setTicketId(ticketId)
             repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)

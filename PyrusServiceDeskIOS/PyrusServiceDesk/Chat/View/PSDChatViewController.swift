@@ -636,7 +636,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         let button = UIButton.init(type: .custom)
         let mainColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         button.titleLabel?.font = .backButton
-        button.setTitle("Back".localizedPSD(), for: .normal)
+        button.setTitle(" " + "Back".localizedPSD(), for: .normal)
         button.setTitleColor(mainColor, for: .normal)
         let backImage = UIImage.PSDImage(name: "Back")?.withRenderingMode(.alwaysTemplate)
         button.setImage(backImage?.imageWith(color: mainColor), for: .normal)

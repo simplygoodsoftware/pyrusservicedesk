@@ -90,6 +90,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         binding.photoVariant.setTextColor(textColor)
         binding.galleryVariant.setTextColor(textColor)
         binding.sendLogsVariant.setTextColor(textColor)
+        binding.customVariant.setTextColor(textColor)
 
         ConfigUtils.getMainFontTypeface()?.let {
             binding.videoVariant.typeface = it

@@ -64,7 +64,6 @@
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
 		1E53D32E2E25082100325A49 /* PSDRatingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32D2E25082100325A49 /* PSDRatingSettings.swift */; };
-		1E53D3312E25084000325A49 /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */; };
 		1E7535CF2F7A44A100B7F20D /* PSDLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */; };
 		1E7535D12F7A44AA00B7F20D /* PSDLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */; };
 		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
@@ -403,6 +402,7 @@
 		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
+		6A7806C730A3120A00F9940B /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B93E9322E3BB47E00883C3C /* InternalHeader.h */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
@@ -1938,7 +1938,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1010;
 				LastUpgradeCheck = 1020;
-				ORGANIZATIONNAME = " Галина Муравьева";
+				ORGANIZATIONNAME = " Галина Муравьева";
 				TargetAttributes = {
 					4B7F34D221F85E2A00977C6D = {
 						CreatedOnToolsVersion = 10.1;
@@ -2300,6 +2300,7 @@
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
 				4BAF0A422822B767008D5B0F /* XmlHelper.swift in Sources */,
 				4B2F47AC224A22FF00E3B23A /* PSDChooser.swift in Sources */,
+				6A7806C730A3120A00F9940B /* RatingCommentViewController.swift in Sources */,
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,
@@ -2309,7 +2310,6 @@
 				1E5068A52CEB148E001A9E2D /* PSDChatRouterProtocol.swift in Sources */,
 				4B7F350C21F8949700977C6D /* customColor.swift in Sources */,
 				4B7F13992215C494007C6358 /* Data+append.swift in Sources */,
-				1E53D3312E25084000325A49 /* RatingCommentViewController.swift in Sources */,
 				4B1C63E6256D8D6500902C8E /* CustomFontHelper.swift in Sources */,
 				4BAA8815221BDD8C00B81B76 /* PSDProgressView.swift in Sources */,
 				1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */,

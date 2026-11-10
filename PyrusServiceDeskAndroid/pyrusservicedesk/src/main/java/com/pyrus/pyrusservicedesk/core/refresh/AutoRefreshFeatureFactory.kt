@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.core.refresh
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk._ref.TimeProvider
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
@@ -30,10 +31,11 @@ internal class AutoRefreshFeatureFactory(
     private val preferencesManager: PreferencesManager,
     private val systemMessageStore: SystemMessageStore,
     private val localTicketsStore: LocalTicketsStore,
+    private val timeProvider: TimeProvider,
 ) {
 
     fun create(
-        liveUpdates: LiveUpdates,
+        liveUpdates: LiveUpdates
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -44,11 +46,12 @@ internal class AutoRefreshFeatureFactory(
             liveUpdates = liveUpdates,
             systemMessageStore = systemMessageStore,
             localTicketsStore = localTicketsStore,
+            timeProvider = timeProvider
         ),
         initialEffects = listOf(
             AutoRefreshContract.Effect.StartUpdates,
             AutoRefreshContract.Effect.StartUpdatesSystemMessage
-        )
+        ),
     )
 
 }
@@ -63,6 +66,7 @@ private class AutoRefreshActor(
     private val liveUpdates: LiveUpdates,
     private val systemMessageStore: SystemMessageStore,
     private val localTicketsStore: LocalTicketsStore,
+    private val timeProvider: TimeProvider,
 ) : Actor<AutoRefreshContract.Effect, Unit> {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -119,7 +123,10 @@ private class AutoRefreshActor(
     }
 
     private suspend fun startSendCalcOperatorTime(ticketId: Long?) {
-        var isActive = if (ticketId != null) localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isActive else null
+        var isActive = when (ticketId) {
+            null -> null
+            else -> localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isActive
+        }
         var id = systemMessageStore.ticketId()
         while (ticketId != null && isActive == true && id != null) {
             val resultTry = repository.sendCalcOperatorTime(ticketId)
@@ -129,15 +136,15 @@ private class AutoRefreshActor(
                     resultTry.value.operatorResponseTimeMessage
                 )
             }
-            val startTime = System.currentTimeMillis()
+            val startTime = timeProvider.currentTimeMillis()
             while (true) {
                 val interval = MILLISECONDS_IN_MINUTE
 
                 val endTime = startTime + interval
-                val currentTime = System.currentTimeMillis()
+                val currentTime = timeProvider.currentTimeMillis()
 
                 id = systemMessageStore.ticketId()
-                if (currentTime > endTime || id == null) {
+                if (currentTime >= endTime || id == null) {
                     break
                 }
 
