@@ -1,13 +1,16 @@
-
 import UIKit
+
 let PLACEHOLDER_ALPHA : CGFloat = 0.2
 let PSD_MESSAGE_DRAFT_KEY : String = "PSDMessageDraft"
+
 protocol PSDMessageTextViewDelegate: class {
     func textViewChanged()
 }
+
 class PSDMessageTextView: UITextView, UITextViewDelegate {
     
     weak var messageDelegate: PSDMessageTextViewDelegate?
+    
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.autoresizingMask = [.flexibleWidth,.flexibleHeight]
@@ -23,6 +26,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         self.textViewDidChange(self)
         self.keyboardAppearance = CustomizationHelper.keyboardStyle
         NotificationCenter.default.addObserver(self, selector: #selector(saveDraft), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(saveDraft), name: UIApplication.didEnterBackgroundNotification, object: nil)
         
     }
     required init?(coder aDecoder: NSCoder) {
@@ -68,29 +72,41 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     }
     ///Save current text in UserDefaults.
     @objc private func saveDraft(){
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
+        guard let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults() else {
+            return
+        }
+        let trimmed = self.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmed.isEmpty {
+            pyrusUserDefaults.removeObject(forKey: PSD_MESSAGE_DRAFT_KEY)
+        } else {
             pyrusUserDefaults.set(self.text, forKey: PSD_MESSAGE_DRAFT_KEY)
-            pyrusUserDefaults.synchronize()
         }
     }
     ///Get saved text from UserDefaults.
     private func getDraft()->String?{
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            return pyrusUserDefaults.value(forKey: PSD_MESSAGE_DRAFT_KEY) as? String
+            return pyrusUserDefaults.string(forKey: PSD_MESSAGE_DRAFT_KEY)
         }
         return ""
     }
+    ///Clear saved draft. Call it after message was sent.
+    func clearDraft(){
+        self.text = ""
+        PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: PSD_MESSAGE_DRAFT_KEY)
+        self.textViewDidChange(self)
+    }
     deinit {
         NotificationCenter.default.removeObserver(self)
-        saveDraft()
     }
     func textViewDidChange(_ textView: UITextView) {
         defineNeedPlaceholder()
+        saveDraft()
         self.messageDelegate?.textViewChanged()
         self.invalidateIntrinsicContentSize()
     }
     func textViewDidEndEditing(_ textView: UITextView) {
         defineNeedPlaceholder()
+        saveDraft()
     }
     private func defineNeedPlaceholder(){
         placeholder.isHidden = self.text.count > 0
