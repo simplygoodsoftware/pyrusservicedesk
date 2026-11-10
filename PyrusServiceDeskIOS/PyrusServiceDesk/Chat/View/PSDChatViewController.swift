@@ -156,6 +156,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return false
     }
     
+    ///Bottom of the flipped table is -contentInset.top; never pass less while keyboard is closed.
+    private var effectiveKeyboardHeight: CGFloat {
+        guard !isKeyBoardOpen else { return currkeyboardHeight }
+        return max(currkeyboardHeight, tableView.contentInset.top)
+    }
+    
     ///Gap between the accessory's bottom and its window's bottom; nil before it is attached.
     private func inputViewGapBelow() -> CGFloat? {
         guard let inputWindow = messageInputView.window else { return nil }
@@ -612,7 +618,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func scrollToBottom() {
-        tableView.scrollsToBottom(animated: true, keyBoardHeight: currkeyboardHeight)
+        tableView.scrollsToBottom(animated: true, keyBoardHeight: effectiveKeyboardHeight)
     }
     
     func setupInfoView() {
@@ -764,7 +770,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
         case .updateRows:
-            tableView.updateRows(keyboardHeight: currkeyboardHeight)
+            tableView.updateRows(keyboardHeight: effectiveKeyboardHeight)
         case .removeNoConnectionView:
             tableView.removeNoConnectionView()
         case .endRefreshing:
@@ -776,7 +782,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .showNoConnectionView:
             tableView.showNoConnectionView()
         case .scrollsToBottom(animated: let animated):
-            tableView.scrollsToBottom(animated: animated, keyBoardHeight: currkeyboardHeight)
+            tableView.scrollsToBottom(animated: animated, keyBoardHeight: effectiveKeyboardHeight)
         case .endLoading:
             tableView.isLoading = false
         case .dataIsShown:
@@ -786,7 +792,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
         case .addRow(scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: currkeyboardHeight)
+            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: effectiveKeyboardHeight)
         case .addNewRow:
             self.deletedAllAttachments()
             if(tableView.numberOfRows(inSection: 0) == 0) {
