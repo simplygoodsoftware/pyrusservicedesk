@@ -446,6 +446,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         guard targetInset > 0, tableView.contentInset.top < targetInset else { return }
         let delta = targetInset - tableView.contentInset.top
+        //Rounding-sized corrections must not visibly push the content after the chat is on screen.
+        guard delta >= Self.safeAreaDetectTolerance else { return }
         tableView.contentInset.top = targetInset
         tableView.contentOffset.y -= delta
     }
