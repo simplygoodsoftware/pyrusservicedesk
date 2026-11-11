@@ -436,16 +436,21 @@ struct PSDGetChats {
                     let phone = authorDic["phone"] as? String ?? ""
                     var hasAccess = authorDic["has_access"] as? Bool ?? true
                     var hasAdminAccess = hasAccess ? authorDic["has_admin_access"] as? Bool ?? false : false
+                    // Отсутствие поля на старом бэке трактуем как «верифицирован»,
+                    // чтобы не показывать всех участников ожидающими верификации.
+                    var isVerified = authorDic["is_verified"] as? Bool ?? true
                     if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id }) {
                         hasAccess = commandHasAccess.params.hasAccess ?? hasAccess
                         hasAdminAccess = commandHasAccess.params.hasAdminAccess ?? hasAdminAccess
+                        isVerified = commandHasAccess.params.isVerified ?? isVerified
                     }
                     let authorInfo = PSDUserInfo.AuthorInfo(
                         id: id,
                         name: name,
                         phone: phone,
                         hasAccess: hasAccess,
-                        hasAdminAccess: hasAdminAccess
+                        hasAdminAccess: hasAdminAccess,
+                        isVerified: isVerified
                     )
                     userAuthors.append(authorInfo)
                 }
