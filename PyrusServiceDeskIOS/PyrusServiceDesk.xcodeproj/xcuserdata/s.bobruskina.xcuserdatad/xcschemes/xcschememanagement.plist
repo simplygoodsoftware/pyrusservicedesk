@@ -12,7 +12,11 @@
 		<key>PyrusServiceDesk.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD
 			<integer>1</integer>
+=======
+			<integer>2</integer>
+>>>>>>> master
 		</dict>
 		<key>PyrusServiceDeskIOS.xcscheme_^#shared#^_</key>
 		<dict>

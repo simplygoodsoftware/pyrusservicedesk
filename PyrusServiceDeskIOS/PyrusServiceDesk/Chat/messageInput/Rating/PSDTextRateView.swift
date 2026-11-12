@@ -104,7 +104,6 @@ class PSDTextRateView: PSDView, RateViewProtocol {
     //ВРЕМЕННО: диагностика задержки, удалить вместе с PSDRateDebug.
     override func layoutSubviews() {
         super.layoutSubviews()
-        PSDRateDebug.log("textRate layout self=\(frame.height) stack=\(stackView.frame.height) glass=\(glassBackground.frame.height)")
     }
     
     @objc private func didTapButton(_ button: UIButton) {

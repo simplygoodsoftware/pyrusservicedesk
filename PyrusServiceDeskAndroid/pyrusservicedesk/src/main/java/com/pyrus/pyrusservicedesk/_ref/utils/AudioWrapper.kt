@@ -34,7 +34,7 @@ internal class AudioWrapper(
     private val coroutineScope: CoroutineScope,
 ) {
 
-    private var downloadingFileJob: Job? = null
+    internal var downloadingFileJob: Job? = null
     private var seekBarUpdateJob: Job? = null
 
     private val eventStateFlow = MutableStateFlow<Int>(0)
@@ -43,7 +43,7 @@ internal class AudioWrapper(
     private var currentAudioFileUrl: String? = null
     private val audioPositions = HashMap<String, Long>()
     private val audioDurations = HashMap<String, Long>()
-    private val downloadingFiles = HashSet<String>()
+    internal val downloadingFiles = HashSet<String>()
     private var isPlaying = false
     private var isSeeking = false
     private var audioInFocus: String? = null
@@ -118,6 +118,14 @@ internal class AudioWrapper(
                 //TODO kate
             }
         })
+    }
+
+    internal fun getEventState(): Int {
+        return eventStateFlow.value
+    }
+
+    internal fun getPlaybackState(): Int {
+        return session.player.playbackState
     }
 
     fun getAudioDataFlow(url: String): Flow<AudioData> {
@@ -379,7 +387,7 @@ internal class AudioWrapper(
         mainActivityIsActive = isActive
     }
 
-    private fun triggerEvent() {
+    internal fun triggerEvent() {
         eventStateFlow.value = eventStateFlow.value + 1
     }
 

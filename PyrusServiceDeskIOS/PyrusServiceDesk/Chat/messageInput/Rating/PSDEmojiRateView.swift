@@ -59,7 +59,6 @@ class PSDEmojiRateView: UIView, RateViewProtocol {
         //не получала фрейм, не создавала ячейки до случайного внешнего layoutIfNeeded,
         //и стекло, считающее себя по её атрибутам, появлялось с непредсказуемой задержкой.
         super.layoutSubviews()
-        PSDRateDebug.log("emojiRate layout h=\(frame.height) cells=\(collectionView.visibleCells.count)") //ВРЕМЕННО
         maxWidth = ((superview?.frame.width ?? 0) / 5 - ROWS_SPACING - 3) / cellWidthDivider
         updateGlassBackgroundFrame()
     }

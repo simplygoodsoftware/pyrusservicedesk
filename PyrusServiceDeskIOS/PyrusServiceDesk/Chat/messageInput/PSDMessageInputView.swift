@@ -259,7 +259,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     var showRate = false {
         didSet {
-            PSDRateDebug.log("showRate didSet -> \(showRate)") //ВРЕМЕННО
             switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
             case .text:
                 let size = CGFloat(CustomizationHelper.ratingSettings.size)
@@ -587,7 +586,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        PSDRateDebug.log("input layout h=\(frame.height)") //ВРЕМЕННО
         if UIDevice.current.orientation.isLandscape{
             heightConstraint?.constant = inputTextView.maxHorizontalHeight()
         }

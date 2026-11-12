@@ -25,6 +25,7 @@ internal object SyncMapper {
         resourceManager: AppResourceManager,
         firstUserId: String,
         firstAppId: String,
+        maxStoredNoteIdProvider: () -> Long?,
     ): RequestBodyBase {
 
         val currentLocale: Locale = Locale.getDefault()
@@ -33,10 +34,15 @@ internal object SyncMapper {
         val locale = if (language.isNullOrBlank()) "ru" else
             if (country.isNullOrBlank()) language else "$language-$country"
 
+        val lastNoteId = when {
+            account is Account.V3 -> calcLastNoteId(tickets, firstUserId)
+            tickets.isEmpty() -> null
+            else -> maxStoredNoteIdProvider()
+        }
         val request = RequestBodyBase(
             needFullInfo = true,
             additionalUsers = account.getAdditionalUsers(tickets),
-            lastNoteId = calcLastNoteId(tickets, firstUserId),
+            lastNoteId = lastNoteId,
             commands = syncRequests.mapNotNull { mapToCommand(it.request, account.getInstanceId()) },
             authorId = account.getAuthorId(),
             authorName = ConfigUtils.getAuthorName(resourceManager),
