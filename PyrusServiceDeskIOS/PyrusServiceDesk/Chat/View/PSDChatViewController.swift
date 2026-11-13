@@ -1,6 +1,6 @@
 import UIKit
 
-///Protocol for updateting info
+///Протокол обновления информации по заявке.
 protocol PSDUpdateInfo {
     func startGettingInfo()
     func refreshChat(showFakeMessage: Int?)
@@ -54,12 +54,22 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var bottomScrollButton: NSLayoutConstraint?
     private lazy var scrollButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = CustomizationHelper.scrollButtonColor//.scrollButtonColor
+        button.backgroundColor = CustomizationHelper.scrollButtonColor
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
         button.transform = CGAffineTransform(scaleX: 0, y: 0)
         return button
     }()
+    
+    ///Стеклянный круг под кнопкой скролла. Используется только в Liquid Glass оформлении.
+    private lazy var scrollButtonGlass = PSDGlassBackgroundView(isInteractive: true)
+    
+    ///Вью, которую позиционируем, прячем и масштабируем: под флагом — стеклянный круг
+    ///с кнопкой внутри, иначе — сама кнопка. Все внешние манипуляции идут через неё,
+    ///чтобы стекло и кнопка не разъезжались.
+    private var scrollControlView: UIView {
+        PSDLiquidGlassStyle.isEnabled ? scrollButtonGlass : scrollButton
+    }
     
     private var bottomStopButton: NSLayoutConstraint?
     private lazy var stopButton: UIButton = {
@@ -104,6 +114,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return table
     }()
     
+    private lazy var keyboardHandler = PSDChatKeyboardHandler(
+        tableView: tableView,
+        messageInputView: messageInputView,
+        containerView: view
+    )
+    
     private lazy var closedTicketView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -111,6 +127,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }()
     
     private lazy var infoButton: UIBarButtonItem? = {
+        if PSDLiquidGlassStyle.isEnabled,
+           let glassItem = PSDChatNavigationItemFactory.makeInfoItem(target: self,
+                                                                     action: #selector(showPopover)) {
+            return glassItem
+        }
         if #available(iOS 14.0, *) {
             let button = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showPopover))
             button.tintColor = .appColor
@@ -120,8 +141,18 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
     }()
     
+    ///Заголовок чата на стеклянной капсуле. Используется только в Liquid Glass оформлении.
+    private lazy var glassTitleView = PSDChatGlassTitleView()
+    
+    ///Подложка под навигационным баром, затухает вниз, к переписке.
+    ///Используется только в Liquid Glass оформлении.
+    private lazy var navigationBackdropView = BlurBackdropView(fadeEdge: .bottom)
+    private var navigationBackdropHeight: NSLayoutConstraint?
+    
     private var firstLoad: Bool = true
     private var isActive: Bool = true
+    ///Пришла ли информация по заявке — до этого кнопке «инфо» показывать нечего.
+    private var isTicketInfoAvailable: Bool = false
     
     private var tableViewTopConstant: NSLayoutConstraint?
     
@@ -138,329 +169,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         interactor.doInteraction(.viewDidload)
     }
     
-    private func keyboardAnimationDuration(_ notification: NSNotification) -> TimeInterval{
-        if let  duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSValue{
-            return duration as? TimeInterval ?? 0
-        }
-        return 0
-    }
-    
-    ///keyboardWillShow hacks are valid for iOS 26 only; hide-compensation stays for 26+.
-    private var isIOS26Only: Bool {
-        if #available(iOS 27.0, *) { return false }
-        if #available(iOS 26.0, *) { return true }
-        return false
-    }
-    
-    ///Bottom of the flipped table is -contentInset.top; never pass less while keyboard is closed.
-    private var effectiveKeyboardHeight: CGFloat {
-        guard !isKeyBoardOpen else { return currkeyboardHeight }
-        return max(currkeyboardHeight, tableView.contentInset.top)
-    }
-    
-    ///Gap between the accessory's bottom and its window's bottom; nil before it is attached.
-    private func inputViewGapBelow() -> CGFloat? {
-        guard let inputWindow = messageInputView.window else { return nil }
-        let frameInWindow = inputWindow.convert(messageInputView.bounds, from: messageInputView)
-        return max(0, inputWindow.bounds.maxY - frameInWindow.maxY)
-    }
-    
-    ///True when the accessory frame is pinned to the screen edge and already contains the safe area.
-    private func inputViewFrameIncludesSafeArea() -> Bool {
-        guard defaultMessageInputViewHeight > 0 else { return false }
-        var diff = messageInputView.frame.size.height - defaultMessageInputViewHeight
-        let attachmentsHeight = PSDMessageInputView.attachmentsHeight
-        while attachmentsHeight > 0, diff >= attachmentsHeight {
-            diff -= attachmentsHeight
-        }
-        return abs(diff - view.safeAreaInsets.bottom) < Self.safeAreaDetectTolerance
-    }
-    
-    ///Detects detached (floating/undocked) keyboard. Falls back to end frame when private key is missing (iOS 27+).
-    private func isKeyboardDetached(_ notification: NSNotification, endFrame: CGRect) -> Bool {
-        if let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
-            return center.y > view.frame.maxY
-        }
-        return endFrame.minY >= UIScreen.main.bounds.maxY
-    }
-    
-    private func needChangeInset(_ newInset: CGFloat) -> Bool {
-        if
-            let presentedViewController = tableView.findViewController()?.presentedViewController,
-            presentedViewController.isBeingDismissed
-        {
-            return tableView.contentInset.bottom <= newInset
-        }
-        return true
-    }
-    
-    private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
-        var newOffsetY = max(0,tableView.contentOffset.y + delta)//block  too little offset
-        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset),newOffsetY)//block  too big offset
-        return newOffsetY
-    }
-    
-    private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
-        if(tableView.contentSize.height > (tableView.frame.size.height-keyboardHeight) && !tableView.isDragging){
-            return true
-        }
-        return false
-        
-    }
-    
-    private var isKeyBoardOpen = false
-    @objc private func keyboardDidHide(_ notification: NSNotification) {
-        isKeyBoardOpen = false
-    }
-    
-    private var isFirstKeyboardShow: Bool = true
-    private var currkeyboardHeight: CGFloat = 0
-    private var defaultMessageInputViewHeight: CGFloat = 0
-    
-    @objc private func keyboardWillShow(_ notification: NSNotification) {
-        if isIOS26Only {
-            if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                let keyboardEndFrame = infoEndKey.cgRectValue
-                guard keyboardEndFrame.height != 0 else {
-                    return
-                }
-                let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
-                let duration = keyboardAnimationDuration(notification)
-                var keyboardHeight = keyboardEndFrame.height
-                
-                let oldInset = self.tableView.contentInset.top
-                let oldOffset = self.tableView.contentOffset.y
-                let oldKeyboardHeight = self.currkeyboardHeight
-                
-                currkeyboardHeight = keyboardHeight
-                
-                if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(keyboardDetached && self.isKeyBoardOpen) {
-                    if self.messageInputView.inputTextView.isFirstResponder {
-                        self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                        self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                        self.view.layoutIfNeeded()
-                    }
-                    
-                    if isFirstKeyboardShow {
-                        defaultMessageInputViewHeight = messageInputView.frame.height
-                        if PyrusServiceDesk.startWithPush {
-                            UIView.performWithoutAnimation {
-                                self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                            }
-                        } else {
-                            self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                        }
-                        isFirstKeyboardShow = false
-                    } else {
-                        let delta = keyboardHeight - oldKeyboardHeight
-                        
-                        if delta > 0 {
-                            self.tableView.contentOffset.y -= delta
-                        }
-                        
-                    }
-                    
-                }
-                if !(keyboardDetached && self.isKeyBoardOpen) {
-                    self.tableView.contentInset.top = keyboardHeight
-                    self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-                }
-            }
-            return
-        }
-        
-        
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            guard keyboardEndFrame.height != 0 else {
-                return
-            }
-            let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
-            let duration = keyboardAnimationDuration(notification)
-            let keyboardHeight = keyboardEndFrame.height
-            currkeyboardHeight = keyboardHeight
-            
-            if defaultMessageInputViewHeight == 0 {
-                defaultMessageInputViewHeight = messageInputView.frame.height
-            }
-            
-            var oldInset = self.tableView.contentInset.top
-            if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(keyboardDetached && self.isKeyBoardOpen) {
-                if self.messageInputView.inputTextView.isFirstResponder {
-                    self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                    self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                }
-                
-                if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
-                    UIView.performWithoutAnimation {
-                        self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                    }
-                    isFirstKeyboardShow = false
-                } else {
-                    self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                }
-                
-            }
-            if !(keyboardDetached && self.isKeyBoardOpen) {
-                self.tableView.contentInset.top = keyboardHeight
-                self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-            }
-        }
-    }
-    
-    private static let staleKeyboardInsetThreshold: CGFloat = 150
-    private static let safeAreaDetectTolerance: CGFloat = 10
-    private var hasAttachmentsInset = false
-    private var oldHeight: CGFloat = 0
-    private var isAddButtonTapped: Bool = false
-    @objc private func keyboardWillHide(_ notification: NSNotification) {
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            let duration = keyboardAnimationDuration(notification)
-            let keyboardHeight = keyboardEndFrame.height
-            currkeyboardHeight = keyboardHeight
-            
-            UIView.animate(withDuration: duration, delay: 0, animations: {
-                self.bottomScrollButton?.constant = -110
-                self.bottomStopButton?.constant = -110
-                self.view.layoutIfNeeded()
-                if !self.isActive {
-                    self.tableView.contentInset.top = 90
-                } else
-                if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
-                {
-                    if #available(iOS 26.0, *) {
-                        var settledCeiling = self.messageInputView.frame.size.height + Self.safeAreaDetectTolerance
-                        if #unavailable(iOS 27.0) {
-                            //On iOS 26 the resting inset is inputH + safe area.
-                            settledCeiling += self.view.safeAreaInsets.bottom
-                        }
-                        let keyboardInsetAbsent = self.tableView.contentInset.top <= settledCeiling
-                        //Attach button dismisses the keyboard, but the first willHide carries only the accessory frame.
-                        let isRealHide = abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20
-                            || self.isAddButtonTapped
-                        if isRealHide, keyboardInsetAbsent {
-                            //Late willHide with a keyboard-sized frame after the inset already settled.
-                        } else
-                        if isRealHide {
-                            var extra: CGFloat = 0
-                            if #available(iOS 27.0, *) {
-                                extra = self.view.safeAreaInsets.bottom
-                                //Accessory frame pinned to the screen edge already contains the safe area.
-                                if let gap = self.inputViewGapBelow() {
-                                    extra = min(gap, extra)
-                                } else if self.inputViewFrameIncludesSafeArea() {
-                                    extra = 0
-                                }
-                            }
-                            self.tableView.contentInset.top = self.messageInputView.frame.size.height + extra
-                            self.tableView.contentOffset.y -= extra
-                        } else {
-                            //Repeated willHide with accessory-only frame must not strip safe area inset.
-                            if #available(iOS 27.0, *) {
-                                let gapBelow = self.inputViewGapBelow()
-                                let accessoryExtra = min(gapBelow ?? self.view.safeAreaInsets.bottom, self.view.safeAreaInsets.bottom)
-                                var expectedInset = self.messageInputView.frame.size.height + accessoryExtra
-                                if self.defaultMessageInputViewHeight > 0 {
-                                    //The bar may still be in transient geometry (no safe area in height, gap 0).
-                                    expectedInset = max(expectedInset, self.defaultMessageInputViewHeight + self.view.safeAreaInsets.bottom)
-                                }
-                                //gapBelow ~ keyboard height means the keyboard is actually on screen.
-                                let keyboardReallyGone = (gapBelow ?? 0) <= self.view.safeAreaInsets.bottom + 20
-                                if !self.isKeyBoardOpen, keyboardReallyGone,
-                                   self.tableView.contentInset.top - expectedInset > Self.staleKeyboardInsetThreshold {
-                                    //Fullscreen modal dismissed the keyboard, but its willHide was skipped by the guards.
-                                    self.tableView.contentInset.top = expectedInset
-                                    if self.tableView.contentOffset.y < -expectedInset {
-                                        self.tableView.contentOffset.y = -expectedInset
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
-                    }
-                    self.isAddButtonTapped = false
-                }
-            })
-            
-            oldHeight = self.messageInputView.frame.size.height
-        }
-    }
-    
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        resizeTable()
-        scrollButton.layer.shadowColor = UIColor.black.cgColor
-        scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-        scrollButton.layer.shadowRadius = 4
-        scrollButton.layer.shadowOpacity = 0.2
-        scrollButton.layer.masksToBounds = false
-        
-//        stopButton.layer.shadowColor = UIColor.black.cgColor
-//        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-//        stopButton.layer.shadowRadius = 4
-//        stopButton.layer.shadowOpacity = 0.2
-//        stopButton.layer.masksToBounds = false
-        
-        messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
-    }
-
-    private var firstLayout: Bool = true
-    override func viewDidLayoutSubviews() {
-        if firstLayout {
-            firstLayout = false
-            tableView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
-            interactor.doInteraction(.viewDidLayoutSubviews)
-            let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
-            let blurEffectView = UIVisualEffectView(effect: blurEffect)
-            blurEffectView.frame = closedTicketView.bounds
-            closedTicketView.addSubview(blurEffectView)
-            closedTicketView.sendSubviewToBack(blurEffectView)
-        }
-        syncInsetWithInputViewIfNeeded()
-    }
-    
-    ///Keeps bottom gap in sync with input view when keyboard is closed and notifications were not delivered.
-    private func syncInsetWithInputViewIfNeeded() {
-        guard isActive, !isKeyBoardOpen, !messageInputView.inputTextView.isFirstResponder else { return }
-        var targetInset = messageInputView.frame.size.height
-        if #available(iOS 27.0, *) {
-            //Accessory frame pinned to the screen edge already contains the safe area.
-            //System alerts report a transient gap below the bar; track only the bar height then.
-            let insetMatchesBar = tableView.contentInset.top >= targetInset - Self.safeAreaDetectTolerance
-            if !insetMatchesBar {
-                let safeBottom = view.safeAreaInsets.bottom
-                targetInset += min(inputViewGapBelow() ?? safeBottom, safeBottom)
-            }
-        }
-        guard targetInset > 0, tableView.contentInset.top < targetInset else { return }
-        let delta = targetInset - tableView.contentInset.top
-        tableView.contentInset.top = targetInset
-        tableView.contentOffset.y -= delta
-    }
-    
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-//        self.tableView.removeListeners()
-//        self.tableView.bottomPSDRefreshControl.isEnabled = false
-//        guard let lastVisibleCell = self.tableView.visibleCells.last,
-//              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
-//            return
-//        }
-//
-//        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
-//            self.tableView.reloadData()
-//            if self.tableView.contentOffset.y > 100,
-//               self.tableView.numberOfSections > lastVisibleRow.section,
-//               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
-//            {
-//                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
-//            }
-//        }, completion: { context in
-//            self.tableView.bottomPSDRefreshControl.isEnabled = true
-////            self.tableView.addKeyboardListeners()
-//        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -474,9 +184,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.setNavigationBarHidden(false, animated: false)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardDidHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
+        keyboardHandler.startObserving()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -494,6 +202,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
+        keyboardHandler.stopObserving()
         if !PyrusServiceDesk.multichats {
             hideAllKeyboard()
             messageInputView.isHidden = true
@@ -506,24 +215,85 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         })
     }
     
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        resizeTable()
+        if !PSDLiquidGlassStyle.isEnabled {
+            //У стекла своя объёмность, тень ему не нужна.
+            scrollButton.layer.shadowColor = UIColor.black.cgColor
+            scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+            scrollButton.layer.shadowRadius = 4
+            scrollButton.layer.shadowOpacity = 0.2
+            scrollButton.layer.masksToBounds = false
+        }
+        
+        if !PSDLiquidGlassStyle.isEnabled {
+            messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+        }
+    }
+
+    private var firstLayout: Bool = true
+    override func viewDidLayoutSubviews() {
+        if firstLayout {
+            firstLayout = false
+            tableView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+            interactor.doInteraction(.viewDidLayoutSubviews)
+            let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = closedTicketView.bounds
+            closedTicketView.addSubview(blurEffectView)
+            closedTicketView.sendSubviewToBack(blurEffectView)
+        }
+        keyboardHandler.logState("layoutSubviews")
+        keyboardHandler.syncInsetWithInputViewIfNeeded()
+    }
+    
     override func recolor() {
         super.recolor()
         recolorTextInput(messageInputView)
+        //PSDViewController.recolor() безусловно кладёт в titleView собственный лейбл.
+        //Возвращаем оформленный заголовок, иначе стеклянная капсула живёт до первой
+        //смены темы или установки title.
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        applyChatTitle()
+        //Цвет бара берётся из кастомизации и может зависеть от темы — подложку перекрашиваем.
+        updateNavigationBackdropColor()
     }
     
     func resizeTable() {
-        if let infoView = PyrusServiceDesk.mainController?.customization?.infoView, !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
-            tableViewTopConstant?.constant = infoView.frame.size.height
-        } else {
-            tableViewTopConstant?.constant = 0
+        let infoViewHeight = visibleInfoViewHeight
+        guard PSDLiquidGlassStyle.isEnabled else {
+            tableViewTopConstant?.constant = infoViewHeight
+            return
         }
+        //Таблица прижата к верху экрана — сдвигать её нельзя, иначе пропадёт уезжание под бар.
+        tableViewTopConstant?.constant = 0
+        navigationBackdropHeight?.constant = navigationBackdropHeightValue
+        updateGlassTopContentInset(infoViewHeight: infoViewHeight)
+    }
+    
+    ///Высота информационной вью заказчика, если она сейчас показана.
+    private var visibleInfoViewHeight: CGFloat {
+        guard let infoView = PyrusServiceDesk.mainController?.customization?.infoView,
+              !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true)
+        else {
+            return 0
+        }
+        return infoView.frame.size.height
+    }
+    
+    ///Отступ от навигационного бара для перевёрнутой таблицы.
+    ///Таблица развёрнута на 180°, поэтому визуальный верх — это нижняя вставка.
+    ///Именно вставка, а не констрейнт: контент должен подъезжать под стекло, а не обрезаться.
+    ///Пишем не в `contentInset.bottom` напрямую — им владеет таблица и складывает
+    ///этот отступ со своим отступом под лоадер.
+    private func updateGlassTopContentInset(infoViewHeight: CGFloat) {
+        tableView.additionalBottomInset = view.safeAreaInsets.top + infoViewHeight
     }
     
     @objc private func appEnteredForeground(){
-//        self.tableView.addKeyboardListeners()
     }
     @objc private func appEnteredBackground(){
-//        self.tableView.removeListeners()
     }
     
     public func updateTitle() {
@@ -533,7 +303,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         tableView.reloadChat()
     }
     
-    ///hide keyboard with inputAccessoryView
+    ///Прячет клавиатуру вместе с inputAccessoryView.
     func hideAllKeyboard(){
         if self.messageInputView.inputTextView.isFirstResponder {
             self.resignFirstResponder()
@@ -545,7 +315,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         let style = CustomizationHelper.keyboardStyle
         input.inputTextView.keyboardAppearance = style
         let (backInputColor, textInputColor) = CustomizationHelper.colorsForInput
-        input.backgroundView.backgroundColor = backInputColor
+        //В Liquid Glass панель прозрачная: её фон рисует блюр-подложка внутри самой панели.
+        input.backgroundView.backgroundColor = PSDLiquidGlassStyle.isEnabled ? .clear : backInputColor
         input.inputTextView.textColor = textInputColor
         input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
     }
@@ -555,6 +326,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackgroundColor
         designNavigation()
         setupTableView()
+        setupNavigationBackdropIfNeeded()
         setupInfoView()
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
@@ -565,7 +337,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     func setupTableView() {
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
-            self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
+            self.tableView.contentInsetAdjustmentBehavior = .never
             
         }
         if #available(iOS 13.0, *) {
@@ -573,11 +345,18 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         tableView.semanticContentAttribute = .forceRightToLeft
         
+        keyboardHandler.logState("inset=10")
         tableView.contentInset.top = 10
         
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        if #available(iOS 11.0, *) {
+        if PSDLiquidGlassStyle.isEnabled {
+            //Переписка уезжает под навигационный бар.
+            //Отступ под баром задаётся не констрейнтом, а вставкой — см. resizeTable().
+            tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.topAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        } else if #available(iOS 11.0, *) {
             tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
@@ -591,18 +370,67 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         tableView.addActivityView()
     }
     
-    func setupScrollButton() {
-        view.addSubview(scrollButton)
-        let image = UIImageView(image: UIImage.PSDImage(name: "down"))
-        image.translatesAutoresizingMaskIntoConstraints = false
-        scrollButton.addSubview(image)
-        badgeView.addSubview(newMessageCount)
-        scrollButton.addSubview(badgeView)
+    ///Подложка под навигационным баром. Добавляется поверх таблицы, чтобы переписка
+    ///уезжала под неё, но остаётся ниже самого бара — его рисует навигационный контроллер.
+    private func setupNavigationBackdropIfNeeded() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        if #available(iOS 26.0, *) {
+            //Автоматический краевой эффект на перевёрнутой таблице гасит всю переписку.
+            tableView.disableAutomaticScrollEdgeEffects()
+        }
+        
+        updateNavigationBackdropColor()
+        view.addSubview(navigationBackdropView)
+        navigationBackdropView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let heightConstraint = navigationBackdropView.heightAnchor.constraint(equalToConstant: 0)
+        navigationBackdropHeight = heightConstraint
         
         NSLayoutConstraint.activate([
-            scrollButton.heightAnchor.constraint(equalToConstant: 40),
-            scrollButton.widthAnchor.constraint(equalToConstant: 40),
-            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
+            navigationBackdropView.topAnchor.constraint(equalTo: view.topAnchor),
+            navigationBackdropView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            navigationBackdropView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            heightConstraint
+        ])
+    }
+    
+    ///Dim-слой подложки должен совпадать с цветом бара из кастомизации, а не с темой
+    ///системы: интегратор может задать тёмный бар в светлой теме и наоборот.
+    private func updateNavigationBackdropColor() {
+        navigationBackdropView.dimColor = CustomizationHelper.navigationBarColor
+            .withAlphaComponent(PSDChatDesign.navigationBackdropDimAlpha)
+    }
+    
+    ///Высота подложки — вся зона под баром вместе со статус-баром.
+    private var navigationBackdropHeightValue: CGFloat {
+        let safeAreaTop = view.safeAreaInsets.top
+        guard safeAreaTop > 0 else {
+            //Подстраховка на случай, если safe area ещё не посчитана:
+            //берём геометрию бара напрямую, она уже включает статус-бар.
+            return navigationController?.navigationBar.frame.maxY ?? 0
+        }
+        return safeAreaTop
+    }
+    
+    func setupScrollButton() {
+        embedScrollButtonIntoGlassIfNeeded()
+        view.addSubview(scrollControlView)
+        let image = UIImageView(image: UIImage.PSDImage(name: "down"))
+        image.translatesAutoresizingMaskIntoConstraints = false
+        if PSDLiquidGlassStyle.isEnabled {
+            image.image = image.image?.withRenderingMode(.alwaysTemplate)
+            image.tintColor = PSDLiquidGlassStyle.iconColor
+        }
+        scrollButton.addSubview(image)
+        badgeView.addSubview(newMessageCount)
+        //Бейдж выступает за край кнопки, а стекло режет содержимое по своей форме —
+        //поэтому в Liquid Glass бейдж лежит на контейнере, поверх стекла.
+        scrollControlView.addSubview(badgeView)
+        
+        NSLayoutConstraint.activate([
+            scrollControlView.heightAnchor.constraint(equalToConstant: 40),
+            scrollControlView.widthAnchor.constraint(equalToConstant: 40),
+            scrollControlView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
             image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
             image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
             badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
@@ -614,11 +442,32 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             newMessageCount.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
             badgeView.leadingAnchor.constraint(equalTo: newMessageCount.leadingAnchor, constant: -4)
         ])
-        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
+        bottomScrollButton = scrollControlView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomScrollButton?.isActive = true
+        keyboardHandler.bottomScrollButton = bottomScrollButton
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
+    }
+    
+    ///Кладёт кнопку скролла внутрь интерактивного стекла. Кнопка — внутри контента стекла,
+    ///а не поверх него: так тап доходит до кнопки, а стекло анимирует нажатие.
+    ///Заливку и стартовый масштаб кнопки перенимает контейнер.
+    private func embedScrollButtonIntoGlassIfNeeded() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        scrollButtonGlass.translatesAutoresizingMaskIntoConstraints = false
+        scrollButtonGlass.transform = scrollButton.transform
+        scrollButton.transform = .identity
+        scrollButton.backgroundColor = .clear
+        
+        let content = scrollButtonGlass.glassContentView
+        content.addSubview(scrollButton)
+        NSLayoutConstraint.activate([
+            scrollButton.topAnchor.constraint(equalTo: content.topAnchor),
+            scrollButton.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            scrollButton.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            scrollButton.trailingAnchor.constraint(equalTo: content.trailingAnchor)
+        ])
     }
     
     func setupStopButton() {
@@ -631,6 +480,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         ])
         bottomStopButton = stopButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomStopButton?.isActive = true
+        keyboardHandler.bottomStopButton = bottomStopButton
         
         stopButton.addTarget(self, action: #selector(stopRecording), for: .touchUpInside)
     }
@@ -662,7 +512,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func scrollToBottom() {
-        tableView.scrollsToBottom(animated: true, keyBoardHeight: effectiveKeyboardHeight)
+        tableView.scrollsToBottom(animated: true, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
     }
     
     func setupInfoView() {
@@ -675,7 +525,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     //MARK : Navigation
-    //Setting design to navigation bar, title and buttons
+    //Оформление навигационного бара, заголовка и кнопок.
     private func designNavigation() {
         if #available(iOS 11.0, *) {
             navigationItem.largeTitleDisplayMode = .never
@@ -683,17 +533,18 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.navigationBar.isTranslucent = true
         
         if #available(iOS 13.0, *) {
-            let color = CustomizationHelper.navigationBarColor
-            let barAppearance = UIBarAppearance()
-            barAppearance.backgroundColor = color
-            let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
-            bigAppear.configureWithOpaqueBackground()
-            bigAppear.backgroundColor = color
-            bigAppear.backgroundEffect = nil
-            navigationItem.scrollEdgeAppearance = bigAppear
-            navigationItem.standardAppearance = bigAppear
+            if PSDLiquidGlassStyle.isEnabled {
+                PSDNavigationBarStyler.applySystem(to: navigationItem)
+            } else {
+                PSDNavigationBarStyler.applyLegacy(to: navigationItem,
+                                                   backgroundColor: CustomizationHelper.navigationBarColor)
+            }
         }
         self.setItems()
+        if PSDLiquidGlassStyle.isEnabled {
+            //Вне Liquid Glass заголовок выставляется только по .updateTitle.
+            applyChatTitle()
+        }
         navigationController?.navigationBar.isHidden = false
     }
     
@@ -716,31 +567,111 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 sheet.prefersEdgeAttachedInCompactHeight = true
             }
         } else {
-            // Fallback on earlier versions
         }
         
         present(popoverContentController, animated: true, completion: nil)
     }
     
-    ///Set navigation items
+    ///Состав кнопок навигационного бара.
+    ///
+    ///Единственное место, где решается состав кнопок бара. Приоритет всегда за кастомизацией:
+    ///если интегратор задал свою кнопку — ставим её, свои кнопки не подмешиваем.
+    ///Правой кнопки может не быть вовсе: пока не пришла информация по заявке
+    ///и своей кнопки у интегратора нет — справа пусто.
     private func setItems() {
-        if let rightBarButtonItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
-            rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
-            navigationItem.rightBarButtonItem = rightBarButtonItem
+        navigationItem.leftBarButtonItem = makeLeftBarButtonItem()
+        navigationItem.rightBarButtonItem = makeRightBarButtonItem()
+    }
+    
+    private func makeLeftBarButtonItem() -> UIBarButtonItem? {
+        if let customItem = PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
+            customItem.tintColor = customBarButtonTintColor
+            return customItem
         }
-        if let leftBarButtonItem =
-            PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
-            leftBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
-            navigationItem.leftBarButtonItem = leftBarButtonItem
+        return makeDefaultBackItem()
+    }
+    
+    private func makeRightBarButtonItem() -> UIBarButtonItem? {
+        if let customItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
+            customItem.tintColor = customBarButtonTintColor
+            return customItem
+        }
+        return isTicketInfoAvailable ? infoButton : nil
+    }
+    
+    ///В Liquid Glass кнопка возврата — иконка-шеврон, вне его — текстовая кнопка `leftButton`.
+    private func makeDefaultBackItem() -> UIBarButtonItem {
+        if PSDLiquidGlassStyle.isEnabled,
+           let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
+                                                                     action: #selector(closeButtonAction)) {
+            return glassItem
+        }
+        return UIBarButtonItem(customView: leftButton)
+    }
+    
+    ///Заголовок чата. Кастомная вью заказчика приоритетнее любого оформления.
+    private func applyChatTitle() {
+        if let customTitleView = PyrusServiceDesk.mainController?.customization?.chatTitleView {
+            navigationItem.titleView = customTitleView
+            customTitleView.sizeToFit()
+            navigationController?.navigationBar.layoutIfNeeded()
+            return
+        }
+        
+        guard PSDLiquidGlassStyle.isEnabled else {
+            title = CustomizationHelper.chatTitle
+            return
+        }
+        
+        let chatTitle = CustomizationHelper.chatTitle
+        //Интегратор не задал ни chatTitle, ни chatTitleView: без этой проверки
+        //по центру бара висела бы пустая капсула фиксированной высоты.
+        guard !chatTitle.isEmpty else {
+            navigationItem.titleView = nil
+            return
+        }
+        
+        glassTitleView.title = chatTitle
+        glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
+        glassTitleView.sizeToFit()
+        navigationItem.titleView = glassTitleView
+        navigationController?.navigationBar.layoutIfNeeded()
+    }
+    
+    ///Заголовок для состояния «нет сети».
+    private func applyConnectionErrorTitle() {
+        let errorText = "Waiting_For_Network".localizedPSD()
+        
+        if PSDLiquidGlassStyle.isEnabled {
+            glassTitleView.title = errorText
+            glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
+            glassTitleView.sizeToFit()
+            navigationItem.titleView = glassTitleView
         } else {
-            let item = UIBarButtonItem.init(customView: leftButton)
-            navigationItem.leftBarButtonItem = item
+            let label = UILabel()
+            label.text = errorText
+            label.textColor = CustomizationHelper.colorForChatTitle
+            label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+            navigationItem.titleView = label
         }
+        tableView.endRefreshing()
+    }
+    
+    ///Цвет кнопок бара, заданных Service Desk.
+    private var barButtonTintColor: UIColor {
+        PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+    }
+    
+    ///Цвет кнопок бара, заданных интегратором. Может быть `nil` — тогда кнопка
+    ///остаётся с тем цветом, который выставил интегратор.
+    private var customBarButtonTintColor: UIColor? {
+        PyrusServiceDesk.mainController?.customization?.themeColor
+        ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
     }
     
     private lazy var leftButton: UIButton = {
         let button = UIButton.init(type: .custom)
-        let mainColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+        let mainColor = barButtonTintColor
         button.titleLabel?.font = .backButton
         button.setTitle(" " + "Back".localizedPSD(), for: .normal)
         button.setTitleColor(mainColor, for: .normal)
@@ -753,6 +684,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }()
     
     private func customiseDesign(color: UIColor) {
+        //В Liquid Glass цвет иконок задаёт фабрика, а кнопки интегратора
+        //остаются с его цветом — перекрашивать здесь нечего.
+        guard !PSDLiquidGlassStyle.isEnabled else { return }
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
@@ -767,9 +701,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     //MARK: KeyBoard hiding and moving
     override var canBecomeFirstResponder: Bool {
         guard
-//            self.tableView.window != nil,
-//            !hasNoConnection(),
-//            self.presentedViewController == nil,
             isActive
         else {
             return false
@@ -791,18 +722,24 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 
 private extension PSDChatViewController {
     func needShowRate(_ showRate: Bool) {
-        if showRate && messageInputView.showRate != showRate {
-            tableView.contentInset.top += PSDMessageInputView.RATE_HEIGHT
-            tableView.contentOffset.y -= PSDMessageInputView.RATE_HEIGHT
+        //Команда показа может прийти раньше, чем загрузятся значения текстового рейтинга, —
+        //тогда показывать нечего. Состояние не трогаем: повторная команда с данными
+        //пройдёт как первый показ и зарезервирует место под фактическую высоту.
+        if showRate, !messageInputView.hasRateContent {
+            return
         }
+        let wasShown = messageInputView.showRate
+        //Сначала установка: showRate пересчитывает фактическую высоту рейтинга.
         messageInputView.showRate = showRate
+        if showRate && !wasShown {
+            //Именно фактическая высота, а не RATE_HEIGHT: у текстового рейтинга она
+            //зависит от числа плашек.
+            keyboardHandler.applyRateInset(messageInputView.currentRateHeight)
+        }
     }
     
     func dataIsShown() {
         if firstLoad {
-//            if !PyrusServiceDesk.multichats {
-//                self.messageInputView.inputTextView.becomeFirstResponder()
-//            }
             firstLoad = false
         }
     }
@@ -814,7 +751,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
         case .updateRows:
-            tableView.updateRows(keyboardHeight: effectiveKeyboardHeight)
+            tableView.updateRows(keyboardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .removeNoConnectionView:
             tableView.removeNoConnectionView()
         case .endRefreshing:
@@ -826,7 +763,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .showNoConnectionView:
             tableView.showNoConnectionView()
         case .scrollsToBottom(animated: let animated):
-            tableView.scrollsToBottom(animated: animated, keyBoardHeight: effectiveKeyboardHeight)
+            tableView.scrollsToBottom(animated: animated, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .endLoading:
             tableView.isLoading = false
         case .dataIsShown:
@@ -836,7 +773,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
         case .addRow(scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: effectiveKeyboardHeight)
+            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .addNewRow:
             self.deletedAllAttachments()
             if(tableView.numberOfRows(inSection: 0) == 0) {
@@ -854,24 +791,9 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.reloadAll(animated: animated)
         case .updateTitle(connectionError: let connectionError):
             if !connectionError {
-                if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {
-                    navigationItem.titleView = view
-                    view.sizeToFit()
-                    navigationController?.navigationBar.layoutIfNeeded()
-                } else {
-                    title = CustomizationHelper.chatTitle
-                }
+                applyChatTitle()
             } else {
-                let label = UILabel()
-                label.text = "Waiting_For_Network".localizedPSD()
-                var textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor ?? .psdLabel
-                if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
-                    textColor = UIColor.getTextColor(for: color)
-                }
-                label.textColor = CustomizationHelper.colorForChatTitle
-                label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-                navigationItem.titleView = label
-                tableView.endRefreshing()
+                applyConnectionErrorTitle()
             }
         case .reloadTitle:
             designNavigation()
@@ -884,15 +806,17 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.layoutIfNeeded()
         case .updateActive(isActive: let isActive):
             self.isActive = isActive
+            keyboardHandler.isChatActive = isActive
             if !isActive {
                 closedTicketView.isHidden = false
-                tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
+                keyboardHandler.applyInactiveInset()
                 self.resignFirstResponder()
                 self.messageInputView.inputTextView.resignFirstResponder()
             }
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
-            navigationItem.rightBarButtonItem = infoButton
+            isTicketInfoAvailable = true
+            navigationItem.rightBarButtonItem = makeRightBarButtonItem()
         case .showRatingComment(ratingText: let ratingText, rating: let rating):
             messageInputView.inputTextView.resignFirstResponder()
             DispatchQueue.main.async { [weak self] in
@@ -906,27 +830,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func deletedAllAttachments() {
-        if #available(iOS 27.0, *) {
-            //Also called on send and on chat setup when no attachments were shown.
-            guard hasAttachmentsInset else {
-                return
-            }
-            hasAttachmentsInset = false
-            //Exact inverse of addAttachment(). Offset is assigned absolutely: shrinking the inset
-            //clamps the out-of-range offset by itself, so a relative "+=" would double the shift.
-            let newInset = tableView.contentInset.top - PSDMessageInputView.attachmentsHeight
-            let newOffset = tableView.contentOffset.y + PSDMessageInputView.attachmentsHeight
-            tableView.contentInset.top = newInset
-            tableView.contentOffset.y = newOffset
-            return
-        }
-        if #available(iOS 26.0, *) {
-            if isKeyBoardOpen {
-                tableView.contentInset.top = currkeyboardHeight
-            } else {
-                tableView.contentInset.top = defaultMessageInputViewHeight
-            }
-        }
+        keyboardHandler.handleAllAttachmentsDeleted()
     }
     
     func recordStop() {
@@ -938,14 +842,16 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
     }
     
     func addAttachment() {
-        hasAttachmentsInset = true
-        tableView.contentInset.top += PSDMessageInputView.attachmentsHeight
-        tableView.contentOffset.y -= PSDMessageInputView.attachmentsHeight
+        keyboardHandler.handleAttachmentAdded()
     }
     
     func addButtonTapped() {
-        isAddButtonTapped = true
+        keyboardHandler.markAddButtonTapped()
         messageInputView.inputTextView.resignFirstResponder()
+    }
+    
+    func presenterForInputMenus() -> UIViewController? {
+        return self
     }
     
     func send(_ message:String, _ attachments: [PSDAttachment]) {
@@ -973,33 +879,33 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
     }
     
     func updateScrollButton(isAtBottom: Bool, isDragging: Bool) {
-        if !isAtBottom && scrollButton.isHidden == true && isDragging {
+        if !isAtBottom && scrollControlView.isHidden == true && isDragging {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isAtBottom && scrollButton.isHidden == false {
+        } else if isAtBottom && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
     }
     
     func updateScrollButton(isHidden: Bool) {
-        if !isHidden && scrollButton.isHidden == true {
+        if !isHidden && scrollControlView.isHidden == true {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isHidden && scrollButton.isHidden == false {
+        } else if isHidden && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
         
@@ -1051,6 +957,12 @@ extension PSDChatViewController: UIPopoverPresentationControllerDelegate {
 
 private extension UIFont {
     static let backButton = CustomizationHelper.systemFont(ofSize: 18)
+}
+
+///Настройки Liquid Glass оформления экрана чата.
+private enum PSDChatDesign {
+    ///Плотность цветовой подмешки подложки под навигационным баром.
+    static let navigationBackdropDimAlpha: CGFloat = 0.45
 }
 
 private extension UIColor {

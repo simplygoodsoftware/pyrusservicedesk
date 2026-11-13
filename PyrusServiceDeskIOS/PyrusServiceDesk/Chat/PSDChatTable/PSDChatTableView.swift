@@ -12,6 +12,11 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
 }
 
 class PSDChatTableView: PSDTableView {
+    private enum Constants {
+        ///Насколько близко к последнему сообщению таблица ещё считается «внизу».
+        static let bottomProximityThreshold: CGFloat = 40.0
+    }
+    
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
@@ -124,6 +129,18 @@ class PSDChatTableView: PSDTableView {
             dataSource = self
         }
         setupOperatorView()
+    }
+    
+    ///Выключает автоматические краевые эффекты.
+    ///
+    ///Таблица развёрнута на 180°, поэтому система считает край по зеркальной геометрии
+    ///и вместо узкой полосы под навигационным баром выцвечивает всю переписку.
+    ///Угадывать «правильный» край бессмысленно: блюр под баром вешается явно,
+    ///через `UIScrollEdgeElementContainerInteraction` на самом баре.
+    @available(iOS 26.0, *)
+    func disableAutomaticScrollEdgeEffects() {
+        topEdgeEffect.isHidden = true
+        bottomEdgeEffect.isHidden = true
     }
     
     func setupOperatorView() {
@@ -487,19 +504,20 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
       //  guard scrollView.isDragging else { return }
-        let contentOffsetY = scrollView.contentOffset.y
-        let inset = contentInset.top + contentInset.bottom - 40
-
-        let isAtBottom = contentOffsetY <= -inset
-        chatDelegate?.updateScrollButton(isAtBottom: isAtBottom, isDragging: scrollView.isDragging)
+        chatDelegate?.updateScrollButton(isAtBottom: isScrolledToBottom, isDragging: scrollView.isDragging)
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let contentOffsetY = scrollView.contentOffset.y
-        let inset = contentInset.top + contentInset.bottom - 40
-
-        let isAtBottom = contentOffsetY <= -inset
-        chatDelegate?.updateScrollButton(isAtBottom: isAtBottom, isDragging: true)
+        chatDelegate?.updateScrollButton(isAtBottom: isScrolledToBottom, isDragging: true)
+    }
+    
+    ///Находится ли таблица у последнего сообщения.
+    ///
+    ///Таблица развёрнута на 180°, поэтому у последнего сообщения `contentOffset.y` равен
+    ///`-contentInset.top`. `contentInset.bottom` в расчёт не входит: это отступ
+    ///противоположного, визуально верхнего края, и до положения последнего сообщения ему дела нет.
+    private var isScrolledToBottom: Bool {
+        contentOffset.y <= -contentInset.top + Constants.bottomProximityThreshold
     }
     
     func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {

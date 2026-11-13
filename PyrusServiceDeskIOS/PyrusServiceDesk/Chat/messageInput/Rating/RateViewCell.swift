@@ -15,7 +15,9 @@ class RateViewCell: UICollectionViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = BORDER_RADIUS
-        view.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
+        //В Liquid Glass эмодзи лежат прямо на общей стеклянной капсуле —
+        //собственная плашка ячейки не нужна.
+        view.backgroundColor = PSDLiquidGlassStyle.isEnabled ? .clear : CustomizationHelper.supportMassageBackgroundColor
         view.isUserInteractionEnabled = false
         return view
     }()

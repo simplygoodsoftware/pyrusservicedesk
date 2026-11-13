@@ -1,4 +1,3 @@
-
 import UIKit
 import  WebKit
 import AVKit
@@ -71,6 +70,9 @@ class PSDAttachmentPreviewView: UIView {
             let webV = WKWebView(frame: self.bounds, configuration: configuration)
             webV.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? UIColor.psdBackground
             webV.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            //Раньше это включалось глобально через UIScrollView.appearance() и при возврате
+            //в чат перезатирало .never у таблицы — настраиваем только свой скролл.
+            webV.scrollView.contentInsetAdjustmentBehavior = .automatic
             webView = webV
             webView?.isOpaque = !needBackground
             self.addSubview(webV)

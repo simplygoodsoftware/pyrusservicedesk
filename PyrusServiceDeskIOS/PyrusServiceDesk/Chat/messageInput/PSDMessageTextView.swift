@@ -1,6 +1,6 @@
 import UIKit
 
-let PLACEHOLDER_ALPHA : CGFloat = 0.2
+let PLACEHOLDER_ALPHA : CGFloat = 0.5
 let PSD_MESSAGE_DRAFT_KEY : String = "PSDMessageDraft"
 
 protocol PSDMessageTextViewDelegate: class {

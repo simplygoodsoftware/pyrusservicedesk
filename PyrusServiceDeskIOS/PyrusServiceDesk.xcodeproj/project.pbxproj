@@ -403,6 +403,14 @@
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
 		6A7806C730A3120A00F9940B /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E53D32F2E25084000325A49 /* RatingCommentViewController.swift */; };
+		6A7807A530A7063800F9940B /* PSDNavigationBlurView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7807A230A7063800F9940B /* PSDNavigationBlurView.swift */; };
+		6A7807A630A7063800F9940B /* PyrusServiceDesk+LiquidGlass.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7807A330A7063800F9940B /* PyrusServiceDesk+LiquidGlass.swift.swift */; };
+		6A7807A730A7063800F9940B /* PSDLiquidGlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7807A030A7063800F9940B /* PSDLiquidGlassStyle.swift */; };
+		6A7807A830A7063800F9940B /* PSDChatGlassTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A78079D30A7063800F9940B /* PSDChatGlassTitleView.swift */; };
+		6A7807A930A7063800F9940B /* PSDGlassBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A78079F30A7063800F9940B /* PSDGlassBackgroundView.swift */; };
+		6A7807AA30A7063800F9940B /* PSDChatNavigationItemFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A78079E30A7063800F9940B /* PSDChatNavigationItemFactory.swift */; };
+		6A7807AB30A7063800F9940B /* PSDNavigationBarStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7807A130A7063800F9940B /* PSDNavigationBarStyler.swift */; };
+		6A7807AC30A7063800F9940B /* BlurBackdropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A78079C30A7063800F9940B /* BlurBackdropView.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B93E9322E3BB47E00883C3C /* InternalHeader.h */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
@@ -830,6 +838,14 @@
 		4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDVIew.swift; sourceTree = "<group>"; };
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
 		4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
+		6A78079C30A7063800F9940B /* BlurBackdropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackdropView.swift; sourceTree = "<group>"; };
+		6A78079D30A7063800F9940B /* PSDChatGlassTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatGlassTitleView.swift; sourceTree = "<group>"; };
+		6A78079E30A7063800F9940B /* PSDChatNavigationItemFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatNavigationItemFactory.swift; sourceTree = "<group>"; };
+		6A78079F30A7063800F9940B /* PSDGlassBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDGlassBackgroundView.swift; sourceTree = "<group>"; };
+		6A7807A030A7063800F9940B /* PSDLiquidGlassStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLiquidGlassStyle.swift; sourceTree = "<group>"; };
+		6A7807A130A7063800F9940B /* PSDNavigationBarStyler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNavigationBarStyler.swift; sourceTree = "<group>"; };
+		6A7807A230A7063800F9940B /* PSDNavigationBlurView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNavigationBlurView.swift; sourceTree = "<group>"; };
+		6A7807A330A7063800F9940B /* PyrusServiceDesk+LiquidGlass.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PyrusServiceDesk+LiquidGlass.swift.swift"; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
 		7B93E9312E3BB44100883C3C /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		7B93E9322E3BB47E00883C3C /* InternalHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InternalHeader.h; sourceTree = "<group>"; };
@@ -1345,6 +1361,7 @@
 				4B6B9044223A55A30003D7F9 /* PSDChatTable */,
 				4B9B0BB922662E8200090DB5 /* LoadAttachments */,
 				4B5AFEA721FB034F00AAF233 /* messageInput */,
+				6A7807A430A7063800F9940B /* LiquidGlass */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -1850,6 +1867,21 @@
 				4B82A4A32268E17600654CE0 /* Back@3x.png */,
 			);
 			path = Back;
+			sourceTree = "<group>";
+		};
+		6A7807A430A7063800F9940B /* LiquidGlass */ = {
+			isa = PBXGroup;
+			children = (
+				6A78079C30A7063800F9940B /* BlurBackdropView.swift */,
+				6A78079D30A7063800F9940B /* PSDChatGlassTitleView.swift */,
+				6A78079E30A7063800F9940B /* PSDChatNavigationItemFactory.swift */,
+				6A78079F30A7063800F9940B /* PSDGlassBackgroundView.swift */,
+				6A7807A030A7063800F9940B /* PSDLiquidGlassStyle.swift */,
+				6A7807A130A7063800F9940B /* PSDNavigationBarStyler.swift */,
+				6A7807A230A7063800F9940B /* PSDNavigationBlurView.swift */,
+				6A7807A330A7063800F9940B /* PyrusServiceDesk+LiquidGlass.swift.swift */,
+			);
+			path = LiquidGlass;
 			sourceTree = "<group>";
 		};
 		7B93E9302E3BB41700883C3C /* ProjectModule */ = {
@@ -2372,6 +2404,14 @@
 				1E1279E52CC271E80080CB19 /* ChatsInteractorProtocol.swift in Sources */,
 				4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */,
 				1E50689F2CEB146F001A9E2D /* PSDChatPresenter.swift in Sources */,
+				6A7807A530A7063800F9940B /* PSDNavigationBlurView.swift in Sources */,
+				6A7807A630A7063800F9940B /* PyrusServiceDesk+LiquidGlass.swift.swift in Sources */,
+				6A7807A730A7063800F9940B /* PSDLiquidGlassStyle.swift in Sources */,
+				6A7807A830A7063800F9940B /* PSDChatGlassTitleView.swift in Sources */,
+				6A7807A930A7063800F9940B /* PSDGlassBackgroundView.swift in Sources */,
+				6A7807AA30A7063800F9940B /* PSDChatNavigationItemFactory.swift in Sources */,
+				6A7807AB30A7063800F9940B /* PSDNavigationBarStyler.swift in Sources */,
+				6A7807AC30A7063800F9940B /* BlurBackdropView.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
 				4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */,
