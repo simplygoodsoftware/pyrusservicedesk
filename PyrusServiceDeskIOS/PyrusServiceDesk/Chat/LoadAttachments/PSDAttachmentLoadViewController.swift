@@ -17,7 +17,6 @@ class PSDAttachmentLoadViewController: PSDViewController {
         return true
     }
     
-    private var oldScrollContentInset : Int? = nil
     override func viewDidLoad() {
         super.viewDidLoad()
         self.design()
@@ -31,20 +30,6 @@ class PSDAttachmentLoadViewController: PSDViewController {
         
         let defaultName = CustomizationHelper.chatTitle
         self.title = attachmentName.count>0 ? attachmentName : defaultName
-       
-        if #available(iOS 11.0, *) {
-            self.oldScrollContentInset =  UIScrollView.appearance().contentInsetAdjustmentBehavior.rawValue
-            UIScrollView.appearance().contentInsetAdjustmentBehavior = .automatic
-        }
-    }
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        if #available(iOS 11.0, *) {
-            if(oldScrollContentInset != nil && UIScrollView.ContentInsetAdjustmentBehavior.init(rawValue: oldScrollContentInset!) != nil){
-                UIScrollView.appearance().contentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior.init(rawValue: oldScrollContentInset!)!
-            }
-        }
     }
     private func drawDownload(){
         errorView.attachmentExtension =  (attachmentName as NSString).pathExtension
