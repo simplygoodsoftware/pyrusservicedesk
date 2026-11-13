@@ -233,6 +233,14 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         
     }
     
+    ///In the flipped table offset below -inset.top is never a valid rest position.
+    private func clampOffsetToRestPosition() {
+        let restOffset = -tableView.contentInset.top
+        if tableView.contentOffset.y < restOffset {
+            tableView.contentOffset.y = restOffset
+        }
+    }
+    
     private var isKeyBoardOpen = false
     @objc private func keyboardDidHide(_ notification: NSNotification) {
         isKeyBoardOpen = false
@@ -252,6 +260,15 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
                 let duration = keyboardAnimationDuration(notification)
                 var keyboardHeight = keyboardEndFrame.height
+                
+                //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
+                if !messageInputView.inputTextView.isFirstResponder,
+                   !isKeyBoardOpen,
+                   keyboardHeight >= Self.staleKeyboardInsetThreshold {
+                    clampOffsetToRestPosition()
+                    logKB("willShow26 skipped, no responder kbH=\(keyboardHeight)")
+                    return
+                }
                 
                 let oldInset = self.tableView.contentInset.top
                 let oldOffset = self.tableView.contentOffset.y
@@ -289,9 +306,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                     }
                     
                 }
+                self.logKB("willShow26 set inset")
                 if !(keyboardDetached && self.isKeyBoardOpen) {
                     self.tableView.contentInset.top = keyboardHeight
                     self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
+                    if !self.messageInputView.inputTextView.isFirstResponder {
+                        clampOffsetToRestPosition()
+                    }
                 }
             }
             return
@@ -306,6 +327,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
+            
+            //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
+            if !messageInputView.inputTextView.isFirstResponder,
+               !isKeyBoardOpen,
+               keyboardHeight >= Self.staleKeyboardInsetThreshold {
+                clampOffsetToRestPosition()
+                logKB("willShowLegacy skipped, no responder kbH=\(keyboardHeight)")
+                return
+            }
+            
             currkeyboardHeight = keyboardHeight
             
             if defaultMessageInputViewHeight == 0 {
@@ -329,6 +360,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 }
                 
             }
+            self.logKB("willShowLegacy set inset")
             if !(keyboardDetached && self.isKeyBoardOpen) {
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
@@ -353,9 +385,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
+                    self.logKB("willHide !isActive inset=90")
                     self.tableView.contentInset.top = 90
                 } else
-                if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
+                //The bar-transition guard must not swallow a real hide: its frame is keyboard-sized.
+                if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom
+                     && keyboardHeight < Self.staleKeyboardInsetThreshold)
                 {
                     if #available(iOS 26.0, *) {
                         var settledCeiling = self.messageInputView.frame.size.height + Self.safeAreaDetectTolerance
@@ -373,16 +408,25 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         if isRealHide {
                             var extra: CGFloat = 0
                             if #available(iOS 27.0, *) {
-                                extra = self.view.safeAreaInsets.bottom
-                                //Accessory frame pinned to the screen edge already contains the safe area.
-                                if let gap = self.inputViewGapBelow() {
-                                    extra = min(gap, extra)
-                                } else if self.inputViewFrameIncludesSafeArea() {
+                                //The bar's target height already contains the safe area; the momentary gap
+                                //is unreliable while the keyboard or a modal is still on screen.
+                                if self.inputViewFrameIncludesSafeArea() {
                                     extra = 0
+                                } else {
+                                    extra = min(self.inputViewGapBelow() ?? self.view.safeAreaInsets.bottom,
+                                                self.view.safeAreaInsets.bottom)
                                 }
                             }
-                            self.tableView.contentInset.top = self.messageInputView.frame.size.height + extra
+                            self.logKB("willHide realHide extra=\(extra)")
+                            let newInset = self.messageInputView.frame.size.height + extra
+                            self.tableView.contentInset.top = newInset
                             self.tableView.contentOffset.y -= extra
+                            //Behind a fullscreen modal UIKit does not re-clamp the offset to the new inset.
+                            if self.tableView.contentOffset.y < -newInset {
+                                self.tableView.contentOffset.y = -newInset
+                            }
+                            //Stale keyboard height makes effectiveKeyboardHeight overscroll on next focus.
+                            self.currkeyboardHeight = newInset
                         } else {
                             //Repeated willHide with accessory-only frame must not strip safe area inset.
                             if #available(iOS 27.0, *) {
@@ -398,14 +442,17 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                                 if !self.isKeyBoardOpen, keyboardReallyGone,
                                    self.tableView.contentInset.top - expectedInset > Self.staleKeyboardInsetThreshold {
                                     //Fullscreen modal dismissed the keyboard, but its willHide was skipped by the guards.
+                                    self.logKB("willHide staleReset")
                                     self.tableView.contentInset.top = expectedInset
                                     if self.tableView.contentOffset.y < -expectedInset {
                                         self.tableView.contentOffset.y = -expectedInset
                                     }
+                                    self.currkeyboardHeight = expectedInset
                                 }
                             }
                         }
                     } else {
+                        self.logKB("willHide pre26 set inset")
                         self.tableView.contentInset.top = self.messageInputView.frame.size.height
                     }
                     self.isAddButtonTapped = false
@@ -451,13 +498,29 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             closedTicketView.addSubview(blurEffectView)
             closedTicketView.sendSubviewToBack(blurEffectView)
         }
+        logKB("layoutSubviews")
         syncInsetWithInputViewIfNeeded()
+    }
+    
+    //TEMP diagnostics, remove after the open-jump bug is found.
+    private func logKB(_ context: String) {
+        print("[PSDChat] \(context) | inset.top=\(tableView.contentInset.top) offset.y=\(tableView.contentOffset.y) inputH=\(messageInputView.frame.size.height) kbOpen=\(isKeyBoardOpen) firstResp=\(messageInputView.inputTextView.isFirstResponder)")
     }
     
     ///Keeps bottom gap in sync with input view when keyboard is closed and notifications were not delivered.
     private func syncInsetWithInputViewIfNeeded() {
         guard isActive, !isKeyBoardOpen, !messageInputView.inputTextView.isFirstResponder else { return }
-        var targetInset = messageInputView.frame.size.height
+        var barHeight = messageInputView.frame.size.height
+        if messageInputView.window == nil {
+            //Before the accessory is attached its frame carries a temporary layout height.
+            let fitting = messageInputView.systemLayoutSizeFitting(
+                CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height),
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            ).height
+            barHeight = max(barHeight, fitting)
+        }
+        var targetInset = barHeight
         if #available(iOS 27.0, *) {
             //Accessory frame pinned to the screen edge already contains the safe area.
             //System alerts report a transient gap below the bar; track only the bar height then.
@@ -469,6 +532,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         guard targetInset > 0, tableView.contentInset.top < targetInset else { return }
         let delta = targetInset - tableView.contentInset.top
+        //Rounding-sized corrections must not visibly push the content after the chat is on screen.
+        guard delta >= Self.safeAreaDetectTolerance else { return }
+        logKB("syncInset apply target=\(targetInset)")
         tableView.contentInset.top = targetInset
         tableView.contentOffset.y -= delta
     }
@@ -638,6 +704,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         tableView.semanticContentAttribute = .forceRightToLeft
         
+        self.logKB("inset=10")
         tableView.contentInset.top = 10
         
         view.addSubview(tableView)
@@ -915,7 +982,15 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             return
         }
         
-        glassTitleView.title = CustomizationHelper.chatTitle
+        let chatTitle = CustomizationHelper.chatTitle
+        //Интегратор не задал ни chatTitle, ни chatTitleView: без этой проверки
+        //по центру бара висела бы пустая капсула фиксированной высоты.
+        guard !chatTitle.isEmpty else {
+            navigationItem.titleView = nil
+            return
+        }
+        
+        glassTitleView.title = chatTitle
         glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
         glassTitleView.sizeToFit()
         navigationItem.titleView = glassTitleView
@@ -1024,6 +1099,7 @@ private extension PSDChatViewController {
             //зависит от числа плашек, и с константой кнопки оказывались за нижней
             //кромкой до ближайшего пересчёта инсета.
             let rateHeight = messageInputView.currentRateHeight
+            self.logKB("rate inset")
             tableView.contentInset.top += rateHeight
             tableView.contentOffset.y -= rateHeight
         }
@@ -1102,6 +1178,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
             self.isActive = isActive
             if !isActive {
                 closedTicketView.isHidden = false
+                self.logKB("inset=90+safe")
                 tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
                 self.resignFirstResponder()
                 self.messageInputView.inputTextView.resignFirstResponder()
@@ -1133,14 +1210,17 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
             //clamps the out-of-range offset by itself, so a relative "+=" would double the shift.
             let newInset = tableView.contentInset.top - PSDMessageInputView.attachmentsHeight
             let newOffset = tableView.contentOffset.y + PSDMessageInputView.attachmentsHeight
+            self.logKB("deletedAllAttachments27")
             tableView.contentInset.top = newInset
             tableView.contentOffset.y = newOffset
             return
         }
         if #available(iOS 26.0, *) {
             if isKeyBoardOpen {
+                self.logKB("deletedAllAttachments26 kbOpen")
                 tableView.contentInset.top = currkeyboardHeight
             } else {
+                self.logKB("deletedAllAttachments26")
                 tableView.contentInset.top = defaultMessageInputViewHeight
             }
         }
@@ -1156,6 +1236,7 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
     
     func addAttachment() {
         hasAttachmentsInset = true
+        self.logKB("addAttachment")
         tableView.contentInset.top += PSDMessageInputView.attachmentsHeight
         tableView.contentOffset.y -= PSDMessageInputView.attachmentsHeight
     }

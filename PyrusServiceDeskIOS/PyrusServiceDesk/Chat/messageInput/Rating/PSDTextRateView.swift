@@ -101,26 +101,26 @@ class PSDTextRateView: PSDView, RateViewProtocol {
             // button.heightAnchor.constraint(equalTo: stackView.heightAnchor).isActive = true
         }
     }
-    //ВРЕМЕННО: диагностика задержки, удалить вместе с PSDRateDebug.
-    override func layoutSubviews() {
-        super.layoutSubviews()
-    }
-    
     @objc private func didTapButton(_ button: UIButton) {
         tapDelegate?.didTapRate(button.tag)
     }
     
     override func recolor() {
         super.recolor()
-        //В Liquid Glass цвета плашек не зависят от смены темы напрямую:
-        //setBackgroundColor уже получил динамические цвета кастомизации.
-        guard !PSDLiquidGlassStyle.isEnabled else { return }
+        //setBackgroundColor рисует одноцветную картинку из цвета на момент вызова,
+        //поэтому при смене темы фоны надо пересоздавать. В Liquid Glass плашки
+        //получают ту же пару цветов, что и при создании.
         for view in stackView.arrangedSubviews {
             guard let button = view as? UIButton else {
                 continue
             }
-            button.setBackgroundColor(color: CustomizationHelper.lightGrayViewColor, forState: .normal)
-            button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
+            if PSDLiquidGlassStyle.isEnabled {
+                button.setBackgroundColor(color: CustomizationHelper.supportMassageBackgroundColor, forState: .normal)
+                button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
+            } else {
+                button.setBackgroundColor(color: CustomizationHelper.lightGrayViewColor, forState: .normal)
+                button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
+            }
         }
     }
 }
