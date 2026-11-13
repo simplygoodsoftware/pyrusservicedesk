@@ -158,7 +158,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }()
     
     ///Блюр-подложка всей панели: затухает вверх, к переписке.
-    private lazy var inputBackdropView = BlurBackdropView(fadeEdge: .top,
+    private lazy var inputBackdropView = PSDBlurBackdropView(fadeEdge: .top,
                                                           dimColor: Self.backdropDimColor)
     
     ///Два взаимоисключающих правых края капсулы: до микрофона либо до края панели.

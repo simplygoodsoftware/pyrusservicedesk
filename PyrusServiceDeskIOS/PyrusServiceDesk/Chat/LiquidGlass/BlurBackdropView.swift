@@ -6,7 +6,7 @@ import UIKit
 /// Используется как под шапкой / прозрачным navigation bar (затухание вниз),
 /// так и за полем ввода (затухание вверх). Компонент самодостаточен и не
 /// привязан к конкретному экрану — переиспользуется чат-подобными экранами.
-public final class BlurBackdropView: UIView {
+public final class PSDBlurBackdropView: UIView {
 
     /// К какому краю подложка затухает в прозрачность.
     public enum FadeEdge {
@@ -78,8 +78,8 @@ public final class BlurBackdropView: UIView {
     private var blurAnimator: UIViewPropertyAnimator?
 
     public init(fadeEdge: FadeEdge,
-                blurIntensity: CGFloat = BlurBackdropView.defaultBlurIntensity,
-                dimColor: UIColor = BlurBackdropView.defaultDimColor) {
+                blurIntensity: CGFloat = PSDBlurBackdropView.defaultBlurIntensity,
+                dimColor: UIColor = PSDBlurBackdropView.defaultDimColor) {
         self.fadeEdge = fadeEdge
         self.blurIntensity = blurIntensity
         self.dimColor = dimColor
@@ -223,7 +223,7 @@ public final class BlurBackdropView: UIView {
     }
 }
 
-private extension BlurBackdropView {
+private extension PSDBlurBackdropView {
     enum Constants {
         static let blurStyle: UIBlurEffect.Style = .systemUltraThinMaterial
 
