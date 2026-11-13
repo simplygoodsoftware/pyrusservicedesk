@@ -1,6 +1,6 @@
 import UIKit
 
-///Protocol for updateting info
+///Протокол обновления информации по заявке.
 protocol PSDUpdateInfo {
     func startGettingInfo()
     func refreshChat(showFakeMessage: Int?)
@@ -54,7 +54,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var bottomScrollButton: NSLayoutConstraint?
     private lazy var scrollButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = CustomizationHelper.scrollButtonColor//.scrollButtonColor
+        button.backgroundColor = CustomizationHelper.scrollButtonColor
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
         button.transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -171,25 +171,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-//        self.tableView.removeListeners()
-//        self.tableView.bottomPSDRefreshControl.isEnabled = false
-//        guard let lastVisibleCell = self.tableView.visibleCells.last,
-//              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
-//            return
-//        }
-//
-//        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
-//            self.tableView.reloadData()
-//            if self.tableView.contentOffset.y > 100,
-//               self.tableView.numberOfSections > lastVisibleRow.section,
-//               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
-//            {
-//                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
-//            }
-//        }, completion: { context in
-//            self.tableView.bottomPSDRefreshControl.isEnabled = true
-////            self.tableView.addKeyboardListeners()
-//        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -245,12 +226,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             scrollButton.layer.shadowOpacity = 0.2
             scrollButton.layer.masksToBounds = false
         }
-        
-//        stopButton.layer.shadowColor = UIColor.black.cgColor
-//        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-//        stopButton.layer.shadowRadius = 4
-//        stopButton.layer.shadowOpacity = 0.2
-//        stopButton.layer.masksToBounds = false
         
         if !PSDLiquidGlassStyle.isEnabled {
             messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
@@ -317,10 +292,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc private func appEnteredForeground(){
-//        self.tableView.addKeyboardListeners()
     }
     @objc private func appEnteredBackground(){
-//        self.tableView.removeListeners()
     }
     
     public func updateTitle() {
@@ -330,7 +303,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         tableView.reloadChat()
     }
     
-    ///hide keyboard with inputAccessoryView
+    ///Прячет клавиатуру вместе с inputAccessoryView.
     func hideAllKeyboard(){
         if self.messageInputView.inputTextView.isFirstResponder {
             self.resignFirstResponder()
@@ -364,7 +337,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     func setupTableView() {
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
-            self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
+            self.tableView.contentInsetAdjustmentBehavior = .never
             
         }
         if #available(iOS 13.0, *) {
@@ -552,7 +525,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     //MARK : Navigation
-    //Setting design to navigation bar, title and buttons
+    //Оформление навигационного бара, заголовка и кнопок.
     private func designNavigation() {
         if #available(iOS 11.0, *) {
             navigationItem.largeTitleDisplayMode = .never
@@ -569,7 +542,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         self.setItems()
         if PSDLiquidGlassStyle.isEnabled {
-            //В прежнем оформлении заголовок выставляется только по .updateTitle — не меняем это.
+            //Вне Liquid Glass заголовок выставляется только по .updateTitle.
             applyChatTitle()
         }
         navigationController?.navigationBar.isHidden = false
@@ -594,13 +567,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 sheet.prefersEdgeAttachedInCompactHeight = true
             }
         } else {
-            // Fallback on earlier versions
         }
         
         present(popoverContentController, animated: true, completion: nil)
     }
     
-    ///Set navigation items
+    ///Состав кнопок навигационного бара.
     ///
     ///Единственное место, где решается состав кнопок бара. Приоритет всегда за кастомизацией:
     ///если интегратор задал свою кнопку — ставим её, свои кнопки не подмешиваем.
@@ -627,8 +599,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return isTicketInfoAvailable ? infoButton : nil
     }
     
-    ///Кнопка возврата по умолчанию — иконка-шеврон.
-    ///В прежнем оформлении остаётся текстовая кнопка `leftButton`.
+    ///В Liquid Glass кнопка возврата — иконка-шеврон, вне его — текстовая кнопка `leftButton`.
     private func makeDefaultBackItem() -> UIBarButtonItem {
         if PSDLiquidGlassStyle.isEnabled,
            let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
@@ -730,9 +701,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     //MARK: KeyBoard hiding and moving
     override var canBecomeFirstResponder: Bool {
         guard
-//            self.tableView.window != nil,
-//            !hasNoConnection(),
-//            self.presentedViewController == nil,
             isActive
         else {
             return false
@@ -755,8 +723,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 private extension PSDChatViewController {
     func needShowRate(_ showRate: Bool) {
         //Команда показа может прийти раньше, чем загрузятся значения текстового рейтинга, —
-        //тогда показывать нечего: рисовался пустой контейнер, а плашки появлялись только
-        //со следующей командой. Не трогаем состояние вовсе: повторная команда с данными
+        //тогда показывать нечего. Состояние не трогаем: повторная команда с данными
         //пройдёт как первый показ и зарезервирует место под фактическую высоту.
         if showRate, !messageInputView.hasRateContent {
             return
@@ -766,17 +733,13 @@ private extension PSDChatViewController {
         messageInputView.showRate = showRate
         if showRate && !wasShown {
             //Именно фактическая высота, а не RATE_HEIGHT: у текстового рейтинга она
-            //зависит от числа плашек, и с константой кнопки оказывались за нижней
-            //кромкой до ближайшего пересчёта инсета.
+            //зависит от числа плашек.
             keyboardHandler.applyRateInset(messageInputView.currentRateHeight)
         }
     }
     
     func dataIsShown() {
         if firstLoad {
-//            if !PyrusServiceDesk.multichats {
-//                self.messageInputView.inputTextView.becomeFirstResponder()
-//            }
             firstLoad = false
         }
     }

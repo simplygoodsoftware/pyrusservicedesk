@@ -83,7 +83,7 @@ final class PSDChatKeyboardHandler: NSObject {
     
     // MARK: - Public state
     
-    ///Bottom of the flipped table is -contentInset.top; never pass less while keyboard is closed.
+    ///Низ перевёрнутой таблицы — это -contentInset.top; при закрытой клавиатуре не возвращаем меньше.
     var effectiveKeyboardHeight: CGFloat {
         guard let tableView = tableView else { return currentKeyboardHeight }
         guard !isKeyboardOpen else { return currentKeyboardHeight }
@@ -108,18 +108,18 @@ final class PSDChatKeyboardHandler: NSObject {
         guard let tableView = tableView else { return }
         switch environment {
         case .ios27Plus:
-            //Also called on send and on chat setup when no attachments were shown.
+            //Вызывается и при отправке, и при настройке чата без показанных вложений.
             guard hasAttachmentsInset else { return }
             hasAttachmentsInset = false
-            //Exact inverse of handleAttachmentAdded(). Offset is assigned absolutely: shrinking
-            //the inset clamps the out-of-range offset by itself, so a relative "+=" would double the shift.
+            //Точная инверсия handleAttachmentAdded(). Офсет присваивается абсолютно: при уменьшении
+            //инсета система сама клэмпит вышедший за пределы офсет, и относительный «+=» удвоил бы сдвиг.
             let newInset = tableView.contentInset.top - PSDMessageInputView.attachmentsHeight
             let newOffset = tableView.contentOffset.y + PSDMessageInputView.attachmentsHeight
             logState("deletedAllAttachments27")
             tableView.contentInset.top = newInset
             tableView.contentOffset.y = newOffset
         case .ios26:
-            //Also called on send and on chat setup when no attachments were shown.
+            //Вызывается и при отправке, и при настройке чата без показанных вложений.
             guard hasAttachmentsInset else { return }
             hasAttachmentsInset = false
             if isKeyboardOpen {
@@ -129,7 +129,7 @@ final class PSDChatKeyboardHandler: NSObject {
                 logState("deletedAllAttachments26")
                 tableView.contentInset.top = defaultMessageInputViewHeight
             }
-            //Behind a fullscreen modal UIKit does not re-clamp the offset to the new inset.
+            //За полноэкранной модалкой UIKit не переклэмпливает офсет под новый инсет.
             clampOffsetToRestPosition()
         case .legacy:
             break
@@ -150,7 +150,7 @@ final class PSDChatKeyboardHandler: NSObject {
         tableView.contentInset.top = Constants.inactiveChatInset + containerView.safeAreaInsets.bottom
     }
     
-    ///Keeps bottom gap in sync with input view when keyboard is closed and notifications were not delivered.
+    ///Держит нижний отступ согласованным с панелью ввода, когда клавиатура закрыта, а нотификации не пришли.
     func syncInsetWithInputViewIfNeeded() {
         guard let tableView = tableView,
               let messageInputView = messageInputView,
@@ -169,7 +169,7 @@ final class PSDChatKeyboardHandler: NSObject {
         guard isChatActive, !isKeyboardOpen, !messageInputView.inputTextView.isFirstResponder else { return }
         var barHeight = messageInputView.frame.size.height
         if messageInputView.window == nil {
-            //Before the accessory is attached its frame carries a temporary layout height.
+            //До прикрепления аксессуара его фрейм несёт временную layout-высоту.
             let fitting = messageInputView.systemLayoutSizeFitting(
                 CGSize(width: containerView.bounds.width, height: UIView.layoutFittingCompressedSize.height),
                 withHorizontalFittingPriority: .required,
@@ -179,8 +179,8 @@ final class PSDChatKeyboardHandler: NSObject {
         }
         var targetInset = barHeight
         if environment == .ios27Plus {
-            //Accessory frame pinned to the screen edge already contains the safe area.
-            //System alerts report a transient gap below the bar; track only the bar height then.
+            //Фрейм аксессуара, прижатого к краю экрана, уже содержит safe area.
+            //При системных алертах под баром возникает переходный зазор — тогда учитываем только высоту бара.
             let insetMatchesBar = tableView.contentInset.top >= targetInset - Constants.safeAreaDetectTolerance
             if !insetMatchesBar {
                 let safeBottom = containerView.safeAreaInsets.bottom
@@ -209,7 +209,7 @@ final class PSDChatKeyboardHandler: NSObject {
         
         guard tableView.contentInset.top < targetInset else { return }
         let delta = targetInset - tableView.contentInset.top
-        //Rounding-sized corrections must not visibly push the content after the chat is on screen.
+        //Поправки размером с округление не должны заметно сдвигать контент уже показанного чата.
         guard delta >= Constants.safeAreaDetectTolerance else { return }
         logState("syncInset apply target=\(targetInset)")
         tableView.contentInset.top = targetInset
@@ -255,7 +255,7 @@ final class PSDChatKeyboardHandler: NSObject {
         tableView.isTracking || tableView.isDragging || tableView.isDecelerating
     }
     
-    //TEMP diagnostics, remove after the open-jump bug is found.
+    //Временная диагностика, удалить после проверки бага с инсетом.
     func logState(_ context: String) {
         guard let tableView = tableView, let messageInputView = messageInputView else { return }
         let adjusted = tableView.adjustedContentInset
@@ -284,7 +284,7 @@ final class PSDChatKeyboardHandler: NSObject {
         
         let keyboardHeight = endFrame.height
         
-        //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
+        //Диссмисс полноэкранной модалки проигрывает willShow клавиатурного размера без responder'а.
         if isStaleWillShow(keyboardHeight: keyboardHeight) {
             clampOffsetToRestPosition()
             logState("willShow26 skipped, no responder kbH=\(keyboardHeight)")
@@ -300,8 +300,8 @@ final class PSDChatKeyboardHandler: NSObject {
         let oldDefaultInputHeight = defaultMessageInputViewHeight
         //Дельта — от текущего инсета, а не от currentKeyboardHeight: ниже инсет
         //ставится абсолютно, и офсет должен сдвинуться ровно на его изменение.
-        //currentKeyboardHeight отстаёт от инсета после addAttachment/needShowRate
-        //и после keyboardWillHide, и офсет по нему уезжал на эту разницу.
+        //currentKeyboardHeight может отставать от инсета после addAttachment/needShowRate
+        //и после keyboardWillHide.
         let delta = keyboardHeight - oldInset
         currentKeyboardHeight = keyboardHeight
         
@@ -366,7 +366,7 @@ final class PSDChatKeyboardHandler: NSObject {
         
         let keyboardHeight = endFrame.height
         
-        //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
+        //Диссмисс полноэкранной модалки проигрывает willShow клавиатурного размера без responder'а.
         if isStaleWillShow(keyboardHeight: keyboardHeight) {
             clampOffsetToRestPosition()
             logState("willShowLegacy skipped, no responder kbH=\(keyboardHeight)")
@@ -430,7 +430,7 @@ final class PSDChatKeyboardHandler: NSObject {
                 return
             }
             
-            //The bar-transition guard must not swallow a real hide: its frame is keyboard-sized.
+            //Страж перехода бара не должен проглотить настоящий hide: у того фрейм клавиатурного размера.
             let isBarTransitionOnly = (self.oldInputViewHeight - messageInputView.frame.size.height).rounded() == containerView.safeAreaInsets.bottom
                 && keyboardHeight < Constants.staleKeyboardInsetThreshold
             guard !isBarTransitionOnly else { return }
@@ -455,12 +455,12 @@ final class PSDChatKeyboardHandler: NSObject {
         guard let tableView = tableView else { return }
         
         let keyboardInsetAbsent = tableView.contentInset.top <= settledInsetCeiling()
-        //Attach button dismisses the keyboard, but the first willHide carries only the accessory frame.
+        //Кнопка вложений прячет клавиатуру, но первый willHide несёт только фрейм аксессуара.
         let isRealHide = abs(keyboardHeight - defaultMessageInputViewHeight) > Constants.realHideHeightTolerance
             || isAddButtonTapped
         
         if isRealHide {
-            //Late willHide with a keyboard-sized frame after the inset already settled.
+            //Поздний willHide с клавиатурным фреймом, когда инсет уже в покое.
             guard !keyboardInsetAbsent else { return }
             applyRealHideInset()
         } else {
@@ -473,7 +473,6 @@ final class PSDChatKeyboardHandler: NSObject {
         guard let messageInputView = messageInputView, let containerView = containerView else { return 0 }
         var ceiling = messageInputView.frame.size.height + Constants.safeAreaDetectTolerance
         if environment == .ios26 {
-            //On iOS 26 the resting inset is inputH + safe area.
             ceiling += containerView.safeAreaInsets.bottom
         }
         return ceiling
@@ -486,11 +485,11 @@ final class PSDChatKeyboardHandler: NSObject {
         let newInset = messageInputView.frame.size.height + extra
         tableView.contentInset.top = newInset
         tableView.contentOffset.y -= extra
-        //Behind a fullscreen modal UIKit does not re-clamp the offset to the new inset.
+        //За полноэкранной модалкой UIKit не переклэмпливает офсет под новый инсет.
         if tableView.contentOffset.y < -newInset {
             tableView.contentOffset.y = -newInset
         }
-        //Stale keyboard height makes effectiveKeyboardHeight overscroll on next focus.
+        //Актуализируем, чтобы effectiveKeyboardHeight не перескролливал при следующем фокусе.
         currentKeyboardHeight = newInset
     }
     
@@ -498,8 +497,8 @@ final class PSDChatKeyboardHandler: NSObject {
     ///на iOS 26 safe area уже входит в высоту бара.
     private func realHideSafeAreaExtra() -> CGFloat {
         guard environment == .ios27Plus, let containerView = containerView else { return 0 }
-        //The bar's target height already contains the safe area; the momentary gap
-        //is unreliable while the keyboard or a modal is still on screen.
+        //Целевая высота бара уже содержит safe area; мгновенный зазор ненадёжен,
+        //пока на экране клавиатура или модалка.
         if inputViewFrameIncludesSafeArea() {
             return 0
         }
@@ -507,7 +506,7 @@ final class PSDChatKeyboardHandler: NSObject {
                    containerView.safeAreaInsets.bottom)
     }
     
-    ///Только iOS 27+. Repeated willHide with accessory-only frame must not strip safe area inset.
+    ///Только iOS 27+. Повторный willHide с фреймом одного аксессуара не должен срезать safe area из инсета.
     private func resetStaleKeyboardInsetIfNeeded() {
         guard environment == .ios27Plus,
               let tableView = tableView,
@@ -520,17 +519,17 @@ final class PSDChatKeyboardHandler: NSObject {
         let accessoryExtra = min(gapBelow ?? safeBottom, safeBottom)
         var expectedInset = messageInputView.frame.size.height + accessoryExtra
         if defaultMessageInputViewHeight > 0 {
-            //The bar may still be in transient geometry (no safe area in height, gap 0).
+            //Бар может быть в переходной геометрии: высота без safe area, зазор 0.
             expectedInset = max(expectedInset, defaultMessageInputViewHeight + safeBottom)
         }
-        //gapBelow ~ keyboard height means the keyboard is actually on screen.
+        //gapBelow порядка высоты клавиатуры означает, что клавиатура реально на экране.
         let keyboardReallyGone = (gapBelow ?? 0) <= safeBottom + Constants.realHideHeightTolerance
         guard !isKeyboardOpen,
               keyboardReallyGone,
               tableView.contentInset.top - expectedInset > Constants.staleKeyboardInsetThreshold
         else { return }
         
-        //Fullscreen modal dismissed the keyboard, but its willHide was skipped by the guards.
+        //Полноэкранная модалка спрятала клавиатуру, а её willHide отсеяли стражи.
         logState("willHide staleReset")
         tableView.contentInset.top = expectedInset
         if tableView.contentOffset.y < -expectedInset {
@@ -557,7 +556,7 @@ final class PSDChatKeyboardHandler: NSObject {
         return 0
     }
     
-    ///Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
+    ///Диссмисс полноэкранной модалки проигрывает willShow клавиатурного размера без responder'а.
     private func isStaleWillShow(keyboardHeight: CGFloat) -> Bool {
         guard let messageInputView = messageInputView else { return false }
         return !messageInputView.inputTextView.isFirstResponder
@@ -565,7 +564,7 @@ final class PSDChatKeyboardHandler: NSObject {
             && keyboardHeight >= Constants.staleKeyboardInsetThreshold
     }
     
-    ///Detects detached (floating/undocked) keyboard. Falls back to end frame when private key is missing (iOS 27+).
+    ///Определяет оторванную (плавающую) клавиатуру. Если приватного ключа нет (iOS 27+), опирается на end frame.
     private func isKeyboardDetached(_ notification: NSNotification, endFrame: CGRect) -> Bool {
         if let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
             return center.y > (containerView?.frame.maxY ?? 0)
@@ -573,7 +572,7 @@ final class PSDChatKeyboardHandler: NSObject {
         return endFrame.minY >= UIScreen.main.bounds.maxY
     }
     
-    ///In the flipped table offset below -inset.top is never a valid rest position.
+    ///В перевёрнутой таблице офсет ниже -inset.top — не валидная позиция покоя.
     private func clampOffsetToRestPosition() {
         guard let tableView = tableView else { return }
         let restOffset = -tableView.contentInset.top
@@ -594,7 +593,7 @@ final class PSDChatKeyboardHandler: NSObject {
     
     // MARK: - Helpers (только iOS 27+)
     
-    ///Gap between the accessory's bottom and its window's bottom; nil before it is attached.
+    ///Зазор между низом аксессуара и низом его окна; nil до прикрепления.
     private func inputViewGapBelow() -> CGFloat? {
         guard let messageInputView = messageInputView,
               let inputWindow = messageInputView.window
@@ -603,7 +602,7 @@ final class PSDChatKeyboardHandler: NSObject {
         return max(0, inputWindow.bounds.maxY - frameInWindow.maxY)
     }
     
-    ///True when the accessory frame is pinned to the screen edge and already contains the safe area.
+    ///True, когда фрейм аксессуара прижат к краю экрана и уже содержит safe area.
     private func inputViewFrameIncludesSafeArea() -> Bool {
         guard let messageInputView = messageInputView,
               let containerView = containerView,
@@ -617,7 +616,7 @@ final class PSDChatKeyboardHandler: NSObject {
         return abs(diff - containerView.safeAreaInsets.bottom) < Constants.safeAreaDetectTolerance
     }
     
-    // MARK: - Legacy helpers (не используются)
+    // MARK: - Неиспользуемые хелперы
     
     private func needChangeInset(_ newInset: CGFloat) -> Bool {
         guard let tableView = tableView else { return true }
@@ -632,8 +631,8 @@ final class PSDChatKeyboardHandler: NSObject {
     
     private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
         guard let tableView = tableView else { return 0 }
-        var newOffsetY = max(0, tableView.contentOffset.y + delta)//block too little offset
-        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset), newOffsetY)//block too big offset
+        var newOffsetY = max(0, tableView.contentOffset.y + delta)//отсекает слишком маленький офсет
+        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset), newOffsetY)//отсекает слишком большой офсет
         return newOffsetY
     }
     
