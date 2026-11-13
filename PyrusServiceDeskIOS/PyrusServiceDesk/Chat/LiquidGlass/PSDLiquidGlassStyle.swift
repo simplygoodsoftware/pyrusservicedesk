@@ -31,6 +31,27 @@ enum PSDLiquidGlassStyle {
         isSupportedBySystem && !isCompatibilityDesignRequested
     }
     
+    /// Принудительная тема панели ввода по кастомизации клавиатуры.
+    ///
+    /// Стекло iOS 26 подстраивается под trait collection и игнорирует
+    /// `keyboardAppearance`, поэтому кастомизация транслируется в override темы.
+    /// `.unspecified` — кастомизации нет, стекло следует системной теме.
+    /// - Parameter systemStyle: тема сцены, не переопределённая на вью, —
+    ///   иначе смешанные конфигурации light/dark зацикливают пересчёт.
+    static func inputOverrideStyle(forSystemStyle systemStyle: UIUserInterfaceStyle) -> UIUserInterfaceStyle {
+        if let keyboardColor = PyrusServiceDesk.mainController?.customization?.keyboardColor {
+            return keyboardColor.isDarkColor ? .dark : .light
+        }
+        switch CustomizationHelper.keyboardStyle(for: systemStyle) {
+        case .dark:
+            return .dark
+        case .light:
+            return .light
+        default:
+            return .unspecified
+        }
+    }
+    
     /// Цвет иконок на стеклянных кнопках: чёрный в светлой теме, белый в тёмной.
     ///
     /// Стекло само подстраивается под фон, поэтому иконкам не нужны цвета кастомизации —

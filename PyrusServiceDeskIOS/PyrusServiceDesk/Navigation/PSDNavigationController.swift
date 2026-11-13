@@ -1,4 +1,3 @@
-
 import UIKit
 
 ///Change appear transaction animation to CoverHorizontal for UINavigationController
@@ -41,6 +40,10 @@ extension PSDNavigationController: Recolorable {
         }
     }
     func recolor() {
+        //barStyle/barTintColor — легаси-стилизация: на iOS 26 она выводит бар
+        //из-под системного Liquid Glass и рисует прежний translucent-фон с hairline.
+        //В glass-режиме цвет бара несёт подложка экрана, сам бар не трогаем.
+        guard !PSDLiquidGlassStyle.isEnabled else { return }
         if let barStyle = CustomizationHelper.barStyle {
             navigationBar.barStyle = barStyle
         }

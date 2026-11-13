@@ -48,16 +48,17 @@ class CustomizationHelper {
     }
     static var keyboardStyle: UIKeyboardAppearance {
         if #available(iOS 13.0, *) {
-            switch UITraitCollection.current.userInterfaceStyle {
-            case .light, .unspecified:
-                return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
-            case .dark:
-                return PyrusServiceDesk.mainController?.customization?.keyboardAppearanceDark ?? .default
-            @unknown default:
-                return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
-            }
+            return keyboardStyle(for: UITraitCollection.current.userInterfaceStyle)
         } else {
             return .default
+        }
+    }
+    static func keyboardStyle(for interfaceStyle: UIUserInterfaceStyle) -> UIKeyboardAppearance {
+        switch interfaceStyle {
+        case .dark:
+            return PyrusServiceDesk.mainController?.customization?.keyboardAppearanceDark ?? .default
+        default:
+            return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
         }
     }
     static func systemFont(ofSize: CGFloat) -> UIFont {

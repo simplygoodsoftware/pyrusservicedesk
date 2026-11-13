@@ -291,6 +291,27 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         if PSDLiquidGlassStyle.isEnabled {
             //Цвет иконки динамический и переключается сам; пересобирать надо только подложку.
             inputBackdropView.dimColor = Self.backdropDimColor
+            applyGlassInterfaceStyleOverride()
+        }
+    }
+    
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        applyGlassInterfaceStyleOverride()
+    }
+    
+    ///Транслирует кастомизацию клавиатуры в тему всей панели: стекло и материалы
+    ///следуют trait collection, а не `keyboardAppearance`, — без override панель
+    ///остаётся светлой до подъёма тёмной клавиатуры.
+    ///Тема берётся у сцены: собственная trait collection уже переопределена.
+    private func applyGlassInterfaceStyleOverride() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        if #available(iOS 13.0, *) {
+            guard let sceneStyle = window?.windowScene?.traitCollection.userInterfaceStyle else { return }
+            let desiredStyle = PSDLiquidGlassStyle.inputOverrideStyle(forSystemStyle: sceneStyle)
+            //Совпадение с системной темой — не повод её пришпиливать:
+            //без override панель продолжает следовать за сменой темы.
+            overrideUserInterfaceStyle = desiredStyle == sceneStyle ? .unspecified : desiredStyle
         }
     }
     

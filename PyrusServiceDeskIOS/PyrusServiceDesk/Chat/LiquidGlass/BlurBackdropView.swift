@@ -40,7 +40,7 @@ public final class BlurBackdropView: UIView {
 
     private let blurView: UIVisualEffectView = {
         // Стартуем без эффекта — нужную силу blur навешивает
-        // `setupBlurIntensity` через paused `UIViewPropertyAnimator`.
+        // `applyBlurIntensity` через paused `UIViewPropertyAnimator`.
         let view = UIVisualEffectView(effect: nil)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -52,12 +52,22 @@ public final class BlurBackdropView: UIView {
         return view
     }()
 
+    /// Маска blur'а живёт в отдельном вью: у `UIVisualEffectView` нельзя
+    /// маскировать слой (`layer.mask`) — эффект деградирует, градиент
+    /// превращается в бинарный обрез с чёткой границей. Маскировать можно
+    /// только через свойство `mask` самого вью.
+    /// Ссылка сильная: `mask` вью не ретейнит.
+    private lazy var blurMaskView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.layer.addSublayer(blurMaskLayer)
+        return view
+    }()
+
     /// Маска blur'а: в сплошной зоне строго непрозрачна.
-    /// `UIVisualEffectView` устроен бинарно по альфе — малейшее снижение
-    /// маски гасит blur целиком.
     private lazy var blurMaskLayer = Self.makeMaskLayer(solidAlpha: 1, fadeEdge: fadeEdge)
 
-    /// Маска dim-слоя
+    /// Маска dim-слоя. Обычный вью слоем маскировать можно.
     private lazy var dimMaskLayer = Self.makeMaskLayer(
         solidAlpha: Constants.solidAlpha,
         fadeEdge: fadeEdge
@@ -92,10 +102,17 @@ public final class BlurBackdropView: UIView {
             dimView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
-        blurView.layer.mask = blurMaskLayer
+        blurView.mask = blurMaskView
         dimView.layer.mask = dimMaskLayer
 
-        setupBlurIntensity()
+        applyBlurIntensity()
+
+        // Снапшоты при уходе приложения в фон сбрасывают paused-аниматор —
+        // blur схлопывается в полную силу материала. После активации пересобираем.
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidBecomeActive),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
     }
 
     @available(*, unavailable)
@@ -104,9 +121,22 @@ public final class BlurBackdropView: UIView {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         // Без явной остановки paused-аниматор продолжает удерживать ссылку
         // на блок анимации
         blurAnimator?.stopAnimation(true)
+    }
+
+    public override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard window != nil else { return }
+        applyBlurIntensity()
+    }
+
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // Частично применённый эффект не пересчитывается под новую тему сам.
+        applyBlurIntensity()
     }
 
     public override func layoutSubviews() {
@@ -115,12 +145,23 @@ public final class BlurBackdropView: UIView {
         // ресайзе градиент плывёт вслед за bounds.
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        blurMaskLayer.frame = blurView.bounds
+        blurMaskView.frame = blurView.bounds
+        blurMaskLayer.frame = blurMaskView.bounds
         dimMaskLayer.frame = dimView.bounds
         CATransaction.commit()
     }
 
-    private func setupBlurIntensity() {
+    @objc private func applicationDidBecomeActive() {
+        applyBlurIntensity()
+    }
+
+    /// Пересоздаёт paused-аниматор и выставляет силу blur'а заново.
+    /// Идемпотентно: вызывается при попадании в окно, активации приложения
+    /// и смене темы.
+    private func applyBlurIntensity() {
+        blurAnimator?.stopAnimation(true)
+        blurView.effect = nil
+
         let animator = UIViewPropertyAnimator(duration: 1, curve: .linear)
         animator.addAnimations { [weak self] in
             self?.blurView.effect = UIBlurEffect(style: Constants.blurStyle)
