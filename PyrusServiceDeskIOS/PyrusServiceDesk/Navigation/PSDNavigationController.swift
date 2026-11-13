@@ -42,13 +42,25 @@ extension PSDNavigationController: Recolorable {
     func recolor() {
         //barStyle/barTintColor — легаси-стилизация: на iOS 26 она выводит бар
         //из-под системного Liquid Glass и рисует прежний translucent-фон с hairline.
-        //В glass-режиме цвет бара несёт подложка экрана, сам бар не трогаем.
-        guard !PSDLiquidGlassStyle.isEnabled else { return }
+        //В glass-режиме кастомизация транслируется в тему бара — стекло красится само.
+        guard !PSDLiquidGlassStyle.isEnabled else {
+            applyGlassBarInterfaceStyle()
+            return
+        }
         if let barStyle = CustomizationHelper.barStyle {
             navigationBar.barStyle = barStyle
         }
         if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
             navigationBar.barTintColor = color
         }
+    }
+    
+    ///Тема берётся у самого контроллера: его trait collection не переопределяется,
+    ///override стоит только на баре — пересчёт не зацикливается.
+    private func applyGlassBarInterfaceStyle() {
+        guard #available(iOS 13.0, *) else { return }
+        let systemStyle = traitCollection.userInterfaceStyle
+        let desiredStyle = PSDLiquidGlassStyle.barOverrideStyle(forSystemStyle: systemStyle)
+        navigationBar.overrideUserInterfaceStyle = desiredStyle == systemStyle ? .unspecified : desiredStyle
     }
 }

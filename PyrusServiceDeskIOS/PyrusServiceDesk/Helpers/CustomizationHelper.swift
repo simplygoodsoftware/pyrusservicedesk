@@ -153,16 +153,17 @@ class CustomizationHelper {
     
     static var barStyle: UIBarStyle? {
         if #available(iOS 13.0, *) {
-            switch UITraitCollection.current.userInterfaceStyle {
-            case .light, .unspecified:
-                return PyrusServiceDesk.mainController?.customization?.barStyle
-            case .dark:
-                return PyrusServiceDesk.mainController?.customization?.barStyleDark
-            @unknown default:
-                return PyrusServiceDesk.mainController?.customization?.barStyle
-            }
+            return barStyle(for: UITraitCollection.current.userInterfaceStyle)
         } else {
             return nil
+        }
+    }
+    static func barStyle(for interfaceStyle: UIUserInterfaceStyle) -> UIBarStyle? {
+        switch interfaceStyle {
+        case .dark:
+            return PyrusServiceDesk.mainController?.customization?.barStyleDark
+        default:
+            return PyrusServiceDesk.mainController?.customization?.barStyle
         }
     }
     static var textColorForTable: UIColor {

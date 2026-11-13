@@ -258,6 +258,19 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         applyChatTitle()
         //Цвет бара берётся из кастомизации и может зависеть от темы — подложку перекрашиваем.
         updateNavigationBackdropColor()
+        applyScrollButtonInterfaceStyle()
+    }
+    
+    ///Кнопка скролла живёт у панели ввода и красится как она — по кастомизации
+    ///клавиатуры, а не по теме системы. Override только на самой кнопке:
+    ///trait collection контроллера остаётся системной, пересчёт не зацикливается.
+    private func applyScrollButtonInterfaceStyle() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        if #available(iOS 13.0, *) {
+            let systemStyle = traitCollection.userInterfaceStyle
+            let desiredStyle = PSDLiquidGlassStyle.inputOverrideStyle(forSystemStyle: systemStyle)
+            scrollControlView.overrideUserInterfaceStyle = desiredStyle == systemStyle ? .unspecified : desiredStyle
+        }
     }
     
     func resizeTable() {
@@ -414,6 +427,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     func setupScrollButton() {
         embedScrollButtonIntoGlassIfNeeded()
+        applyScrollButtonInterfaceStyle()
         view.addSubview(scrollControlView)
         let image = UIImageView(image: UIImage.PSDImage(name: "down"))
         image.translatesAutoresizingMaskIntoConstraints = false

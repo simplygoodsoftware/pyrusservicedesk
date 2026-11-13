@@ -52,6 +52,27 @@ enum PSDLiquidGlassStyle {
         }
     }
     
+    /// Принудительная тема навигационного бара по кастомизации.
+    ///
+    /// Легаси-стилизация (`barStyle`, `barTintColor`) в Liquid Glass не применяется,
+    /// поэтому тёмный бар кастомизации транслируется в override темы: стекло капсул
+    /// и системные подложки кнопок следуют trait collection.
+    /// Приоритет повторяет `CustomizationHelper.navigationBarColor`:
+    /// явный цвет бара, затем стиль бара, затем цвет фона чата.
+    static func barOverrideStyle(forSystemStyle systemStyle: UIUserInterfaceStyle) -> UIUserInterfaceStyle {
+        let customization = PyrusServiceDesk.mainController?.customization
+        if let barColor = customization?.customBarColor {
+            return barColor.isDarkColor ? .dark : .light
+        }
+        if let barStyle = CustomizationHelper.barStyle(for: systemStyle) {
+            return barStyle == .default ? .light : .dark
+        }
+        if let backgroundColor = customization?.customBackgroundColor {
+            return backgroundColor.isDarkColor ? .dark : .light
+        }
+        return .unspecified
+    }
+    
     /// Цвет иконок на стеклянных кнопках: чёрный в светлой теме, белый в тёмной.
     ///
     /// Стекло само подстраивается под фон, поэтому иконкам не нужны цвета кастомизации —
