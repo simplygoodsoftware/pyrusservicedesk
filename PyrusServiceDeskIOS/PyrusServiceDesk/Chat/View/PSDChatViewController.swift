@@ -114,6 +114,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return table
     }()
     
+    private lazy var keyboardHandler = PSDChatKeyboardHandler(
+        tableView: tableView,
+        messageInputView: messageInputView,
+        containerView: view
+    )
+    
     private lazy var closedTicketView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -163,304 +169,69 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         interactor.doInteraction(.viewDidload)
     }
     
-    private func keyboardAnimationDuration(_ notification: NSNotification) -> TimeInterval{
-        if let  duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSValue{
-            return duration as? TimeInterval ?? 0
-        }
-        return 0
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+//        self.tableView.removeListeners()
+//        self.tableView.bottomPSDRefreshControl.isEnabled = false
+//        guard let lastVisibleCell = self.tableView.visibleCells.last,
+//              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
+//            return
+//        }
+//
+//        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
+//            self.tableView.reloadData()
+//            if self.tableView.contentOffset.y > 100,
+//               self.tableView.numberOfSections > lastVisibleRow.section,
+//               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
+//            {
+//                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
+//            }
+//        }, completion: { context in
+//            self.tableView.bottomPSDRefreshControl.isEnabled = true
+////            self.tableView.addKeyboardListeners()
+//        })
     }
     
-    ///keyboardWillShow hacks are valid for iOS 26 only; hide-compensation stays for 26+.
-    private var isIOS26Only: Bool {
-        if #available(iOS 27.0, *) { return false }
-        if #available(iOS 26.0, *) { return true }
-        return false
-    }
-    
-    ///Bottom of the flipped table is -contentInset.top; never pass less while keyboard is closed.
-    private var effectiveKeyboardHeight: CGFloat {
-        guard !isKeyBoardOpen else { return currkeyboardHeight }
-        return max(currkeyboardHeight, tableView.contentInset.top)
-    }
-    
-    ///Gap between the accessory's bottom and its window's bottom; nil before it is attached.
-    private func inputViewGapBelow() -> CGFloat? {
-        guard let inputWindow = messageInputView.window else { return nil }
-        let frameInWindow = inputWindow.convert(messageInputView.bounds, from: messageInputView)
-        return max(0, inputWindow.bounds.maxY - frameInWindow.maxY)
-    }
-    
-    ///True when the accessory frame is pinned to the screen edge and already contains the safe area.
-    private func inputViewFrameIncludesSafeArea() -> Bool {
-        guard defaultMessageInputViewHeight > 0 else { return false }
-        var diff = messageInputView.frame.size.height - defaultMessageInputViewHeight
-        let attachmentsHeight = PSDMessageInputView.attachmentsHeight
-        while attachmentsHeight > 0, diff >= attachmentsHeight {
-            diff -= attachmentsHeight
-        }
-        return abs(diff - view.safeAreaInsets.bottom) < Self.safeAreaDetectTolerance
-    }
-    
-    ///Detects detached (floating/undocked) keyboard. Falls back to end frame when private key is missing (iOS 27+).
-    private func isKeyboardDetached(_ notification: NSNotification, endFrame: CGRect) -> Bool {
-        if let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
-            return center.y > view.frame.maxY
-        }
-        return endFrame.minY >= UIScreen.main.bounds.maxY
-    }
-    
-    private func needChangeInset(_ newInset: CGFloat) -> Bool {
-        if
-            let presentedViewController = tableView.findViewController()?.presentedViewController,
-            presentedViewController.isBeingDismissed
-        {
-            return tableView.contentInset.bottom <= newInset
-        }
-        return true
-    }
-    
-    private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
-        var newOffsetY = max(0,tableView.contentOffset.y + delta)//block  too little offset
-        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset),newOffsetY)//block  too big offset
-        return newOffsetY
-    }
-    
-    private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
-        if(tableView.contentSize.height > (tableView.frame.size.height-keyboardHeight) && !tableView.isDragging){
-            return true
-        }
-        return false
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        startGettingInfo()
+        resizeTable()
+        messageInputView.isHidden = false
+        interactor.doInteraction(.viewWillAppear)
         
+        navigationController?.navigationBar.isHidden = false
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        keyboardHandler.startObserving()
     }
     
-    ///In the flipped table offset below -inset.top is never a valid rest position.
-    private func clampOffsetToRestPosition() {
-        let restOffset = -tableView.contentInset.top
-        if tableView.contentOffset.y < restOffset {
-            tableView.contentOffset.y = restOffset
-        }
-    }
-    
-    private var isKeyBoardOpen = false
-    @objc private func keyboardDidHide(_ notification: NSNotification) {
-        isKeyBoardOpen = false
-    }
-    
-    private var isFirstKeyboardShow: Bool = true
-    private var currkeyboardHeight: CGFloat = 0
-    private var defaultMessageInputViewHeight: CGFloat = 0
-    
-    @objc private func keyboardWillShow(_ notification: NSNotification) {
-        if isIOS26Only {
-            if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                let keyboardEndFrame = infoEndKey.cgRectValue
-                guard keyboardEndFrame.height != 0 else {
-                    return
-                }
-                let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
-                let duration = keyboardAnimationDuration(notification)
-                var keyboardHeight = keyboardEndFrame.height
-                
-                //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
-                if !messageInputView.inputTextView.isFirstResponder,
-                   !isKeyBoardOpen,
-                   keyboardHeight >= Self.staleKeyboardInsetThreshold {
-                    clampOffsetToRestPosition()
-                    logKB("willShow26 skipped, no responder kbH=\(keyboardHeight)")
-                    return
-                }
-                
-                let oldInset = self.tableView.contentInset.top
-                let oldOffset = self.tableView.contentOffset.y
-                
-                currkeyboardHeight = keyboardHeight
-                
-                if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(keyboardDetached && self.isKeyBoardOpen) {
-                    if self.messageInputView.inputTextView.isFirstResponder {
-                        self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                        self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                        self.view.layoutIfNeeded()
-                    }
-                    
-                    if isFirstKeyboardShow {
-                        defaultMessageInputViewHeight = messageInputView.frame.height
-                        if PyrusServiceDesk.startWithPush {
-                            UIView.performWithoutAnimation {
-                                self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                            }
-                        } else {
-                            self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                        }
-                        isFirstKeyboardShow = false
-                    } else {
-                        //Дельта — от текущего инсета, а не от currkeyboardHeight: ниже инсет
-                        //ставится абсолютно, и офсет должен сдвинуться ровно на его изменение.
-                        //currkeyboardHeight отстаёт от инсета после addAttachment/needShowRate
-                        //и после keyboardWillHide, и офсет по нему уезжал на эту разницу.
-                        let delta = keyboardHeight - oldInset
-                        
-                        if delta > 0 {
-                            self.tableView.contentOffset.y -= delta
-                        }
-                        
-                    }
-                    
-                }
-                self.logKB("willShow26 set inset")
-                if !(keyboardDetached && self.isKeyBoardOpen) {
-                    self.tableView.contentInset.top = keyboardHeight
-                    self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-                    if !self.messageInputView.inputTextView.isFirstResponder {
-                        clampOffsetToRestPosition()
-                    }
-                }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        tableView.isVisible = true
+        if !PyrusServiceDesk.multichats {
+            UIView.performWithoutAnimation {
+                self.becomeFirstResponder()
+                messageInputView.inputTextView.resignFirstResponder()
             }
-            return
+        }
+        interactor.doInteraction(.viewDidAppear)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self)
+        keyboardHandler.stopObserving()
+        if !PyrusServiceDesk.multichats {
+            hideAllKeyboard()
+            messageInputView.isHidden = true
         }
         
+        interactor.doInteraction(.viewWillDisappear)
         
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            guard keyboardEndFrame.height != 0 else {
-                return
-            }
-            let keyboardDetached = isKeyboardDetached(notification, endFrame: keyboardEndFrame)
-            let duration = keyboardAnimationDuration(notification)
-            let keyboardHeight = keyboardEndFrame.height
-            
-            //Dismissing a fullscreen modal replays a keyboard-sized willShow with no responder.
-            if !messageInputView.inputTextView.isFirstResponder,
-               !isKeyBoardOpen,
-               keyboardHeight >= Self.staleKeyboardInsetThreshold {
-                clampOffsetToRestPosition()
-                logKB("willShowLegacy skipped, no responder kbH=\(keyboardHeight)")
-                return
-            }
-            
-            currkeyboardHeight = keyboardHeight
-            
-            if defaultMessageInputViewHeight == 0 {
-                defaultMessageInputViewHeight = messageInputView.frame.height
-            }
-            
-            var oldInset = self.tableView.contentInset.top
-            if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(keyboardDetached && self.isKeyBoardOpen) {
-                if self.messageInputView.inputTextView.isFirstResponder {
-                    self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                    self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                }
-                
-                if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
-                    UIView.performWithoutAnimation {
-                        self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                    }
-                    isFirstKeyboardShow = false
-                } else {
-                    self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                }
-                
-            }
-            self.logKB("willShowLegacy set inset")
-            if !(keyboardDetached && self.isKeyBoardOpen) {
-                self.tableView.contentInset.top = keyboardHeight
-                self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-            }
-        }
-    }
-    
-    private static let staleKeyboardInsetThreshold: CGFloat = 150
-    private static let safeAreaDetectTolerance: CGFloat = 10
-    private var hasAttachmentsInset = false
-    private var oldHeight: CGFloat = 0
-    private var isAddButtonTapped: Bool = false
-    @objc private func keyboardWillHide(_ notification: NSNotification) {
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            let duration = keyboardAnimationDuration(notification)
-            let keyboardHeight = keyboardEndFrame.height
-            currkeyboardHeight = keyboardHeight
-            
-            UIView.animate(withDuration: duration, delay: 0, animations: {
-                self.bottomScrollButton?.constant = -110
-                self.bottomStopButton?.constant = -110
-                self.view.layoutIfNeeded()
-                if !self.isActive {
-                    self.logKB("willHide !isActive inset=90")
-                    self.tableView.contentInset.top = 90
-                } else
-                //The bar-transition guard must not swallow a real hide: its frame is keyboard-sized.
-                if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom
-                     && keyboardHeight < Self.staleKeyboardInsetThreshold)
-                {
-                    if #available(iOS 26.0, *) {
-                        var settledCeiling = self.messageInputView.frame.size.height + Self.safeAreaDetectTolerance
-                        if #unavailable(iOS 27.0) {
-                            //On iOS 26 the resting inset is inputH + safe area.
-                            settledCeiling += self.view.safeAreaInsets.bottom
-                        }
-                        let keyboardInsetAbsent = self.tableView.contentInset.top <= settledCeiling
-                        //Attach button dismisses the keyboard, but the first willHide carries only the accessory frame.
-                        let isRealHide = abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20
-                            || self.isAddButtonTapped
-                        if isRealHide, keyboardInsetAbsent {
-                            //Late willHide with a keyboard-sized frame after the inset already settled.
-                        } else
-                        if isRealHide {
-                            var extra: CGFloat = 0
-                            if #available(iOS 27.0, *) {
-                                //The bar's target height already contains the safe area; the momentary gap
-                                //is unreliable while the keyboard or a modal is still on screen.
-                                if self.inputViewFrameIncludesSafeArea() {
-                                    extra = 0
-                                } else {
-                                    extra = min(self.inputViewGapBelow() ?? self.view.safeAreaInsets.bottom,
-                                                self.view.safeAreaInsets.bottom)
-                                }
-                            }
-                            self.logKB("willHide realHide extra=\(extra)")
-                            let newInset = self.messageInputView.frame.size.height + extra
-                            self.tableView.contentInset.top = newInset
-                            self.tableView.contentOffset.y -= extra
-                            //Behind a fullscreen modal UIKit does not re-clamp the offset to the new inset.
-                            if self.tableView.contentOffset.y < -newInset {
-                                self.tableView.contentOffset.y = -newInset
-                            }
-                            //Stale keyboard height makes effectiveKeyboardHeight overscroll on next focus.
-                            self.currkeyboardHeight = newInset
-                        } else {
-                            //Repeated willHide with accessory-only frame must not strip safe area inset.
-                            if #available(iOS 27.0, *) {
-                                let gapBelow = self.inputViewGapBelow()
-                                let accessoryExtra = min(gapBelow ?? self.view.safeAreaInsets.bottom, self.view.safeAreaInsets.bottom)
-                                var expectedInset = self.messageInputView.frame.size.height + accessoryExtra
-                                if self.defaultMessageInputViewHeight > 0 {
-                                    //The bar may still be in transient geometry (no safe area in height, gap 0).
-                                    expectedInset = max(expectedInset, self.defaultMessageInputViewHeight + self.view.safeAreaInsets.bottom)
-                                }
-                                //gapBelow ~ keyboard height means the keyboard is actually on screen.
-                                let keyboardReallyGone = (gapBelow ?? 0) <= self.view.safeAreaInsets.bottom + 20
-                                if !self.isKeyBoardOpen, keyboardReallyGone,
-                                   self.tableView.contentInset.top - expectedInset > Self.staleKeyboardInsetThreshold {
-                                    //Fullscreen modal dismissed the keyboard, but its willHide was skipped by the guards.
-                                    self.logKB("willHide staleReset")
-                                    self.tableView.contentInset.top = expectedInset
-                                    if self.tableView.contentOffset.y < -expectedInset {
-                                        self.tableView.contentOffset.y = -expectedInset
-                                    }
-                                    self.currkeyboardHeight = expectedInset
-                                }
-                            }
-                        }
-                    } else {
-                        self.logKB("willHide pre26 set inset")
-                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
-                    }
-                    self.isAddButtonTapped = false
-                }
-            })
-            
-            oldHeight = self.messageInputView.frame.size.height
-        }
+        UIView.animate(withDuration: 0.2, animations: {
+            self.tabBarController?.tabBar.alpha = 1.0
+        })
     }
     
     override func viewWillLayoutSubviews() {
@@ -498,111 +269,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             closedTicketView.addSubview(blurEffectView)
             closedTicketView.sendSubviewToBack(blurEffectView)
         }
-        logKB("layoutSubviews")
-        syncInsetWithInputViewIfNeeded()
-    }
-    
-    //TEMP diagnostics, remove after the open-jump bug is found.
-    private func logKB(_ context: String) {
-        print("[PSDChat] \(context) | inset.top=\(tableView.contentInset.top) offset.y=\(tableView.contentOffset.y) inputH=\(messageInputView.frame.size.height) kbOpen=\(isKeyBoardOpen) firstResp=\(messageInputView.inputTextView.isFirstResponder)")
-    }
-    
-    ///Keeps bottom gap in sync with input view when keyboard is closed and notifications were not delivered.
-    private func syncInsetWithInputViewIfNeeded() {
-        guard isActive, !isKeyBoardOpen, !messageInputView.inputTextView.isFirstResponder else { return }
-        var barHeight = messageInputView.frame.size.height
-        if messageInputView.window == nil {
-            //Before the accessory is attached its frame carries a temporary layout height.
-            let fitting = messageInputView.systemLayoutSizeFitting(
-                CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height),
-                withHorizontalFittingPriority: .required,
-                verticalFittingPriority: .fittingSizeLevel
-            ).height
-            barHeight = max(barHeight, fitting)
-        }
-        var targetInset = barHeight
-        if #available(iOS 27.0, *) {
-            //Accessory frame pinned to the screen edge already contains the safe area.
-            //System alerts report a transient gap below the bar; track only the bar height then.
-            let insetMatchesBar = tableView.contentInset.top >= targetInset - Self.safeAreaDetectTolerance
-            if !insetMatchesBar {
-                let safeBottom = view.safeAreaInsets.bottom
-                targetInset += min(inputViewGapBelow() ?? safeBottom, safeBottom)
-            }
-        }
-        guard targetInset > 0, tableView.contentInset.top < targetInset else { return }
-        let delta = targetInset - tableView.contentInset.top
-        //Rounding-sized corrections must not visibly push the content after the chat is on screen.
-        guard delta >= Self.safeAreaDetectTolerance else { return }
-        logKB("syncInset apply target=\(targetInset)")
-        tableView.contentInset.top = targetInset
-        tableView.contentOffset.y -= delta
-    }
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-//        self.tableView.removeListeners()
-//        self.tableView.bottomPSDRefreshControl.isEnabled = false
-//        guard let lastVisibleCell = self.tableView.visibleCells.last,
-//              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
-//            return
-//        }
-//
-//        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
-//            self.tableView.reloadData()
-//            if self.tableView.contentOffset.y > 100,
-//               self.tableView.numberOfSections > lastVisibleRow.section,
-//               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
-//            {
-//                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
-//            }
-//        }, completion: { context in
-//            self.tableView.bottomPSDRefreshControl.isEnabled = true
-////            self.tableView.addKeyboardListeners()
-//        })
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        startGettingInfo()
-        resizeTable()
-        messageInputView.isHidden = false
-        interactor.doInteraction(.viewWillAppear)
-        
-        navigationController?.navigationBar.isHidden = false
-        navigationController?.setNavigationBarHidden(false, animated: false)
-        NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardDidHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        tableView.isVisible = true
-        if !PyrusServiceDesk.multichats {
-            UIView.performWithoutAnimation {
-                self.becomeFirstResponder()
-                messageInputView.inputTextView.resignFirstResponder()
-            }
-        }
-        interactor.doInteraction(.viewDidAppear)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self)
-        if !PyrusServiceDesk.multichats {
-            hideAllKeyboard()
-            messageInputView.isHidden = true
-        }
-        
-        interactor.doInteraction(.viewWillDisappear)
-        
-        UIView.animate(withDuration: 0.2, animations: {
-            self.tabBarController?.tabBar.alpha = 1.0
-        })
+        keyboardHandler.logState("layoutSubviews")
+        keyboardHandler.syncInsetWithInputViewIfNeeded()
     }
     
     override func recolor() {
@@ -704,7 +372,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         }
         tableView.semanticContentAttribute = .forceRightToLeft
         
-        self.logKB("inset=10")
+        keyboardHandler.logState("inset=10")
         tableView.contentInset.top = 10
         
         view.addSubview(tableView)
@@ -803,6 +471,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         ])
         bottomScrollButton = scrollControlView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomScrollButton?.isActive = true
+        keyboardHandler.bottomScrollButton = bottomScrollButton
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
@@ -838,6 +507,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         ])
         bottomStopButton = stopButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomStopButton?.isActive = true
+        keyboardHandler.bottomStopButton = bottomStopButton
         
         stopButton.addTarget(self, action: #selector(stopRecording), for: .touchUpInside)
     }
@@ -869,7 +539,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func scrollToBottom() {
-        tableView.scrollsToBottom(animated: true, keyBoardHeight: effectiveKeyboardHeight)
+        tableView.scrollsToBottom(animated: true, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
     }
     
     func setupInfoView() {
@@ -1098,10 +768,7 @@ private extension PSDChatViewController {
             //Именно фактическая высота, а не RATE_HEIGHT: у текстового рейтинга она
             //зависит от числа плашек, и с константой кнопки оказывались за нижней
             //кромкой до ближайшего пересчёта инсета.
-            let rateHeight = messageInputView.currentRateHeight
-            self.logKB("rate inset")
-            tableView.contentInset.top += rateHeight
-            tableView.contentOffset.y -= rateHeight
+            keyboardHandler.applyRateInset(messageInputView.currentRateHeight)
         }
     }
     
@@ -1121,7 +788,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
         case .updateRows:
-            tableView.updateRows(keyboardHeight: effectiveKeyboardHeight)
+            tableView.updateRows(keyboardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .removeNoConnectionView:
             tableView.removeNoConnectionView()
         case .endRefreshing:
@@ -1133,7 +800,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .showNoConnectionView:
             tableView.showNoConnectionView()
         case .scrollsToBottom(animated: let animated):
-            tableView.scrollsToBottom(animated: animated, keyBoardHeight: effectiveKeyboardHeight)
+            tableView.scrollsToBottom(animated: animated, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .endLoading:
             tableView.isLoading = false
         case .dataIsShown:
@@ -1143,7 +810,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
         case .addRow(scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: effectiveKeyboardHeight)
+            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: keyboardHandler.effectiveKeyboardHeight)
         case .addNewRow:
             self.deletedAllAttachments()
             if(tableView.numberOfRows(inSection: 0) == 0) {
@@ -1176,10 +843,10 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.layoutIfNeeded()
         case .updateActive(isActive: let isActive):
             self.isActive = isActive
+            keyboardHandler.isChatActive = isActive
             if !isActive {
                 closedTicketView.isHidden = false
-                self.logKB("inset=90+safe")
-                tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
+                keyboardHandler.applyInactiveInset()
                 self.resignFirstResponder()
                 self.messageInputView.inputTextView.resignFirstResponder()
             }
@@ -1200,30 +867,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func deletedAllAttachments() {
-        if #available(iOS 27.0, *) {
-            //Also called on send and on chat setup when no attachments were shown.
-            guard hasAttachmentsInset else {
-                return
-            }
-            hasAttachmentsInset = false
-            //Exact inverse of addAttachment(). Offset is assigned absolutely: shrinking the inset
-            //clamps the out-of-range offset by itself, so a relative "+=" would double the shift.
-            let newInset = tableView.contentInset.top - PSDMessageInputView.attachmentsHeight
-            let newOffset = tableView.contentOffset.y + PSDMessageInputView.attachmentsHeight
-            self.logKB("deletedAllAttachments27")
-            tableView.contentInset.top = newInset
-            tableView.contentOffset.y = newOffset
-            return
-        }
-        if #available(iOS 26.0, *) {
-            if isKeyBoardOpen {
-                self.logKB("deletedAllAttachments26 kbOpen")
-                tableView.contentInset.top = currkeyboardHeight
-            } else {
-                self.logKB("deletedAllAttachments26")
-                tableView.contentInset.top = defaultMessageInputViewHeight
-            }
-        }
+        keyboardHandler.handleAllAttachmentsDeleted()
     }
     
     func recordStop() {
@@ -1235,14 +879,11 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
     }
     
     func addAttachment() {
-        hasAttachmentsInset = true
-        self.logKB("addAttachment")
-        tableView.contentInset.top += PSDMessageInputView.attachmentsHeight
-        tableView.contentOffset.y -= PSDMessageInputView.attachmentsHeight
+        keyboardHandler.handleAttachmentAdded()
     }
     
     func addButtonTapped() {
-        isAddButtonTapped = true
+        keyboardHandler.markAddButtonTapped()
         messageInputView.inputTextView.resignFirstResponder()
     }
     
