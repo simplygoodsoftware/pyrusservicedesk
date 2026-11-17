@@ -5,12 +5,13 @@ import Foundation
 struct PSDGetChats {
     private static let RATING_SETTINGS_KEY = "rating_settings"
     private static let WELCOME_MESSAGE = "welcome_message"
+    private static let OPERATOR_TIME_MESSAGE_KEY = "operator_response_time_message"
     private static var sessionTask : URLSessionDataTask? = nil
     /**
      Get chats from server.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
      */
-    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?, _ clients: [PSDClientInfo]?, _ complete: Bool) -> Void) {
+    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?, _ clients: [PSDClientInfo]?, _ operatorTimeMessages: [Int: String]?, _ complete: Bool) -> Void) {
         //remove old session if it is
         remove()
         var parameters = [String: Any]()
@@ -24,15 +25,15 @@ struct PSDGetChats {
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
-        
+
         if let fieldsData = PyrusServiceDesk.fieldsData {
             parameters[EXTRA_FIELDS_KEY] = fieldsData
         }
-        
+
         if PyrusServiceDesk.needShowLoading {
             parameters["last_note_id"] = 0
         }
-        
+
         if PyrusServiceDesk.additionalUsers.count > 0 {
             var additional_users = [[String: Any]]()
             for user in PyrusServiceDesk.additionalUsers {
@@ -46,21 +47,21 @@ struct PSDGetChats {
             parameters["additional_users"] = additional_users
         }
         parameters["commands"] = commands
-        
+
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
 
 //        print("GetTickets: \(Date()), commands count: \(commands.count)")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
-                completion(nil, nil, nil, nil, false)
+                completion(nil, nil, nil, nil, nil, false)
                 return
             }
-            
+
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 DispatchQueue.main.async {
                     if httpStatus.statusCode == 429 {
                         SyncManager.removeLastActivityDate()
-                        completion(nil, nil, nil, nil, true)
+                        completion(nil, nil, nil, nil, nil, true)
                     }
                     if httpStatus.statusCode == 403 {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
@@ -74,14 +75,14 @@ struct PSDGetChats {
                 }
                 let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 print("Запрос не прошел, код ошибки (\(httpStatus.statusCode), ошибка: \(String(describing: error))")
-                completion(nil, nil, nil, nil, false)
+                completion(nil, nil, nil, nil, nil, false)
             } else {
                 do{
                     let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                     let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
                     let clients = generateClients(from: clientsArray)
                     let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
-                    let chats = generateChats(from: chatsArray, clients: clients)
+                    let (chats, operatorTimeMessages) = generateChats(from: chatsArray, clients: clients)
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
 //                    print("количество чатов: \(chats.count)")
                     do {
@@ -89,15 +90,15 @@ struct PSDGetChats {
                         let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
                         let decoder = JSONDecoder()
                         let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
-                        completion(chats, commands, authorAccessDenied, clients, true)
+                        completion(chats, commands, authorAccessDenied, clients, operatorTimeMessages, true)
                     } catch {
-                        completion(chats, nil, authorAccessDenied, clients, true)
+                        completion(chats, nil, authorAccessDenied, clients, operatorTimeMessages, true)
                     }
-                } catch { 
+                } catch {
                     print("PSDGetChats error when convert to dictionary")
                 }
             }
-            
+
         }
         PSDGetChats.sessionTask?.resume()
     }
@@ -110,7 +111,7 @@ struct PSDGetChats {
             PSDGetChats.sessionTask = nil
         }
     }
-    
+
     private static func generateClients(from response: NSArray) -> [PSDClientInfo] {
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
@@ -150,7 +151,7 @@ struct PSDGetChats {
             if !serverClients.contains(client) {
                 serverClients.append(client)
             }
-            
+
             let extraUsers = dic["extra_users"] as? NSArray ?? []
             for extraUser in extraUsers {
                 guard let extraUserDic: [String: Any] = extraUser as? [String: Any] else {
@@ -166,7 +167,7 @@ struct PSDGetChats {
                     NotificationCenter.default.post(name: .createMenuNotification, object: nil)
                 }
             }
-            
+
             let authorsInfo = dic["author_info"] as? [String: Any] ?? [:]
             for userId in authorsInfo.keys {
                 let authors = authorsInfo[userId] as? NSArray ?? []
@@ -189,24 +190,25 @@ struct PSDGetChats {
                     user.authors = userAuthors
                 }
             }
-            
+
         }
-        
+
         for client in clients {
             if !serverClients.contains(client) {
                 clients.removeAll(where: { $0.clientId == client.clientId })
             }
         }
-        
+
         return clients
     }
-    
+
     static func updateClientIcon(client: PSDClientInfo) {
-        
+
     }
-    
-    private static func generateChats(from response: NSArray, clients: [PSDClientInfo]) -> [PSDChat] {
+
+    private static func generateChats(from response: NSArray, clients: [PSDClientInfo]) -> (chats: [PSDChat], operatorTimeMessages: [Int: String]) {
         var chats: [PSDChat] = []
+        var operatorTimeMessages = [Int: String]()
         for i in 0..<response.count {
             let dic: [String: Any] = response[i] as! [String: Any]
             let ticketId = dic["ticket_id"] as? Int
@@ -217,19 +219,25 @@ struct PSDGetChats {
                 date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .lastMessage, id: "\(messageId)") ?? Date()
                 lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: messageId, owner: nil, date: date)
             }
-            
+
+            if let ticketId,
+               let operatorTimeMessage = dic[PSDGetChats.OPERATOR_TIME_MESSAGE_KEY] as? String,
+               !operatorTimeMessage.isEmpty {
+                operatorTimeMessages[ticketId] = operatorTimeMessage
+            }
+
             let userId = dic["user_id"] as? String ?? ""
             var messages: [PSDMessage] = [PSDMessage]()
             let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
-            
+
             messages = newMessages
-            
+
             if let message = messages.last {
                 lastMessage?.attachments = message.attachments
                 lastMessage?.owner = message.owner
                 lastMessage?.isOutgoing = message.isOutgoing
             }
-            
+
             let chat = PSDChat.init(chatId: ticketId, date: date, messages: messages)
             chat.subject = dic["subject"] as? String
             chat.isRead = dic["is_read"] as? Bool ??  true
@@ -247,14 +255,14 @@ struct PSDGetChats {
 
             chats.append(chat)
         }
-        return sortByLastMessage(chats)
+        return (sortByLastMessage(chats), operatorTimeMessages)
     }
-    
+
     private static func isMoreThan24Hours(from date: Date) -> Bool {
         let timeInterval = Date().timeIntervalSince(date)
         return timeInterval > 24 * 60 * 60 // 24 часа
     }
-    
+
     static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
         return chats.sorted(by: {
             if $0.isActive, !$1.isActive {
@@ -269,7 +277,7 @@ struct PSDGetChats {
             return $0.date ?? Date() > $1.date ?? Date()
         })
     }
-    
+
     static func getSortedChatForMessages(_ messages: [PSDMessage]) -> [PSDChat] {
         var chats = [PSDChat]()
         messages.forEach {
