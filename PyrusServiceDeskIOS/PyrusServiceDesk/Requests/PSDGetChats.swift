@@ -331,7 +331,8 @@ struct PSDGetChats {
     
     /// Разбор блока applications ответа. Схема блока не менялась при переходе
     /// на HelpySync, поэтому метод переиспользуется из `PSDHelpySync`.
-    static func generateClients(from response: NSArray) -> ClientsResult {
+    /// allowedExtraUserIds — фильтр extra_users по переносу тикетов
+    static func generateClients(from response: NSArray, allowedExtraUserIds: Set<String>? = nil) -> ClientsResult {
         let updateAccessCommands = PyrusServiceDesk.repository.getCommands().filter({ $0.type == TicketCommandType.updateAccess.rawValue }).sorted(by: { $0.params.date ?? Date() > $1.params.date ?? Date() })
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
@@ -397,6 +398,10 @@ struct PSDGetChats {
                     continue
                 }
                 let userId = extraUserDic["user_id"] as? String ?? ""
+                // Extra user добавляется только при переносе тикета на него.
+                if let allowedExtraUserIds, !allowedExtraUserIds.contains(userId) {
+                    continue
+                }
                 let userName = extraUserDic["title"] as? String ?? ""
                 let user = PSDUserInfo(appId: clientId, clientName: clientName, userId: userId, userName: userName, secretKey: nil)
                 if PyrusServiceDesk.clientId == clientId && PyrusServiceDesk.customUserId?.count ?? 0 == 0  {
@@ -430,17 +435,26 @@ struct PSDGetChats {
                     let id = authorDic["author_id"] as? String ?? ""
                     let phone = authorDic["phone"] as? String ?? ""
                     var hasAccess = authorDic["has_access"] as? Bool ?? true
-                    var hasAdminAccess = hasAccess ? authorDic["has_admin_access"] as? Bool ?? false : false
+                    var hasAdminAccess = authorDic["has_admin_access"] as? Bool ?? false
+                    // Отсутствие поля трактуем как «не верифицирован».
+                    var isVerified = authorDic["is_verified"] as? Bool ?? false
                     if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id }) {
                         hasAccess = commandHasAccess.params.hasAccess ?? hasAccess
                         hasAdminAccess = commandHasAccess.params.hasAdminAccess ?? hasAdminAccess
+                        isVerified = commandHasAccess.params.isVerified ?? isVerified
+                    }
+                    // Админом может быть только верифицированный участник с доступом,
+                    // даже если сервер прислал иное.
+                    if !hasAccess || !isVerified {
+                        hasAdminAccess = false
                     }
                     let authorInfo = PSDUserInfo.AuthorInfo(
                         id: id,
                         name: name,
                         phone: phone,
                         hasAccess: hasAccess,
-                        hasAdminAccess: hasAdminAccess
+                        hasAdminAccess: hasAdminAccess,
+                        isVerified: isVerified
                     )
                     userAuthors.append(authorInfo)
                 }
