@@ -679,6 +679,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             if let hasAdminAccess = ticketCommand.params.hasAdminAccess {
                 dbTicketCommand.hasAdminAccess = hasAdminAccess
             }
+            if let isVerified = ticketCommand.params.isVerified {
+                dbTicketCommand.isVerified = isVerified
+            }
             dbTicketCommand.token = ticketCommand.params.token
             dbTicketCommand.tokenType = ticketCommand.params.type
             dbTicketCommand.userId = ticketCommand.userId
@@ -741,6 +744,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             date: dbCommand.date,
                             messageClientId: dbCommand.clientId,
                             hasAccess: dbCommand.hasAccess,
+                            isVerified: dbCommand.isVerified ? true : nil,
                             extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
                         )
                     )
@@ -793,6 +797,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         messageClientId: dbCommand.clientId,
                         hasAccess: dbCommand.hasAccess,
                         hasAdminAccess: dbCommand.hasAdminAccess,
+                        // Скалярный Bool не различает nil и false: false считаем
+                        // «поле не передавалось», явный is_verified = false не шлём.
+                        isVerified: dbCommand.isVerified ? true : nil,
                         extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil,
                         lastReadAnnouncementId: dbCommand.lastReadAnnouncementId
                     )

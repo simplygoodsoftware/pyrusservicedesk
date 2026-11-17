@@ -83,13 +83,15 @@ class TicketCommandParams: Codable {
     let authorId: String?
     let hasAccess: Bool?
     let hasAdminAccess: Bool?
+    /// nil — не менять статус верификации участника.
+    let isVerified: Bool?
     let ratingComment: String?
     var date: Date? = nil
     var messageClientId: String? = nil
     let extraFields: [String: String]?
     let lastReadAnnouncementId: String?
     
-    init(ticketId: Int? = nil, appId: String? = nil, requestNewTicket: Bool? = nil, userId: String? = nil, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, hasAdminAccess: Bool? = nil, extraFields: [String: String]? = nil, lastReadAnnouncementId: String? = nil) {
+    init(ticketId: Int? = nil, appId: String? = nil, requestNewTicket: Bool? = nil, userId: String? = nil, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, hasAdminAccess: Bool? = nil, isVerified: Bool? = nil, extraFields: [String: String]? = nil, lastReadAnnouncementId: String? = nil) {
 
         self.ticketId = ticketId
         self.appId = appId
@@ -106,6 +108,7 @@ class TicketCommandParams: Codable {
         self.authorId = authorId
         self.hasAccess = hasAccess
         self.hasAdminAccess = hasAdminAccess
+        self.isVerified = isVerified
         self.ratingComment = ratingComment
         self.extraFields = extraFields
         self.lastReadAnnouncementId = lastReadAnnouncementId
@@ -125,6 +128,7 @@ class TicketCommandParams: Codable {
         case authorId = "author_id"
         case hasAccess = "has_access"
         case hasAdminAccess = "has_admin_access"
+        case isVerified = "is_verified"
         case ratingComment = "rating_comment"
         case extraFields = "extra_fields"
         case lastReadAnnouncementId = "last_read_announcement_id"
@@ -161,6 +165,7 @@ class TicketCommandParams: Codable {
         authorId = try container.decodeIfPresent(String.self, forKey: .authorId)
         hasAccess = try container.decodeIfPresent(Bool.self, forKey: .hasAccess)
         hasAdminAccess = try container.decodeIfPresent(Bool.self, forKey: .hasAdminAccess)
+        isVerified = try container.decodeIfPresent(Bool.self, forKey: .isVerified)
         ratingComment = try container.decodeIfPresent(String.self, forKey: .ratingComment)
         extraFields = try container.decodeIfPresent([String: String].self, forKey: .extraFields)
         lastReadAnnouncementId = try container.decodeIfPresent(String.self, forKey: .lastReadAnnouncementId)
@@ -181,6 +186,7 @@ class TicketCommandParams: Codable {
         try container.encodeIfPresent(authorId, forKey: .authorId)
         try container.encodeIfPresent(hasAccess, forKey: .hasAccess)
         try container.encodeIfPresent(hasAdminAccess, forKey: .hasAdminAccess)
+        try container.encodeIfPresent(isVerified, forKey: .isVerified)
         try container.encodeIfPresent(ratingComment, forKey: .ratingComment)
         try container.encodeIfPresent(extraFields, forKey: .extraFields)
         try container.encodeIfPresent(lastReadAnnouncementId, forKey: .lastReadAnnouncementId)

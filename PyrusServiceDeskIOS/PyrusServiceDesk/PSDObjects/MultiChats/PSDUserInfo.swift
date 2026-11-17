@@ -31,13 +31,15 @@ import Foundation
         let phone: String?
         var hasAccess: Bool
         var hasAdminAccess: Bool
+        var isVerified: Bool
         
-        init(id: String, name: String, phone: String?, hasAccess: Bool, hasAdminAccess: Bool) {
+        init(id: String, name: String, phone: String?, hasAccess: Bool, hasAdminAccess: Bool, isVerified: Bool) {
             self.id = id
             self.name = name
             self.phone = phone
             self.hasAccess = hasAccess
             self.hasAdminAccess = hasAdminAccess
+            self.isVerified = isVerified
         }
     }
 }
