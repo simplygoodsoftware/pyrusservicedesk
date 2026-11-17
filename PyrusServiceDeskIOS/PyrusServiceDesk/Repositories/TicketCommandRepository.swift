@@ -119,12 +119,12 @@ class TicketCommandRepository {
 //            } else {
 //                hasUnsendNewTicketCommand = false
 //            }
-//            
+//
 //            if !hasUnsendNewTicketCommand {
 //                commandsForSync.append(command)
 //            }
 //        }
-//        
+//
 //        if commandsForSync.count > 0 {
 //            print(commandsForSync)
 //        }
@@ -193,19 +193,7 @@ class TicketCommandRepository {
     }
     
     func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil, needSync: Bool = true) {
-        if command.type == TicketCommandType.setPushToken.rawValue {
-            var idsForDelete = [String]()
-            for cmnd in commandsCache ?? [] {
-                if cmnd.type == TicketCommandType.setPushToken.rawValue,
-                   cmnd.appId == command.appId,
-                   cmnd.userId == command.userId {
-                    idsForDelete.append(cmnd.commandId)
-                }
-            }
-            for id in idsForDelete {
-                deleteCommand(withId: id)
-            }
-        }
+        removeSupersededPushTokenCommands(for: command)
         chatsDataService.saveTicketCommand(with: command) { [weak self] _ in
             DispatchQueue.main.async { [weak self] in
                 self?.commandsCache = self?.chatsDataService.getAllCommands()
@@ -213,6 +201,69 @@ class TicketCommandRepository {
                     PyrusServiceDesk.syncManager.syncGetTickets()
                 }
             }
+        }
+    }
+    
+    /// Добавляет несколько команд без автосинка. Completion вызывается
+    /// на main после обновления кэша — getCommands() уже вернёт добавленное.
+    func add(commands: [TicketCommand], completion: (() -> Void)? = nil) {
+        guard !commands.isEmpty else {
+            DispatchQueue.main.async { completion?() }
+            return
+        }
+        // commandsCache обновится только после сохранения, поэтому дубли
+        // setPushToken внутри самой пачки суперсидим до записи.
+        let commandsToSave = supersededWithinBatch(commands)
+        for command in commandsToSave {
+            removeSupersededPushTokenCommands(for: command)
+        }
+        
+        let group = DispatchGroup()
+        for command in commandsToSave {
+            group.enter()
+            chatsDataService.saveTicketCommand(with: command) { _ in
+                group.leave()
+            }
+        }
+        group.notify(queue: .main) { [weak self] in
+            guard let self else { return }
+            self.commandsCache = self.chatsDataService.getAllCommands()
+            completion?()
+        }
+    }
+    
+    /// Оставляет последнюю setPushToken по каждой паре appId + userId,
+    /// сохраняя порядок остальных команд.
+    private func supersededWithinBatch(_ commands: [TicketCommand]) -> [TicketCommand] {
+        var seenPushTokenKeys = Set<String>()
+        var result = [TicketCommand]()
+        for command in commands.reversed() {
+            if command.type == TicketCommandType.setPushToken.rawValue {
+                let key = "\(command.appId ?? "")|\(command.userId ?? "")"
+                guard seenPushTokenKeys.insert(key).inserted else {
+                    continue
+                }
+            }
+            result.append(command)
+        }
+        return result.reversed()
+    }
+    
+    /// Для setPushToken актуальна только последняя команда
+    /// по паре appId + userId — предыдущие удаляем.
+    private func removeSupersededPushTokenCommands(for command: TicketCommand) {
+        guard command.type == TicketCommandType.setPushToken.rawValue else {
+            return
+        }
+        let idsForDelete = (commandsCache ?? [])
+            .filter {
+                $0.type == TicketCommandType.setPushToken.rawValue
+                    && $0.appId == command.appId
+                    && $0.userId == command.userId
+            }
+            .map { $0.commandId }
+        for id in idsForDelete {
+            deleteCommand(withId: id)
         }
     }
     

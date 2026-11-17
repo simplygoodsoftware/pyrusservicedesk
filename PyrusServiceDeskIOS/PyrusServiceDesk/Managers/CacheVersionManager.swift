@@ -4,8 +4,9 @@ final class CacheVersionManager {
     
     static let shared = CacheVersionManager()
 
-    /// Текущая версия кэша
-    private let currentVersion = 7
+    /// Текущая версия кэша.
+    /// 8 — перезапись кэша после фикса полярности isSupportMessage.
+    private let currentVersion = 8
     
     private let userDefaults = UserDefaults.standard
     private let cacheVersionKey = "cacheVersionKey"

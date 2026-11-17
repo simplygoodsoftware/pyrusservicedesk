@@ -6,7 +6,7 @@ enum EntityType {
 }
 
 final class CoreDataService {
-    private let currentSchemaVersion = 5
+    private let currentSchemaVersion = 6
 
     private let schemaVersionKey = "PSDChatsSchemaVersion"
     
@@ -366,6 +366,36 @@ extension CoreDataService: CoreDataServiceProtocol {
     }
 
     
+    /// Удаляет команды при очистке кэша, оставляя только setPushToken
+    /// с token == nil (отложенный разлогин). Команды с реальным токеном
+    /// удаляются: при смене пользователя без разлогина они подписали бы
+    /// старого пользователя на пуши в следующей сессии.
+    func deleteCommandsForCacheClean() {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBTicketCommand")
+        fetchRequest.predicate = NSPredicate(
+            format: "NOT (type == %d AND token == nil)",
+            TicketCommandType.setPushToken.rawValue
+        )
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        deleteRequest.resultType = .resultTypeObjectIDs
+        do {
+            let result = try backgroundContext.execute(deleteRequest) as? NSBatchDeleteResult
+            // Batch delete идёт мимо контекстов — мерджим удаления,
+            // чтобы загруженные объекты не остались протухшими.
+            // Только viewContext: `backgroundContext` — computed property,
+            // отдающая новый контекст на каждое обращение, долгоживущих
+            // фоновых контекстов в сервисе нет.
+            if let objectIDs = result?.result as? [NSManagedObjectID], !objectIDs.isEmpty {
+                NSManagedObjectContext.mergeChanges(
+                    fromRemoteContextSave: [NSDeletedObjectsKey: objectIDs],
+                    into: [persistentContainer.viewContext]
+                )
+            }
+        } catch {
+            PyrusLogger.shared.logEvent("Error deleting commands: \(error)")
+        }
+    }
+
     func deleteAllObjects(forEntityName entityName: String) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
