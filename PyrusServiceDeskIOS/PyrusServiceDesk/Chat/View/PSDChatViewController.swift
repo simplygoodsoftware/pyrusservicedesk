@@ -146,7 +146,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     ///Подложка под навигационным баром, затухает вниз, к переписке.
     ///Используется только в Liquid Glass оформлении.
-    private lazy var navigationBackdropView = BlurBackdropView(fadeEdge: .bottom)
+    private lazy var navigationBackdropView = PSDBlurBackdropView(fadeEdge: .bottom)
     private var navigationBackdropHeight: NSLayoutConstraint?
     
     private var firstLoad: Bool = true
