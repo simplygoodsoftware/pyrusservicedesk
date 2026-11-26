@@ -156,6 +156,6 @@
 "File" = "Archivo";
 "TicketNumber" = "Número de ticket";
 "HoldToRecord" = "Mantenga presionado para grabar un audio";
-"DTF_Full" = "ddMMyyyy_HHmmss";
+"DTF_Full" = "ddMMaaaa_HHmmss";
 "PyrusCannotAccessYourMicrophone" = "Permitir el acceso al micrófono";
 "PleaseEnableAccessMicrophone" = "Le permitirá grabar mensajes de audio y adjuntarlos.\nPara activar esto, haga clic en Configuración y active el Micrófono.";
