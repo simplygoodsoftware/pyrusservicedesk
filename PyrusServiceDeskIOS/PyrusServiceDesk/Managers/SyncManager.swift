@@ -11,17 +11,18 @@ class SyncManager {
     let monitor = NWPathMonitor()
     private var lastMonitorPathStatus: NWPath.Status = .satisfied
     private let throttle: ThrottleController
-    
+
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
+    private(set) var operatorTimeMessages = [Int: String]()
     var networkAvailability = true {
         didSet {
             NotificationCenter.default.post(name: SyncManager.connectionErrorNotification, object: nil)
         }
     }
-    
+
     var logsToSend: [LogInfo] = []
-    
+
     private var timerFosSendSync: Timer?
     private var previousDelay: Double?
 
@@ -46,7 +47,7 @@ class SyncManager {
         }
         monitor.start(queue: DispatchQueue.main)
     }
-    
+
     func syncGetTickets(isFilter: Bool = false) {
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         if ticketCommands.contains(where: { $0.type == TicketCommandType.createComment.rawValue }) {
@@ -58,28 +59,33 @@ class SyncManager {
             self?.sync(isFilter: isFilter)
         }
     }
-    
+
     func loadCache() {
         firstLoadUpdates()
+    }
+
+    func operatorTimeMessage(for ticketId: Int?) -> String? {
+        guard let ticketId else { return nil }
+        return operatorTimeMessages[ticketId]
     }
 }
 
 private extension SyncManager {
-    
+
     func sync(isFilter: Bool = false) {
         if logsToSend.count > 0 {
             let logs = Logs(exceptions: logsToSend)
             PSDLogService.sendLog(logs)
             logsToSend.removeAll()
         }
-        
+
         guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
-        
+
         if !self.isFilter {
             self.isFilter = isFilter
         }
-        
+
         if isRequestInProgress {
             shouldSendAnotherRequest = true
             return
@@ -88,37 +94,38 @@ private extension SyncManager {
         isRequestInProgress = true
         shouldSendAnotherRequest = false
         sendingMessages = PSDMessagesStorage.getSendingMessages()
-        
+
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         let userId = PyrusServiceDesk.customUserId
-        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] chats, commandsResult, authorAccessDenied, clientsArray, operatorTimeMessages, complete in
             guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
             if !PyrusServiceDesk.multichats && userId != PyrusServiceDesk.customUserId {
                 return
             }
             guard let self = self else { return }
-            
+
             let userInfo = ["isFilter": isFilter]
             var clients = clientsArray
-            
+
             // Проверяем доступы и удаляем вендоров (clients) при необходимости
             checkAccesses(authorAccessDenied: authorAccessDenied, clientsArray: clientsArray, clients: &clients, userInfo: userInfo)
-            
+
             // Обрабатываем результаты команд
             updateCommandsAndMessageStorage(commandsResult: commandsResult)
-            
+
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                
+
                 if let chats, complete {
+                    updateOperatorTimeMessages(operatorTimeMessages ?? [:])
                     chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
                             guard let self else { return }
-                            
+
                             if let clients, clients.count > 0  {
                                 updateChatsAndClients(clients: clients, userInfo: userInfo)
                             }
-                            
+
                             if isFilter {
                                 self.isFilter = false
                             }
@@ -126,7 +133,7 @@ private extension SyncManager {
                             previousDelay = nil
                             networkAvailability = true
                             isRequestInProgress = false
-                            
+
                             if shouldSendAnotherRequest {
                                 syncGetTickets(isFilter: self.isFilter)
                             }
@@ -148,7 +155,7 @@ private extension SyncManager {
             }
         }
     }
-    
+
     func firstLoadUpdates() {
         PyrusServiceDesk.clients = chatsDataService.getAllClients()
         PyrusServiceDesk.repository.loadCommands()
@@ -163,8 +170,8 @@ private extension SyncManager {
             PyrusServiceDesk.chats = localChats + chats
             PyrusServiceDesk.allMessages = messages + createMessages
         }
-        
-        
+
+
         firstLoad = false
         if CacheVersionManager.shared.checkAndUpdateIfNeeded() {
             PyrusServiceDesk.lastNoteId = 0
@@ -172,14 +179,14 @@ private extension SyncManager {
                 user.lastNoteId = 0
             }
         }
-        
+
         let commands = PyrusServiceDesk.repository.getCommands()
         if commands.count > 0,
            commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue }) {
             syncGetTickets()
         }
     }
-    
+
     func checkAccesses(authorAccessDenied: [String]?, clientsArray: [PSDClientInfo]?, clients: inout [PSDClientInfo]?, userInfo: [AnyHashable : Any]?) {
         DispatchQueue.main.async {
             PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
@@ -189,9 +196,9 @@ private extension SyncManager {
             DispatchQueue.main.async {
                 PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
             }
-            
+
             NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil, userInfo: userInfo)
-            
+
             if let clientsArray {
                 for client in clientsArray {
                     var removeClient = true
@@ -204,7 +211,7 @@ private extension SyncManager {
                     if client.clientId == PyrusServiceDesk.clientId && !authorAccessDenied.contains(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
                         continue
                     }
-                    
+
                     if !removeClient { continue }
                     if PyrusServiceDesk.currentClientId == client.clientId {
                         PyrusServiceDesk.currentClientId = nil
@@ -214,7 +221,7 @@ private extension SyncManager {
             }
         }
     }
-    
+
     func updateCommandsAndMessageStorage(commandsResult: [TicketCommandResult]?) {
         if let commandsResult {
             self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? Int.max < $1.commentId ?? 0 })
@@ -223,27 +230,8 @@ private extension SyncManager {
                 let jsonData = try JSONEncoder().encode(commandsWithTicketIds)
                 NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
             } catch { }
-            
-            let commands = PyrusServiceDesk.repository.getCommands()
+
             for commandResult in commandsResult {
-                if PyrusServiceDeskController.PSDIsOpen(),
-                   let command = commands.first(where: { $0.commandId == commandResult.commandId }),
-                   command.type == TicketCommandType.calcOperatorTime.rawValue,
-                   let ticketId = commandResult.ticketId {
-                    if let operatorTimeMessage = commandResult.operatorResponseTimeMessage {
-                        NotificationCenter.default.post(name: SyncManager.updateOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId, "message": operatorTimeMessage])
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
-                            if PyrusServiceDeskController.PSDIsOpen() {
-                                let params = TicketCommandParams(ticketId: ticketId, appId: command.appId, userId: command.userId)
-                                let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: command.appId, userId: command.userId, params: params)
-                                PyrusServiceDesk.repository.add(command: command)
-                            }
-                        }
-                    } else {
-                        NotificationCenter.default.post(name: SyncManager.removeOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId])
-                    }
-                }
-                
                 if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
                     PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
                     PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
@@ -257,7 +245,7 @@ private extension SyncManager {
                             stack: PyrusLogger.shared.getLogFileContent()
                         )
                         logsToSend.append(log)
-                        
+
                         message.state = .cantSend
                         PSDMessagesStorage.save(message: message)
                     }
@@ -265,11 +253,32 @@ private extension SyncManager {
                     PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
                 }
             }
-            
+
             PSDMessagesStorage.saveMessagesToFile()
         }
     }
-    
+
+    func updateOperatorTimeMessages(_ messages: [Int: String]) {
+        let previousMessages = operatorTimeMessages
+        operatorTimeMessages = messages
+
+        for (ticketId, message) in messages where previousMessages[ticketId] != message {
+            NotificationCenter.default.post(
+                name: SyncManager.updateOperatorTimeNotification,
+                object: nil,
+                userInfo: ["ticketId": ticketId, "message": message]
+            )
+        }
+
+        for ticketId in previousMessages.keys where messages[ticketId] == nil {
+            NotificationCenter.default.post(
+                name: SyncManager.removeOperatorTimeNotification,
+                object: nil,
+                userInfo: ["ticketId": ticketId]
+            )
+        }
+    }
+
     func updateChatsAndClients(clients: [PSDClientInfo], userInfo: [AnyHashable: Any]) {
         if PyrusServiceDesk.multichats {
             chatsDataService.getAllChats() { [weak self, userInfo] chats in
@@ -290,7 +299,7 @@ private extension SyncManager {
                         let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
                         PyrusServiceDesk.chats = localChats + chats
                         PyrusServiceDesk.allMessages = messages + createMessages
-                        
+
                         var unreadChats = 0
                         var lastMessage: PSDMessage?
                         if let chat = chats.first {
@@ -300,14 +309,14 @@ private extension SyncManager {
                             }
                         }
                         UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lastMessage)
-                        
+
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                     }
                 }
             }
         }
     }
-    
+
     func updateRepeatSyncTimer() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -319,22 +328,22 @@ private extension SyncManager {
                 let currentRepeatInterval = previousDelay ?? Constants.baseDelay
                 defaultDelay = currentRepeatInterval * 3
             }
-            
+
             clearTimer()
-            
+
             var delay = min(defaultDelay, Constants.maxDelay)
             delay = TimeInterval(Double.random(in: Constants.baseDelay...delay))
             previousDelay = defaultDelay
-            
+
             self.timerFosSendSync = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
         }
     }
-    
+
     func clearTimer() {
         timerFosSendSync?.invalidate()
         timerFosSendSync = nil
     }
-    
+
     @objc func doSync() {
         DispatchQueue.main.async { [weak self] in
             self?.syncGetTickets(isFilter: self?.isFilter ?? false)
@@ -361,7 +370,7 @@ extension SyncManager {
     static let REFRESH_TIME_INTERVAL_1_MINUTE = TimeInterval(60)
     static let REFRESH_TIME_INTERVAL_3_MINUTES = TimeInterval(180)
     static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
-    
+
     public static func getTimerInerval() -> TimeInterval? {
         if let date = getLastActivityDate() {
             let difference = Date().timeIntervalSince(date)
@@ -377,22 +386,22 @@ extension SyncManager {
         }
         return nil
     }
-    
+
     static func userLastActivityKey() -> String{
         return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
     }
-    
+
     static func getLastActivityDate() -> Date? {
         return PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: userLastActivityKey()) as? Date
     }
-    
+
     static func getLastActivityDuration() -> TimeInterval {
         guard let date = getLastActivityDate() else {
             return .greatestFiniteMagnitude
         }
         return Date().timeIntervalSince(date)
     }
-    
+
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool {
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
@@ -407,7 +416,7 @@ extension SyncManager {
         }
         return false
     }
-    
+
     static func removeLastActivityDate() {
         PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: userLastActivityKey())
     }
